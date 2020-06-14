@@ -1,6 +1,6 @@
 {
   "name": "extract-base-iterator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Base iterator for extract iterators like tar-iterator and zip-iterator",
   "keywords": [
     "extract",
@@ -52,7 +52,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "fs-generate": "^1.8.3",
+    "fs-generate": "^1.8.4",
     "fs-iterator": "^3.0.3",
     "fs-stats-spys": "^1.0.1",
     "lodash.find": "^4.6.0",

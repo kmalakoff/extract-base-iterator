@@ -46,7 +46,7 @@ describe('asyncIterator', function () {
   });
 
   describe('happy path', function () {
-    it('extract entries - no strip', async function () {
+    it('extract - no strip', async function () {
       var options = { now: new Date() };
       try {
         await extract(new EntriesIterator(entries), TARGET, options);
@@ -56,7 +56,7 @@ describe('asyncIterator', function () {
       }
     });
 
-    it('extract entries - strip 1', async function () {
+    it('extract - strip 1', async function () {
       var options = { now: new Date(), strip: 1 };
       try {
         await extract(new EntriesIterator(entries), TARGET, options);
