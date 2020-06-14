@@ -1,21 +1,19 @@
 var inherits = require('inherits');
 var BaseIterator = require('../..');
 
-function EntryIterator(entries) {
-  BaseIterator.call(this);
-  this.entries = entries.slice();
-
+function EntryIterator(entries, options) {
+  BaseIterator.call(this, options);
   var self = this;
-  function next() {
-    if (self.done) return;
-    if (!self.entries.length) return self.end();
+  self.entries = entries.slice();
 
-    // push next
-    self.entries.push(self.entries.shift());
-    self.stack.push(next);
-    self.resume();
+  function next(iterator, callback) {
+    if (iterator.done || !self.entries.length) return callback(null, null);
+
+    // keep going
+    iterator.stack.push(next);
+    callback(null, self.entries.shift());
   }
-  next();
+  self.stack.push(next);
 }
 inherits(EntryIterator, BaseIterator);
 
