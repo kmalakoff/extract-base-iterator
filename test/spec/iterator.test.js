@@ -82,7 +82,7 @@ describe('iterator', function () {
   });
 
   describe('happy path', function () {
-    it('extract entries - no strip - concurrency 1', function (done) {
+    it('extract - no strip - concurrency 1', function (done) {
       var options = { now: new Date(), concurrency: 1 };
       extract(new EntriesIterator(entries), TARGET, options, function (err) {
         assert.ok(!err);
@@ -94,7 +94,7 @@ describe('iterator', function () {
       });
     });
 
-    it('extract entries - no strip - concurrency Infinity', function (done) {
+    it('extract - no strip - concurrency Infinity', function (done) {
       var options = { now: new Date(), concurrency: Infinity };
       extract(new EntriesIterator(entries), TARGET, options, function (err) {
         assert.ok(!err);
@@ -106,7 +106,7 @@ describe('iterator', function () {
       });
     });
 
-    it('extract entries - no strip - promise', function (done) {
+    it('extract - no strip - promise', function (done) {
       if (typeof Promise === 'undefined') return done();
 
       var options = { now: new Date() };
@@ -120,7 +120,7 @@ describe('iterator', function () {
       });
     });
 
-    it('extract entries - strip 1', function (done) {
+    it('extract - strip 1', function (done) {
       var options = { now: new Date(), strip: 1 };
       extract(new EntriesIterator(entries), TARGET, options, function (err) {
         assert.ok(!err);

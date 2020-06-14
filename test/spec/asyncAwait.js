@@ -64,7 +64,7 @@ describe('asyncAwait', function () {
   });
 
   describe('happy path', function () {
-    it('extract entries - no strip - concurrency 1', async function () {
+    it('extract - no strip - concurrency 1', async function () {
       var options = { now: new Date(), concurrency: 1 };
       try {
         await extract(new EntriesIterator(entries), TARGET, options);
@@ -74,7 +74,7 @@ describe('asyncAwait', function () {
       }
     });
 
-    it('extract entries - no strip - concurrency Infinity', async function () {
+    it('extract - no strip - concurrency Infinity', async function () {
       var options = { now: new Date(), concurrency: Infinity };
       try {
         await extract(new EntriesIterator(entries), TARGET, options);
@@ -84,7 +84,7 @@ describe('asyncAwait', function () {
       }
     });
 
-    it('extract entries - no strip - forEach', async function () {
+    it('extract - no strip - forEach', async function () {
       var options = { now: new Date(), concurrency: Infinity };
       try {
         await extractForEach(new EntriesIterator(entries), TARGET, options);
@@ -94,7 +94,7 @@ describe('asyncAwait', function () {
       }
     });
 
-    it('extract entries - strip 1', async function () {
+    it('extract - strip 1', async function () {
       var options = { now: new Date(), strip: 1 };
       try {
         await extract(new EntriesIterator(entries), TARGET, options);
