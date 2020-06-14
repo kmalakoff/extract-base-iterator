@@ -1,5 +1,5 @@
 module.exports = require('./lib/BaseIterator');
-module.exports.DirectoryEntry = require('./lib/entry/Directory');
-module.exports.FileEntry = require('./lib/entry/File');
-module.exports.LinkEntry = require('./lib/entry/Link');
-module.exports.SymbolicLinkEntry = require('./lib/entry/SymbolicLink');
+module.exports.DirectoryEntry = require('./lib/entries/Directory');
+module.exports.FileEntry = require('./lib/entries/File');
+module.exports.LinkEntry = require('./lib/entries/Link');
+module.exports.SymbolicLinkEntry = require('./lib/entries/SymbolicLink');

@@ -16,8 +16,8 @@ function FileEntry(attributes, contents) {
   this.contents = contents;
 }
 inherits(FileEntry, BaseIterator.FileEntry);
-FileEntry.prototype._writeFile = function _writeFile(dest, options, callback) {
-  fs.writeFile(dest, this.contents, callback);
+FileEntry.prototype._writeFile = function _writeFile(fullPath, options, callback) {
+  fs.writeFile(fullPath, this.contents, callback);
 };
 var LinkEntry = BaseIterator.LinkEntry;
 var SymbolicLinkEntry = BaseIterator.SymbolicLinkEntry;
