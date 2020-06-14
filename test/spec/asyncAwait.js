@@ -6,23 +6,24 @@ var statsSpys = require('fs-stats-spys');
 
 var Iterator = require('../..');
 
-var TEST_DIR = path.resolve(path.join(__dirname, '..', '..', '.tmp', 'test'));
+var DATA_DIR = path.resolve(path.join(__dirname, '..', '..', '.tmp', 'data'));
 var STRUCTURE = {
-  file1: 'a',
-  file2: 'b',
-  dir1: null,
-  'dir2/file1': 'c',
-  'dir2/file2': 'd',
-  'dir3/dir4/file1': 'e',
-  'dir3/dir4/dir5': null,
-  filelink1: '~dir3/dir4/file1',
-  'dir3/filelink2': '~dir2/file1',
+  'fixture.js': 'var thing = true;',
+  symlink1: '~fixture.js',
+  link1: ':fixture.js',
+  'dir1/fixture.js': 'var thing = true;',
+  symlink2: '~dir1/fixture.js',
+  link2: ':dir1/fixture.js',
+  'dir1/symlink1': '~dir1/fixture.js',
+  'dir1/link1': ':dir1/fixture.js',
+  'dir1/dir2/symlink1': '~dir1/fixture.js',
+  'dir1/dir2/link1': ':dir1/fixture.js',
 };
 
 describe('async await', function () {
   beforeEach(function (done) {
     rimraf(TEST_DIR, function () {
-      generate(TEST_DIR, STRUCTURE, done);
+      generate(DATA_DIR, STRUCTURE, done);
     });
   });
 

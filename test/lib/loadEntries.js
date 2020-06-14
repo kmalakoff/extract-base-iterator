@@ -2,10 +2,11 @@ var path = require('path');
 var fs = require('fs');
 var inherits = require('inherits');
 var assign = require('object-assign');
+var find = require('lodash.find');
 var Iterator = require('fs-iterator');
 
 var BaseIterator = require('../..');
-var statsToType = require('./statsToType');
+var entryToType = require('./entryToType');
 
 var DirectoryEntry = BaseIterator.DirectoryEntry;
 function FileEntry(attributes, contents) {
@@ -16,31 +17,45 @@ inherits(FileEntry, BaseIterator.FileEntry);
 FileEntry.prototype._writeFile = function _writeFile(dest, options, callback) {
   fs.writeFile(dest, this.contents, callback);
 };
+var LinkEntry = BaseIterator.LinkEntry;
 var SymbolicLinkEntry = BaseIterator.SymbolicLinkEntry;
 
-module.exports = function loadentries(directory, callback) {
+module.exports = function loadEntries(directory, callback) {
   var basename = path.basename(directory);
   var entries = [];
-
   entries.push(new DirectoryEntry(assign({ path: basename }, fs.statSync(directory))));
-  new Iterator(directory, { alwaysStat: true, lstat: true }).forEach(
-    function (entry) {
-      var type = statsToType(entry.stats);
-      var relativePath = path.join(basename, entry.path);
-      var fullPath = path.join(directory, entry.path);
+
+  var fsEntries = [];
+  new Iterator(directory, { alwaysStat: true, lstat: true }).forEach(fsEntries.push.bind(fsEntries), function (err) {
+    for (var index = 0; index < fsEntries.length; index++) {
+      var fsEntry = fsEntries[index];
+      var type = entryToType(fsEntry);
+      var relativePath = path.join(basename, fsEntry.path);
+      var fullPath = path.join(directory, fsEntry.path);
       switch (type) {
         case 'directory':
-          return entries.push(new DirectoryEntry(assign({ path: relativePath }, entry.stats)));
+          entries.push(new DirectoryEntry(assign({ path: relativePath }, fsEntry.stats)));
+          break;
         case 'file':
-          return entries.push(new FileEntry(assign({ path: relativePath }, entry.stats), fs.readFileSync(fullPath)));
+          entries.push(new FileEntry(assign({ path: relativePath }, fsEntry.stats), fs.readFileSync(fullPath)));
+          break;
+        case 'link':
         case 'symlink':
-          var targetFullPath = fs.realpathSync(fullPath);
-          var targetPath = path.join(basename, path.relative(path.dirname(fullPath), targetFullPath));
-          return entries.push(new SymbolicLinkEntry(assign({ path: relativePath, targetPath: targetPath }, entry.stats)));
+          var targetFullPath;
+
+          if (type === 'link') {
+            var fileEntry = find(fsEntries, function (x) {
+              return x.stats.ino === fsEntry.stats.ino && x.basename.indexOf('link') !== 0;
+            });
+            targetFullPath = fileEntry.fullPath;
+          } else targetFullPath = fs.realpathSync(fullPath);
+
+          var targetPath = path.relative(path.dirname(fullPath), targetFullPath);
+          var Link = type === 'symlink' ? SymbolicLinkEntry : LinkEntry;
+          entries.push(new Link(assign({ path: relativePath, targetPath: targetPath }, fsEntry.stats)));
+          break;
       }
-    },
-    function (err) {
-      err ? callback(err) : callback(null, entries);
     }
-  );
+    err ? callback(err) : callback(null, entries);
+  });
 };
