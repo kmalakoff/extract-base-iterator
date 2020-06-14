@@ -19,14 +19,14 @@ function extract(iterator, dest, options, callback) {
     function (entry, callback) {
       if (entry.type === 'symlink' || entry.type === 'link') {
         links.push(entry);
-        return callback();
-      }
-      entry.create(dest, options, callback);
+        callback();
+      } else entry.create(dest, options, callback);
     },
-    { callbacks: true },
+    { callbacks: true, concurrency: options.concurrency },
     function (err) {
       if (err) return callback(err);
 
+      // create links after directories and files
       var queue = new Queue();
       for (var index = 0; index < links.length; index++) {
         var entry = links[index];
@@ -40,14 +40,15 @@ function extract(iterator, dest, options, callback) {
 function extractPromise(iterator, dest, options, callback) {
   var links = [];
   iterator
-    .forEach(function (entry) {
-      if (entry.type === 'symlink' || entry.type === 'link') {
-        links.push(entry);
-        return;
-      }
-      return entry.create(dest, options);
-    })
+    .forEach(
+      function (entry) {
+        if (entry.type === 'symlink' || entry.type === 'link') links.push(entry);
+        else return entry.create(dest, options);
+      },
+      { concurrency: options.concurrency }
+    )
     .then(function () {
+      // create links after directories and files
       var queue = new Queue();
       for (var index = 0; index < links.length; index++) {
         (function (entry) {
@@ -61,7 +62,7 @@ function extractPromise(iterator, dest, options, callback) {
     .catch(callback);
 }
 
-describe.only('iterator', function () {
+describe('iterator', function () {
   var entries;
   beforeEach(function (callback) {
     var queue = new Queue(1);
@@ -81,8 +82,20 @@ describe.only('iterator', function () {
   });
 
   describe('happy path', function () {
-    it('extract entries - no strip', function (done) {
-      var options = { now: new Date() };
+    it('extract entries - no strip - concurrency 1', function (done) {
+      var options = { now: new Date(), concurrency: 1 };
+      extract(new EntriesIterator(entries), TARGET, options, function (err) {
+        assert.ok(!err);
+
+        validateFiles(options, 'tar', function (err) {
+          assert.ok(!err);
+          done();
+        });
+      });
+    });
+
+    it('extract entries - no strip - concurrency Infinity', function (done) {
+      var options = { now: new Date(), concurrency: Infinity };
       extract(new EntriesIterator(entries), TARGET, options, function (err) {
         assert.ok(!err);
 

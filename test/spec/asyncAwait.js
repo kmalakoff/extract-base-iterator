@@ -1,120 +1,131 @@
 var assert = require('assert');
-var path = require('path');
 var rimraf = require('rimraf');
+var Queue = require('queue-cb');
 var generate = require('fs-generate');
-var statsSpys = require('fs-stats-spys');
 
-var Iterator = require('../..');
+var EntriesIterator = require('../lib/EntriesIterator');
+var loadEntries = require('../lib/loadEntries');
+var validateFiles = require('../lib/validateFiles');
 
-var DATA_DIR = path.resolve(path.join(__dirname, '..', '..', '.tmp', 'data'));
-var STRUCTURE = {
-  'fixture.js': 'var thing = true;',
-  symlink1: '~fixture.js',
-  link1: ':fixture.js',
-  'dir1/fixture.js': 'var thing = true;',
-  symlink2: '~dir1/fixture.js',
-  link2: ':dir1/fixture.js',
-  'dir1/symlink1': '~dir1/fixture.js',
-  'dir1/link1': ':dir1/fixture.js',
-  'dir1/dir2/symlink1': '~dir1/fixture.js',
-  'dir1/dir2/link1': ':dir1/fixture.js',
-};
+var constants = require('../lib/constants');
+var TMP_DIR = constants.TMP_DIR;
+var TARGET = constants.TARGET;
+var DATA_DIR = constants.DATA_DIR;
+var STRUCTURE = constants.STRUCTURE;
 
-describe('async await', function () {
-  beforeEach(function (done) {
-    rimraf(TEST_DIR, function () {
-      generate(DATA_DIR, STRUCTURE, done);
+async function extract(iterator, dest, options) {
+  const links = [];
+  let entry = await iterator.next();
+  while (entry) {
+    if (entry.type === 'symlink' || entry.type === 'link') links.push(entry);
+    else await entry.create(dest, options);
+    entry = await iterator.next();
+  }
+
+  // create links after directories and files
+  for (entry of links) {
+    await entry.create(dest, options);
+  }
+}
+
+async function extractForEach(iterator, dest, options) {
+  const links = [];
+  await iterator.forEach(
+    async function (entry) {
+      if (entry.type === 'symlink' || entry.type === 'link') links.push(entry);
+      else await entry.create(dest, options);
+    },
+    { concurrency: options.concurrency }
+  );
+
+  // create links after directories and files
+  for (const entry of links) {
+    await entry.create(dest, options);
+  }
+}
+
+describe('asyncAwait', function () {
+  var entries;
+  beforeEach(function (callback) {
+    var queue = new Queue(1);
+    queue.defer(function (callback) {
+      rimraf(TMP_DIR, function (err) {
+        err && err.code !== 'EEXIST' ? callback(err) : callback();
+      });
     });
+    queue.defer(generate.bind(generate, DATA_DIR, STRUCTURE));
+    queue.defer(function (callback) {
+      loadEntries(DATA_DIR, function (err, _entries) {
+        entries = _entries;
+        callback(err);
+      });
+    });
+    queue.await(callback);
   });
 
-  it('should be default false', async function () {
-    var spys = statsSpys();
-
-    var iterator = new Iterator(TEST_DIR, {
-      filter: function (entry) {
-        spys(entry.stats);
-      },
-    });
-
-    let value = await iterator.next();
-    while (value) {
-      assert.ok(typeof value.basename === 'string');
-      assert.ok(typeof value.path === 'string');
-      assert.ok(typeof value.fullPath === 'string');
-      assert.ok(typeof value.stats === 'object');
-      value = await iterator.next();
-    }
-
-    assert.ok(spys.callCount, 13);
-  });
-
-  it('Should find everything with no return', async function () {
-    var spys = statsSpys();
-
-    var iterator = new Iterator(TEST_DIR, {
-      filter: function (entry) {
-        spys(entry.stats);
-      },
-      lstat: true,
-    });
-
-    let value = await iterator.next();
-    while (value) {
-      assert.ok(typeof value.basename === 'string');
-      assert.ok(typeof value.path === 'string');
-      assert.ok(typeof value.fullPath === 'string');
-      assert.ok(typeof value.stats === 'object');
-      value = await iterator.next();
-    }
-
-    assert.equal(spys.dir.callCount, 5);
-    assert.equal(spys.file.callCount, 5);
-    assert.equal(spys.link.callCount, 2);
-  });
-
-  it('Should find everything with return true', async function () {
-    var spys = statsSpys();
-
-    var iterator = new Iterator(TEST_DIR, {
-      filter: function (entry) {
-        spys(entry.stats);
-        return true;
-      },
-      lstat: true,
-    });
-
-    let value = await iterator.next();
-    while (value) {
-      assert.ok(typeof value.basename === 'string');
-      assert.ok(typeof value.path === 'string');
-      assert.ok(typeof value.fullPath === 'string');
-      assert.ok(typeof value.stats === 'object');
-      value = await iterator.next();
-    }
-
-    assert.equal(spys.dir.callCount, 5);
-    assert.equal(spys.file.callCount, 5);
-    assert.equal(spys.link.callCount, 2);
-  });
-
-  it('should propagate errors', async function () {
-    var iterator = new Iterator(TEST_DIR, {
-      filter: function () {
-        return Promise.reject(new Error('Failed'));
-      },
-    });
-
-    try {
-      let value = await iterator.next();
-      while (value) {
-        assert.ok(typeof value.basename === 'string');
-        assert.ok(typeof value.path === 'string');
-        assert.ok(typeof value.fullPath === 'string');
-        assert.ok(typeof value.stats === 'object');
-        value = await iterator.next();
+  describe('happy path', function () {
+    it('extract entries - no strip - concurrency 1', async function () {
+      var options = { now: new Date(), concurrency: 1 };
+      try {
+        await extract(new EntriesIterator(entries), TARGET, options);
+        await validateFiles(options, 'tar');
+      } catch (err) {
+        assert.ok(!err);
       }
-    } catch (err) {
-      assert.ok(!!err);
-    }
+    });
+
+    it('extract entries - no strip - concurrency Infinity', async function () {
+      var options = { now: new Date(), concurrency: Infinity };
+      try {
+        await extract(new EntriesIterator(entries), TARGET, options);
+        await validateFiles(options, 'tar');
+      } catch (err) {
+        assert.ok(!err);
+      }
+    });
+
+    it('extract entries - no strip - forEach', async function () {
+      var options = { now: new Date(), concurrency: Infinity };
+      try {
+        await extractForEach(new EntriesIterator(entries), TARGET, options);
+        await validateFiles(options, 'tar');
+      } catch (err) {
+        assert.ok(!err);
+      }
+    });
+
+    it('extract entries - strip 1', async function () {
+      var options = { now: new Date(), strip: 1 };
+      try {
+        await extract(new EntriesIterator(entries), TARGET, options);
+        await validateFiles(options, 'tar');
+      } catch (err) {
+        assert.ok(!err);
+      }
+    });
+
+    it('extract multiple times', async function () {
+      var options = { now: new Date(), strip: 1 };
+      try {
+        await extract(new EntriesIterator(entries), TARGET, options);
+        await validateFiles(options, 'tar');
+        await extract(new EntriesIterator(entries), TARGET, options);
+        await validateFiles(options, 'tar');
+      } catch (err) {
+        assert.ok(!err);
+      }
+    });
+  });
+
+  describe('unhappy path', function () {
+    it('should fail with too large strip', async function () {
+      var options = { now: new Date(), strip: 2 };
+      try {
+        await extract(new EntriesIterator(entries), TARGET, options);
+        assert.ok(false);
+      } catch (err) {
+        assert.ok(!!err);
+      }
+    });
   });
 });
