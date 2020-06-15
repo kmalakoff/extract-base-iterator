@@ -10,9 +10,9 @@ var BaseIterator = require('extract-base-iterator'));
 
 // extend BaseIterator (see tests, tar-iterator, zip-iterator for examples)
 
-var iterator = new YourIterator();
-
 (async function() {
+  var iterator = new YourIterator();
+
   const links = [];
   for await (const entry of iterator) {
     if (entry.type === 'symlink' || entry.type === 'link') links.push(entry);
@@ -23,6 +23,9 @@ var iterator = new YourIterator();
   for (const entry of links) {
     await entry.create(dest, options);
   }
+
+  iterator.destroy();
+  iterator = null;
 })();
 ```
 
@@ -38,6 +41,8 @@ var iterator = new YourIterator();
 
 // one by one
 (async function() {
+  let iterator = new YourIterator();
+
   const links = [];
   let entry = await iterator.next();
   while (entry) {
@@ -50,10 +55,15 @@ var iterator = new YourIterator();
   for (entry of links) {
     await entry.create(dest, options);
   }
+
+  iterator.destroy();
+  iterator = null;
 })();
 
 // infinite concurrency
 (async function() {
+  let iterator = new YourIterator();
+
   const links = [];
   await iterator.forEach(
     async function (entry) {
@@ -67,6 +77,9 @@ var iterator = new YourIterator();
   for (const entry of links) {
     await entry.create(dest, options);
   }
+
+  iterator.destroy();
+  iterator = null;
 })();
 ```
 
@@ -103,4 +116,7 @@ iterator.forEach(
     queue.await(callback);
   }
 );
+
+iterator.destroy();
+iterator = null;
 ```

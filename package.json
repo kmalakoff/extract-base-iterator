@@ -64,8 +64,5 @@
   },
   "engines": {
     "node": ">=0.8"
-  },
-  "peerOptionalDependencies": {
-    "lzma-native": "^6.0.1"
   }
 }
