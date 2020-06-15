@@ -47,19 +47,15 @@ module.exports = function loadEntries(directory, callback) {
             results.push(new FileEntry(assign({ path: relativePath }, entry.stats), fs.readFileSync(fullPath)));
             break;
           case 'link':
+            var fileEntry = find(entries, function (x) {
+              return x.stats.ino === entry.stats.ino && x.basename.indexOf('link') !== 0;
+            });
+            results.push(new LinkEntry(assign({ path: relativePath, linkpath: path.join(basename, fileEntry.path) }, entry.stats)));
+            break;
           case 'symlink':
-            var targetFullPath;
-
-            if (type === 'link') {
-              var fileEntry = find(entries, function (x) {
-                return x.stats.ino === entry.stats.ino && x.basename.indexOf('link') !== 0;
-              });
-              targetFullPath = fileEntry.fullPath;
-            } else targetFullPath = fs.realpathSync(fullPath);
-
-            var targetPath = path.relative(path.dirname(fullPath), targetFullPath);
-            var Link = type === 'symlink' ? SymbolicLinkEntry : LinkEntry;
-            results.push(new Link(assign({ path: relativePath, targetPath: targetPath }, entry.stats)));
+            var targetFullPath = fs.realpathSync(fullPath);
+            var linkpath = path.relative(path.dirname(fullPath), targetFullPath);
+            results.push(new SymbolicLinkEntry(assign({ path: relativePath, linkpath: linkpath }, entry.stats)));
             break;
         }
       }
