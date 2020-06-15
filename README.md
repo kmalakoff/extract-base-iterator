@@ -15,14 +15,13 @@ var BaseIterator = require('extract-base-iterator'));
 
   const links = [];
   for await (const entry of iterator) {
-    if (entry.type === 'symlink' || entry.type === 'link') links.push(entry);
+    if (entry.type === 'link') links.unshift(entry);
+    else if (entry.type === 'symlink') links.push(entry);
     else await entry.create(dest, options);
   }
 
   // create links after directories and files
-  for (const entry of links) {
-    await entry.create(dest, options);
-  }
+  for (const entry of links) await entry.create(dest, options);
 
   iterator.destroy();
   iterator = null;
@@ -46,7 +45,8 @@ var iterator = new YourIterator();
   const links = [];
   let entry = await iterator.next();
   while (entry) {
-    if (entry.type === 'symlink' || entry.type === 'link') links.push(entry);
+    if (entry.type === 'link') links.unshift(entry);
+    else if (entry.type === 'symlink') links.push(entry);
     else await entry.create(dest, options);
     entry = await iterator.next();
   }
@@ -67,16 +67,15 @@ var iterator = new YourIterator();
   const links = [];
   await iterator.forEach(
     async function (entry) {
-      if (entry.type === 'symlink' || entry.type === 'link') links.push(entry);
+      if (entry.type === 'link') links.unshift(entry);
+      else if (entry.type === 'symlink') links.push(entry);
       else await entry.create(dest, options);
     },
     { concurrency: Infinity }
   );
 
   // create links after directories and files
-  for (const entry of links) {
-    await entry.create(dest, options);
-  }
+  for (const entry of links) await entry.create(dest, options);
 
   iterator.destroy();
   iterator = null;
@@ -98,7 +97,10 @@ var iterator = new YourIterator();
 var links = [];
 iterator.forEach(
   function (entry, callback) {
-    if (entry.type === 'symlink' || entry.type === 'link') {
+    if (entry.type === 'link') {
+      links.unshift(entry);
+      callback();
+    } else if (entry.type === 'symlink') {
       links.push(entry);
       callback();
     } else entry.create(dest, options, callback);
