@@ -1,6 +1,6 @@
 {
   "name": "extract-base-iterator",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Base iterator for extract iterators like tar-iterator and zip-iterator",
   "keywords": [
     "extract",
@@ -35,7 +35,7 @@
     "inherits": "^2.0.4",
     "is-absolute": "^1.0.0",
     "lodash.compact": "^3.0.1",
-    "maximize-iterator": "^2.6.2",
+    "maximize-iterator": "^2.6.4",
     "mkpath": "^1.0.0",
     "next-tick": "^1.1.0",
     "object-assign": "^4.1.1",
