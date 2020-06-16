@@ -10,10 +10,10 @@ function EntryIterator(entries, options) {
     if (iterator.done || !self.entries.length) return callback(null, null);
 
     // keep going
-    iterator.stack.push(next);
+    iterator.push(next);
     callback(null, self.entries.shift());
   }
-  self.stack.push(next);
+  self.push(next);
 }
 inherits(EntryIterator, BaseIterator);
 
