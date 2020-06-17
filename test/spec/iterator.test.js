@@ -86,6 +86,12 @@ describe('iterator', function () {
   });
 
   describe('happy path', function () {
+    it('destroy iterator', function () {
+      var iterator = new EntriesIterator(entries);
+      iterator.destroy();
+      assert.ok(true);
+    });
+
     it('extract - no strip - concurrency 1', function (done) {
       var options = { now: new Date(), concurrency: 1 };
       extract(new EntriesIterator(entries), TARGET, options, function (err) {
