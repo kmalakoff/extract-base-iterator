@@ -38,24 +38,31 @@ module.exports = function loadEntries(directory, callback) {
         var entry = entries[index];
         var type = entryToType(entry);
         var relativePath = path.join(basename, entry.path);
+        var relativeDenormalizedPath = relativePath.split(path.sep).join('/');
         var fullPath = path.join(directory, entry.path);
+
         switch (type) {
           case 'directory':
-            results.push(new DirectoryEntry(assign({ path: relativePath }, entry.stats)));
+            results.push(new DirectoryEntry(assign({ path: relativeDenormalizedPath }, entry.stats)));
             break;
           case 'file':
-            results.push(new FileEntry(assign({ path: relativePath }, entry.stats), fs.readFileSync(fullPath)));
+            results.push(new FileEntry(assign({ path: relativeDenormalizedPath }, entry.stats), fs.readFileSync(fullPath)));
             break;
           case 'link':
             var fileEntry = find(entries, function (x) {
               return x.stats.ino === entry.stats.ino && x.basename.indexOf('link') !== 0;
             });
-            results.push(new LinkEntry(assign({ path: relativePath, linkpath: path.join(basename, fileEntry.path) }, entry.stats)));
+            var linkpath = path.join(basename, fileEntry.path);
+            var linkDenormalizedPath = linkpath.split(path.sep).join('/');
+            results.push(new LinkEntry(assign({ path: relativeDenormalizedPath, linkpath: linkDenormalizedPath }, entry.stats)));
             break;
           case 'symlink':
-            var targetFullPath = fs.realpathSync(fullPath);
-            var linkpath = path.relative(path.dirname(fullPath), targetFullPath);
-            results.push(new SymbolicLinkEntry(assign({ path: relativePath, linkpath: linkpath }, entry.stats)));
+            var linkFullPath = fs.realpathSync(fullPath);
+            // eslint-disable-next-line no-redeclare
+            var linkpath = path.relative(path.dirname(fullPath), linkFullPath);
+            // eslint-disable-next-line no-redeclare
+            var linkDenormalizedPath = linkpath.split(path.sep).join('/');
+            results.push(new SymbolicLinkEntry(assign({ path: relativeDenormalizedPath, linkpath: linkDenormalizedPath }, entry.stats)));
             break;
         }
       }
