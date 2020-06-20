@@ -1,5 +1,5 @@
-module.exports = require('./lib/ExtractBaseIterator');
-module.exports.DirectoryEntry = require('./lib/entries/Directory');
-module.exports.FileEntry = require('./lib/entries/File');
-module.exports.LinkEntry = require('./lib/entries/Link');
-module.exports.SymbolicLinkEntry = require('./lib/entries/SymbolicLink');
+module.exports = require('stack-base-iterator');
+module.exports.DirectoryEntry = require('./lib/DirectoryEntry');
+module.exports.FileEntry = require('./lib/FileEntry');
+module.exports.LinkEntry = require('./lib/LinkEntry');
+module.exports.SymbolicLinkEntry = require('./lib/SymbolicLinkEntry');
