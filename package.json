@@ -28,16 +28,12 @@
     "test": "mocha-compat test/spec/**/*.test.js --no-timeouts"
   },
   "dependencies": {
-    "async-compat": "^1.4.6",
-    "fifo": "^2.3.0",
     "fs-access-compat": "^1.0.1",
     "graceful-fs": "^4.2.4",
     "inherits": "^2.0.4",
     "is-absolute": "^1.0.0",
     "lodash.compact": "^3.0.1",
-    "maximize-iterator": "^2.6.4",
     "mkpath": "^1.0.0",
-    "next-tick": "^1.1.0",
     "object-assign": "^4.1.1",
     "queue-cb": "^1.1.5",
     "rimraf": "^2.7.1",
