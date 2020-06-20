@@ -92,6 +92,19 @@ describe('iterator', function () {
       assert.ok(true);
     });
 
+    it('destroy entries', function (done) {
+      var iterator = new EntriesIterator(entries);
+      iterator.forEach(
+        function (entry) {
+          entry.destroy();
+        },
+        function (err) {
+          assert.ok(!err);
+          done();
+        }
+      );
+    });
+
     it('extract - no strip - concurrency 1', function (done) {
       var options = { now: new Date(), concurrency: 1 };
       extract(new EntriesIterator(entries), TARGET, options, function (err) {
