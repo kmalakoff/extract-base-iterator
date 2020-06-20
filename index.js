@@ -1,4 +1,4 @@
-module.exports = require('./lib/BaseIterator');
+module.exports = require('./lib/ExtractBaseIterator');
 module.exports.DirectoryEntry = require('./lib/entries/Directory');
 module.exports.FileEntry = require('./lib/entries/File');
 module.exports.LinkEntry = require('./lib/entries/Link');
