@@ -1,7 +1,7 @@
 var assert = require('assert');
 var rimraf = require('rimraf');
+var mkpath = require('mkpath');
 var Queue = require('queue-cb');
-var generate = require('fs-generate');
 
 var EntriesIterator = require('../lib/EntriesIterator');
 var loadEntries = require('../lib/loadEntries');
@@ -10,8 +10,6 @@ var validateFiles = require('../lib/validateFiles');
 var constants = require('../lib/constants');
 var TMP_DIR = constants.TMP_DIR;
 var TARGET = constants.TARGET;
-var DATA_DIR = constants.DATA_DIR;
-var STRUCTURE = constants.STRUCTURE;
 
 function extract(iterator, dest, options, callback) {
   var links = [];
@@ -67,22 +65,12 @@ function extractPromise(iterator, dest, options, callback) {
 }
 
 describe('iterator', function () {
-  var entries;
+  var entries = loadEntries();
   beforeEach(function (callback) {
-    var queue = new Queue(1);
-    queue.defer(function (callback) {
-      rimraf(TMP_DIR, function (err) {
-        err && err.code !== 'EEXIST' ? callback(err) : callback();
-      });
+    rimraf(TMP_DIR, function (err) {
+      if (err && err.code !== 'EEXIST') return callback(err);
+      mkpath(TMP_DIR, callback);
     });
-    queue.defer(generate.bind(generate, DATA_DIR, STRUCTURE));
-    queue.defer(function (callback) {
-      loadEntries(DATA_DIR, function (err, _entries) {
-        entries = _entries;
-        callback(err);
-      });
-    });
-    queue.await(callback);
   });
 
   describe('happy path', function () {
