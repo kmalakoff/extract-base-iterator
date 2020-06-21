@@ -1,4 +1,5 @@
 var fs = require('graceful-fs');
+var path = require('path');
 var inherits = require('inherits');
 var find = require('lodash.find');
 
@@ -33,8 +34,10 @@ var STRUCTURE = {
   'data/dir3/symlink1': '~data/dir1/fixture.js',
   'data/dir3/link1': ':data/dir1/fixture.js',
 };
-var DMODE = parseInt(333, 8);
-var FMODE = parseInt(666, 8);
+var DMODE = parseInt(755, 8);
+var FMODE = parseInt(644, 8);
+var SMODE = parseInt(755, 8);
+var LMODE = parseInt(644, 8);
 
 function addDirectories(relativePath, entries) {
   var parts = relativePath.split('/');
@@ -55,9 +58,14 @@ module.exports = function loadEntries() {
   for (var relativePath in STRUCTURE) {
     var contents = STRUCTURE[relativePath];
     addDirectories(relativePath, entries);
-    if (contents[0] === ':') entries.push(new LinkEntry({ path: relativePath, linkpath: contents.slice(1), mode: FMODE, mtime: new Date() }));
-    else if (contents[0] === '~') entries.push(new SymbolicLinkEntry({ path: relativePath, linkpath: contents.slice(1), mode: FMODE, mtime: new Date() }));
-    else entries.push(new FileEntry({ path: relativePath, mode: FMODE, mtime: new Date() }, contents));
+    if (contents[0] === ':') entries.push(new LinkEntry({ path: relativePath, linkpath: contents.slice(1), mode: LMODE, mtime: new Date() }));
+    else if (contents[0] === '~') {
+      var fullPath = relativePath.split('/').join(path.sep);
+      var linkFullPath = contents.slice(1).split('/').join(path.sep);
+      var linkpath = path.relative(path.dirname(fullPath), linkFullPath);
+      var linkDenormalizedPath = linkpath.split(path.sep).join('/');
+      entries.push(new SymbolicLinkEntry({ path: relativePath, linkpath: linkDenormalizedPath, mode: SMODE, mtime: new Date() }));
+    } else entries.push(new FileEntry({ path: relativePath, mode: FMODE, mtime: new Date() }, contents));
   }
   return entries;
 };
