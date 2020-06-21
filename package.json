@@ -28,7 +28,7 @@
     "test": "mocha-compat test/spec/**/*.test.js --no-timeouts"
   },
   "dependencies": {
-    "fs-access-compat": "^1.0.1",
+    "fs-access-compat": "^1.0.2",
     "graceful-fs": "^4.2.4",
     "inherits": "^2.0.4",
     "is-absolute": "^1.0.0",
