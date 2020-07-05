@@ -1,6 +1,7 @@
 var assert = require('assert');
 var rimraf = require('rimraf');
 var mkpath = require('mkpath');
+var assign = require('object-assign');
 
 var EntriesIterator = require('../lib/EntriesIterator');
 var loadEntries = require('../lib/loadEntries');
@@ -57,7 +58,13 @@ describe('asyncIterator', function () {
       try {
         await extract(new EntriesIterator(entries), TARGET, options);
         await validateFiles(options, 'tar');
-        await extract(new EntriesIterator(entries), TARGET, options);
+        try {
+          await extract(new EntriesIterator(entries), TARGET, options);
+          assert.ok(false);
+        } catch (err) {
+          assert.ok(err);
+        }
+        await extract(new EntriesIterator(entries), TARGET, assign({ force: true }, options));
         await validateFiles(options, 'tar');
       } catch (err) {
         assert.ok(!err);
