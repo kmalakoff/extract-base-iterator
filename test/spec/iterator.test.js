@@ -2,6 +2,7 @@ var assert = require('assert');
 var rimraf = require('rimraf');
 var mkpath = require('mkpath');
 var Queue = require('queue-cb');
+var assign = require('object-assign');
 
 var EntriesIterator = require('../lib/EntriesIterator');
 var loadEntries = require('../lib/loadEntries');
@@ -152,11 +153,15 @@ describe('iterator', function () {
           assert.ok(!err);
 
           extract(new EntriesIterator(entries), TARGET, options, function (err) {
-            assert.ok(!err);
+            assert.ok(err);
 
-            validateFiles(options, 'tar', function (err) {
+            extract(new EntriesIterator(entries), TARGET, assign({ force: true }, options), function (err) {
               assert.ok(!err);
-              done();
+
+              validateFiles(options, 'tar', function (err) {
+                assert.ok(!err);
+                done();
+              });
             });
           });
         });
