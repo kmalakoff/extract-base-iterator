@@ -35,9 +35,9 @@
     "lodash.compact": "^3.0.1",
     "mkpath": "^1.0.0",
     "object-assign": "^4.1.1",
-    "queue-cb": "^1.1.5",
+    "queue-cb": "^1.1.6",
     "rimraf": "^2.7.1",
-    "stack-base-iterator": "^0.1.5"
+    "stack-base-iterator": "^0.1.6"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
@@ -51,7 +51,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "fs-iterator": "^4.0.2",
+    "fs-iterator": "^4.1.0",
     "fs-stats-spys": "^1.0.1",
     "lodash.find": "^4.6.0",
     "mocha-compat": "^3.5.5",
