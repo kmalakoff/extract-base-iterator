@@ -12,7 +12,7 @@ function FileEntry(attributes, contents) {
 }
 inherits(FileEntry, BaseIterator.FileEntry);
 FileEntry.prototype._writeFile = function _writeFile(fullPath, options, callback) {
-  // eslint-disable-next-line node/no-deprecated-api
+  // eslint-disable-next-line n/no-deprecated-api
   fs.writeFile(fullPath, this.contents, callback);
 };
 var LinkEntry = BaseIterator.LinkEntry;

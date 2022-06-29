@@ -1,7 +1,7 @@
 var assert = require('assert');
 var rimraf = require('rimraf');
 var mkpath = require('mkpath');
-var assign = require('object-assign');
+var assign = require('just-extend');
 
 var EntriesIterator = require('../lib/EntriesIterator');
 var loadEntries = require('../lib/loadEntries');
