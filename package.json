@@ -32,14 +32,14 @@
     "test:engines": "nvu engines npm test"
   },
   "dependencies": {
-    "fs-access-compat": "^1.0.2",
+    "fs-access-compat": "^1.0.3",
     "graceful-fs": "^4.2.10",
     "inherits": "^2.0.4",
     "is-absolute": "^1.0.0",
     "just-extend": "^6.0.1",
     "lodash.compact": "^3.0.1",
     "mkpath": "^1.0.0",
-    "queue-cb": "^1.1.6",
+    "queue-cb": "^1.1.7",
     "rimraf": "^2.7.1",
     "stack-base-iterator": "^0.1.7"
   },
@@ -54,7 +54,7 @@
     "eslint-plugin-n": "^15.2.4",
     "eslint-plugin-promise": "^6.0.0",
     "fs-iterator": "^4.1.1",
-    "fs-stats-spys": "^1.0.1",
+    "fs-stats-spys": "^1.0.2",
     "lodash.find": "^4.6.0",
     "mocha-compat": "^3.5.5",
     "prettier": "^2.7.1"
