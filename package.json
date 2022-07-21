@@ -40,7 +40,7 @@
     "lodash.compact": "^3.0.1",
     "mkpath": "^1.0.0",
     "queue-cb": "^1.1.7",
-    "rimraf": "^2.7.1",
+    "rimraf": "^3.0.2",
     "stack-base-iterator": "^0.1.7"
   },
   "devDependencies": {
