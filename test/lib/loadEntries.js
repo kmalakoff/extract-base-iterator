@@ -3,7 +3,7 @@ const path = require('path');
 const inherits = require('inherits');
 const find = require('lodash.find');
 
-const BaseIterator = require('extract-base-iterator');
+const BaseIterator = require('extract-base-iterator').default;
 
 const DirectoryEntry = BaseIterator.DirectoryEntry;
 function FileEntry(attributes, contents) {
