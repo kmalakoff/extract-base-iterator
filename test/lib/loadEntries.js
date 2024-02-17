@@ -1,26 +1,25 @@
-var fs = require('graceful-fs');
-var path = require('path');
-var inherits = require('inherits');
-var find = require('lodash.find');
+const fs = require('graceful-fs');
+const path = require('path');
+const inherits = require('inherits');
+const find = require('lodash.find');
 
-var BaseIterator = require('../..');
+const BaseIterator = require('extract-base-iterator');
 
-var DirectoryEntry = BaseIterator.DirectoryEntry;
+const DirectoryEntry = BaseIterator.DirectoryEntry;
 function FileEntry(attributes, contents) {
   BaseIterator.FileEntry.call(this, attributes);
   this.contents = contents;
 }
 inherits(FileEntry, BaseIterator.FileEntry);
-FileEntry.prototype._writeFile = function _writeFile(fullPath, options, callback) {
-  // eslint-disable-next-line n/no-deprecated-api
+FileEntry.prototype._writeFile = function _writeFile(fullPath, _options, callback) {
   fs.writeFile(fullPath, this.contents, callback);
 };
-var LinkEntry = BaseIterator.LinkEntry;
-var SymbolicLinkEntry = BaseIterator.SymbolicLinkEntry;
+const LinkEntry = BaseIterator.LinkEntry;
+const SymbolicLinkEntry = BaseIterator.SymbolicLinkEntry;
 
-var constants = require('./constants');
-var CONTENTS = constants.CONTENTS;
-var STRUCTURE = {
+const constants = require('./constants');
+const CONTENTS = constants.CONTENTS;
+const STRUCTURE = {
   'data/fixture.js': CONTENTS,
   'data/symlink1': '~data/fixture.js',
   'data/link1': ':data/fixture.js',
@@ -34,36 +33,31 @@ var STRUCTURE = {
   'data/dir3/symlink1': '~data/dir1/fixture.js',
   'data/dir3/link1': ':data/dir1/fixture.js',
 };
-var DMODE = parseInt(755, 8);
-var FMODE = parseInt(644, 8);
-var SMODE = parseInt(755, 8);
-var LMODE = parseInt(644, 8);
+const DMODE = parseInt(755, 8);
+const FMODE = parseInt(644, 8);
+const SMODE = parseInt(755, 8);
+const LMODE = parseInt(644, 8);
 
 function addDirectories(relativePath, entries) {
-  var parts = relativePath.split('/');
-  for (var index = 0; index < parts.length - 1; index++) {
-    var directoryPath = parts.slice(0, index + 1).join('/');
+  const parts = relativePath.split('/');
+  for (let index = 0; index < parts.length - 1; index++) {
+    const directoryPath = parts.slice(0, index + 1).join('/');
 
-    if (
-      !find(entries, function (entry) {
-        return entry instanceof DirectoryEntry && entry.path === directoryPath;
-      })
-    )
-      entries.push(new DirectoryEntry({ path: directoryPath, mode: DMODE, mtime: new Date() }));
+    if (!find(entries, (entry) => entry instanceof DirectoryEntry && entry.path === directoryPath)) entries.push(new DirectoryEntry({ path: directoryPath, mode: DMODE, mtime: new Date() }));
   }
 }
 
 module.exports = function loadEntries() {
-  var entries = [];
-  for (var relativePath in STRUCTURE) {
-    var contents = STRUCTURE[relativePath];
+  const entries = [];
+  for (const relativePath in STRUCTURE) {
+    const contents = STRUCTURE[relativePath];
     addDirectories(relativePath, entries);
     if (contents[0] === ':') entries.push(new LinkEntry({ path: relativePath, linkpath: contents.slice(1), mode: LMODE, mtime: new Date() }));
     else if (contents[0] === '~') {
-      var fullPath = relativePath.split('/').join(path.sep);
-      var linkFullPath = contents.slice(1).split('/').join(path.sep);
-      var linkpath = path.relative(path.dirname(fullPath), linkFullPath);
-      var linkDenormalizedPath = linkpath.split(path.sep).join('/');
+      const fullPath = relativePath.split('/').join(path.sep);
+      const linkFullPath = contents.slice(1).split('/').join(path.sep);
+      const linkpath = path.relative(path.dirname(fullPath), linkFullPath);
+      const linkDenormalizedPath = linkpath.split(path.sep).join('/');
       entries.push(new SymbolicLinkEntry({ path: relativePath, linkpath: linkDenormalizedPath, mode: SMODE, mtime: new Date() }));
     } else entries.push(new FileEntry({ path: relativePath, mode: FMODE, mtime: new Date() }, contents));
   }
