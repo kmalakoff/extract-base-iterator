@@ -1,19 +1,19 @@
-var path = require('path');
-var assign = require('just-extend');
-var fs = require('graceful-fs');
-var mkpath = require('mkpath');
-var rimraf = require('rimraf');
-var Queue = require('queue-cb');
+const path = require('path');
+const assign = require('just-extend');
+const fs = require('graceful-fs');
+const mkpath = require('mkpath');
+const rimraf = require('rimraf');
+const Queue = require('queue-cb');
 
-var chmod = require('./fs/chmod');
-var chown = require('./fs/chown');
-var utimes = require('./fs/utimes');
-var stripPath = require('./stripPath');
-var validateAttributes = require('./validateAttributes');
+const chmod = require('./fs/chmod');
+const chown = require('./fs/chown');
+const utimes = require('./fs/utimes');
+const stripPath = require('./stripPath');
+const validateAttributes = require('./validateAttributes');
 
-var MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
+const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
-function LinkEntry(attributes, type) {
+function LinkEntry(attributes, _type) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
   assign(this, attributes);
   if (this.basename === undefined) this.basename = path.basename(this.path);
@@ -26,19 +26,19 @@ LinkEntry.prototype.create = function create(dest, options, callback) {
     options = null;
   }
 
-  var self = this;
+  const self = this;
   if (typeof callback === 'function') {
     options = options || {};
     try {
-      var normalizedPath = path.normalize(self.path);
-      var fullPath = path.join(dest, stripPath(normalizedPath, options));
-      var normalizedLinkpath = path.normalize(self.linkpath);
-      var linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
+      const normalizedPath = path.normalize(self.path);
+      const fullPath = path.join(dest, stripPath(normalizedPath, options));
+      const normalizedLinkpath = path.normalize(self.linkpath);
+      const linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
 
-      var queue = new Queue(1);
+      const queue = new Queue(1);
       if (options.force) {
-        queue.defer(function (callback) {
-          rimraf(fullPath, function (err) {
+        queue.defer((callback) => {
+          rimraf(fullPath, (err) => {
             err && err.code !== 'ENOENT' ? callback(err) : callback();
           });
         });
