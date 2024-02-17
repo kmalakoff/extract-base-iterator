@@ -18,11 +18,11 @@ function _interop_require_default(obj) {
         default: obj
     };
 }
-var _default = _stackbaseiterator.default;
 _stackbaseiterator.default.DirectoryEntry = _DirectoryEntrycjs.default;
 _stackbaseiterator.default.FileEntry = _FileEntrycjs.default;
 _stackbaseiterator.default.LinkEntry = _LinkEntrycjs.default;
 _stackbaseiterator.default.SymbolicLinkEntry = _SymbolicLinkEntrycjs.default;
+var _default = _stackbaseiterator.default;
 
 if ((typeof exports.default === 'function' || (typeof exports.default === 'object' && exports.default !== null)) && typeof exports.default.__esModule === 'undefined') {
   Object.defineProperty(exports.default, '__esModule', { value: true });
