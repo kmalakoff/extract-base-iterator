@@ -1,5 +1,5 @@
 const inherits = require('inherits');
-const BaseIterator = require('extract-base-iterator');
+const BaseIterator = require('extract-base-iterator').default;
 
 function EntryIterator(entries, options) {
   BaseIterator.call(this, options);
