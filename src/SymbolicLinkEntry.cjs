@@ -10,8 +10,8 @@ const chmod = require('./fs/chmod');
 const chown = require('./fs/chown');
 const utimes = require('./fs/utimes');
 const lstatReal = require('./fs/lstatReal');
-const stripPath = require('./stripPath');
-const validateAttributes = require('./validateAttributes');
+const stripPath = require('./stripPath.cjs');
+const validateAttributes = require('./validateAttributes.cjs');
 
 function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
   lstatReal(linkFullPath, (err, targetStat) => {

@@ -5,20 +5,22 @@ const assign = require('just-extend');
 
 const chmod = require('./fs/chmod');
 const chown = require('./fs/chown');
+const rimraf = require('rimraf');
 const utimes = require('./fs/utimes');
-const stripPath = require('./stripPath');
-const validateAttributes = require('./validateAttributes');
+const stripPath = require('./stripPath.cjs');
+const validateAttributes = require('./validateAttributes.cjs');
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
-function DirectoryEntry(attributes) {
+function FileEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
   assign(this, attributes);
-  if (this.type === undefined) this.type = 'directory';
   if (this.basename === undefined) this.basename = path.basename(this.path);
+  if (this.type === undefined) this.type = 'file';
+  if (this._writeFile === undefined) throw new Error('File self missing _writeFile. Please implement this method in your subclass');
 }
 
-DirectoryEntry.prototype.create = function create(dest, options, callback) {
+FileEntry.prototype.create = function create(dest, options, callback) {
   if (typeof options === 'function') {
     callback = options;
     options = null;
@@ -31,9 +33,16 @@ DirectoryEntry.prototype.create = function create(dest, options, callback) {
       const normalizedPath = path.normalize(self.path);
       const fullPath = path.join(dest, stripPath(normalizedPath, options));
 
-      // do not check for the existence of the directory but allow out-of-order calling
       const queue = new Queue(1);
-      queue.defer(mkpath.bind(null, fullPath));
+      if (options.force) {
+        queue.defer((callback) => {
+          rimraf(fullPath, (err) => {
+            err && err.code !== 'ENOENT' ? callback(err) : callback();
+          });
+        });
+      }
+      queue.defer(mkpath.bind(null, path.dirname(fullPath)));
+      queue.defer(this._writeFile.bind(this, fullPath, options));
       queue.defer(chmod.bind(null, fullPath, self, options));
       queue.defer(chown.bind(null, fullPath, self, options));
       queue.defer(utimes.bind(null, fullPath, self, options));
@@ -50,6 +59,6 @@ DirectoryEntry.prototype.create = function create(dest, options, callback) {
   });
 };
 
-DirectoryEntry.prototype.destroy = function destroy() {};
+FileEntry.prototype.destroy = function destroy() {};
 
-module.exports = DirectoryEntry;
+module.exports = FileEntry;
