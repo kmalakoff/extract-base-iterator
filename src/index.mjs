@@ -4,8 +4,8 @@ import FileEntry from './FileEntry.cjs';
 import LinkEntry from './LinkEntry.cjs';
 import SymbolicLinkEntry from './SymbolicLinkEntry.cjs';
 
-export default StackBaseIterator;
 StackBaseIterator.DirectoryEntry = DirectoryEntry;
 StackBaseIterator.FileEntry = FileEntry;
 StackBaseIterator.LinkEntry = LinkEntry;
 StackBaseIterator.SymbolicLinkEntry = SymbolicLinkEntry;
+export default StackBaseIterator;
