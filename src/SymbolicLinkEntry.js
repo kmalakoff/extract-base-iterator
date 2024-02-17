@@ -1,28 +1,28 @@
-var path = require('path');
-var assign = require('just-extend');
-var fs = require('graceful-fs');
-var mkpath = require('mkpath');
-var rimraf = require('rimraf');
-var Queue = require('queue-cb');
-var isAbsolute = require('is-absolute');
+const path = require('path');
+const assign = require('just-extend');
+const fs = require('graceful-fs');
+const mkpath = require('mkpath');
+const rimraf = require('rimraf');
+const Queue = require('queue-cb');
+const isAbsolute = require('is-absolute');
 
-var chmod = require('./fs/chmod');
-var chown = require('./fs/chown');
-var utimes = require('./fs/utimes');
-var lstatReal = require('./fs/lstatReal');
-var stripPath = require('./stripPath');
-var validateAttributes = require('./validateAttributes');
+const chmod = require('./fs/chmod');
+const chown = require('./fs/chown');
+const utimes = require('./fs/utimes');
+const lstatReal = require('./fs/lstatReal');
+const stripPath = require('./stripPath');
+const validateAttributes = require('./validateAttributes');
 
 function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
-  lstatReal(linkFullPath, function (err, targetStat) {
-    if (err || !targetStat) return callback(err || new Error('Symlink path does not exist' + linkFullPath));
-    var type = targetStat.isDirectory() ? 'dir' : 'file';
+  lstatReal(linkFullPath, (err, targetStat) => {
+    if (err || !targetStat) return callback(err || new Error(`Symlink path does not exist${linkFullPath}`));
+    const type = targetStat.isDirectory() ? 'dir' : 'file';
     fs.symlink(linkpath, fullPath, type, callback);
   });
 }
-var isWindows = process.platform === 'win32';
+const isWindows = process.platform === 'win32';
 
-var MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
+const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
 function SymbolicLinkEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
@@ -37,24 +37,24 @@ SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
     options = null;
   }
 
-  var self = this;
+  const self = this;
   if (typeof callback === 'function') {
     options = options || {};
     try {
-      var normalizedPath = path.normalize(self.path);
-      var fullPath = path.join(dest, stripPath(normalizedPath, options));
-      var normalizedLinkpath = path.normalize(self.linkpath);
-      var linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
+      const normalizedPath = path.normalize(self.path);
+      const fullPath = path.join(dest, stripPath(normalizedPath, options));
+      let normalizedLinkpath = path.normalize(self.linkpath);
+      let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
       if (!isAbsolute(normalizedLinkpath)) {
-        var linkRelativePath = path.join(path.dirname(normalizedPath), self.linkpath);
+        const linkRelativePath = path.join(path.dirname(normalizedPath), self.linkpath);
         linkFullPath = path.join(dest, stripPath(linkRelativePath, options));
         normalizedLinkpath = path.relative(path.dirname(fullPath), linkFullPath);
       }
 
-      var queue = new Queue(1);
+      const queue = new Queue(1);
       if (options.force) {
-        queue.defer(function (callback) {
-          rimraf(fullPath, function (err) {
+        queue.defer((callback) => {
+          rimraf(fullPath, (err) => {
             err && err.code !== 'ENOENT' ? callback(err) : callback();
           });
         });

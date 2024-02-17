@@ -1,15 +1,15 @@
-var path = require('path');
-var mkpath = require('mkpath');
-var Queue = require('queue-cb');
-var assign = require('just-extend');
+const path = require('path');
+const mkpath = require('mkpath');
+const Queue = require('queue-cb');
+const assign = require('just-extend');
 
-var chmod = require('./fs/chmod');
-var chown = require('./fs/chown');
-var utimes = require('./fs/utimes');
-var stripPath = require('./stripPath');
-var validateAttributes = require('./validateAttributes');
+const chmod = require('./fs/chmod');
+const chown = require('./fs/chown');
+const utimes = require('./fs/utimes');
+const stripPath = require('./stripPath');
+const validateAttributes = require('./validateAttributes');
 
-var MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
+const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
 function DirectoryEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
@@ -24,15 +24,15 @@ DirectoryEntry.prototype.create = function create(dest, options, callback) {
     options = null;
   }
 
-  var self = this;
+  const self = this;
   if (typeof callback === 'function') {
     options = options || {};
     try {
-      var normalizedPath = path.normalize(self.path);
-      var fullPath = path.join(dest, stripPath(normalizedPath, options));
+      const normalizedPath = path.normalize(self.path);
+      const fullPath = path.join(dest, stripPath(normalizedPath, options));
 
       // do not check for the existence of the directory but allow out-of-order calling
-      var queue = new Queue(1);
+      const queue = new Queue(1);
       queue.defer(mkpath.bind(null, fullPath));
       queue.defer(chmod.bind(null, fullPath, self, options));
       queue.defer(chown.bind(null, fullPath, self, options));
