@@ -51,7 +51,7 @@
     "@types/node": "^20.11.19",
     "cr": "^0.1.0",
     "depcheck": "^1.4.7",
-    "fs-iterator": "^4.1.1",
+    "fs-iterator": "^4.2.0",
     "fs-stats-spys": "^1.0.2",
     "lodash.find": "^4.6.0",
     "ts-dev-stack": "^0.13.0"
