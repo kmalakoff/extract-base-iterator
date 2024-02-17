@@ -1,26 +1,26 @@
 const path = require('path');
-const mkpath = require('mkpath');
-const Queue = require('queue-cb');
 const assign = require('just-extend');
+const fs = require('graceful-fs');
+const mkpath = require('mkpath');
+const rimraf = require('rimraf');
+const Queue = require('queue-cb');
 
 const chmod = require('./fs/chmod');
 const chown = require('./fs/chown');
-const rimraf = require('rimraf');
 const utimes = require('./fs/utimes');
-const stripPath = require('./stripPath');
-const validateAttributes = require('./validateAttributes');
+const stripPath = require('./stripPath.cjs');
+const validateAttributes = require('./validateAttributes.cjs');
 
-const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
+const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
-function FileEntry(attributes) {
+function LinkEntry(attributes, _type) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
   assign(this, attributes);
   if (this.basename === undefined) this.basename = path.basename(this.path);
-  if (this.type === undefined) this.type = 'file';
-  if (this._writeFile === undefined) throw new Error('File self missing _writeFile. Please implement this method in your subclass');
+  if (this.type === undefined) this.type = 'link';
 }
 
-FileEntry.prototype.create = function create(dest, options, callback) {
+LinkEntry.prototype.create = function create(dest, options, callback) {
   if (typeof options === 'function') {
     callback = options;
     options = null;
@@ -32,6 +32,8 @@ FileEntry.prototype.create = function create(dest, options, callback) {
     try {
       const normalizedPath = path.normalize(self.path);
       const fullPath = path.join(dest, stripPath(normalizedPath, options));
+      const normalizedLinkpath = path.normalize(self.linkpath);
+      const linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
 
       const queue = new Queue(1);
       if (options.force) {
@@ -42,7 +44,7 @@ FileEntry.prototype.create = function create(dest, options, callback) {
         });
       }
       queue.defer(mkpath.bind(null, path.dirname(fullPath)));
-      queue.defer(this._writeFile.bind(this, fullPath, options));
+      queue.defer(fs.link.bind(fs, linkFullPath, fullPath));
       queue.defer(chmod.bind(null, fullPath, self, options));
       queue.defer(chown.bind(null, fullPath, self, options));
       queue.defer(utimes.bind(null, fullPath, self, options));
@@ -59,6 +61,6 @@ FileEntry.prototype.create = function create(dest, options, callback) {
   });
 };
 
-FileEntry.prototype.destroy = function destroy() {};
+LinkEntry.prototype.destroy = function destroy() {};
 
-module.exports = FileEntry;
+module.exports = LinkEntry;

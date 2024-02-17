@@ -60,7 +60,7 @@
     "node": ">=0.8"
   },
   "tsds": {
-    "source": "src/index.js",
+    "source": "src/index.mjs",
     "targets": [
       "cjs"
     ]

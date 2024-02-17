@@ -6,8 +6,8 @@ var assign = require("just-extend");
 var chmod = require("./fs/chmod");
 var chown = require("./fs/chown");
 var utimes = require("./fs/utimes");
-var stripPath = require("./stripPath");
-var validateAttributes = require("./validateAttributes");
+var stripPath = require("./stripPath.js");
+var validateAttributes = require("./validateAttributes.js");
 var MANDATORY_ATTRIBUTES = [
     "mode",
     "mtime",

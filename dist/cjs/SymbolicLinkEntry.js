@@ -10,8 +10,8 @@ var chmod = require("./fs/chmod");
 var chown = require("./fs/chown");
 var utimes = require("./fs/utimes");
 var lstatReal = require("./fs/lstatReal");
-var stripPath = require("./stripPath");
-var validateAttributes = require("./validateAttributes");
+var stripPath = require("./stripPath.js");
+var validateAttributes = require("./validateAttributes.js");
 function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
     lstatReal(linkFullPath, function(err, targetStat) {
         if (err || !targetStat) return callback(err || new Error("Symlink path does not exist".concat(linkFullPath)));

@@ -1,26 +1,24 @@
 const path = require('path');
-const assign = require('just-extend');
-const fs = require('graceful-fs');
 const mkpath = require('mkpath');
-const rimraf = require('rimraf');
 const Queue = require('queue-cb');
+const assign = require('just-extend');
 
 const chmod = require('./fs/chmod');
 const chown = require('./fs/chown');
 const utimes = require('./fs/utimes');
-const stripPath = require('./stripPath');
-const validateAttributes = require('./validateAttributes');
+const stripPath = require('./stripPath.cjs');
+const validateAttributes = require('./validateAttributes.cjs');
 
-const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
+const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
-function LinkEntry(attributes, _type) {
+function DirectoryEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
   assign(this, attributes);
+  if (this.type === undefined) this.type = 'directory';
   if (this.basename === undefined) this.basename = path.basename(this.path);
-  if (this.type === undefined) this.type = 'link';
 }
 
-LinkEntry.prototype.create = function create(dest, options, callback) {
+DirectoryEntry.prototype.create = function create(dest, options, callback) {
   if (typeof options === 'function') {
     callback = options;
     options = null;
@@ -32,19 +30,10 @@ LinkEntry.prototype.create = function create(dest, options, callback) {
     try {
       const normalizedPath = path.normalize(self.path);
       const fullPath = path.join(dest, stripPath(normalizedPath, options));
-      const normalizedLinkpath = path.normalize(self.linkpath);
-      const linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
 
+      // do not check for the existence of the directory but allow out-of-order calling
       const queue = new Queue(1);
-      if (options.force) {
-        queue.defer((callback) => {
-          rimraf(fullPath, (err) => {
-            err && err.code !== 'ENOENT' ? callback(err) : callback();
-          });
-        });
-      }
-      queue.defer(mkpath.bind(null, path.dirname(fullPath)));
-      queue.defer(fs.link.bind(fs, linkFullPath, fullPath));
+      queue.defer(mkpath.bind(null, fullPath));
       queue.defer(chmod.bind(null, fullPath, self, options));
       queue.defer(chown.bind(null, fullPath, self, options));
       queue.defer(utimes.bind(null, fullPath, self, options));
@@ -61,6 +50,6 @@ LinkEntry.prototype.create = function create(dest, options, callback) {
   });
 };
 
-LinkEntry.prototype.destroy = function destroy() {};
+DirectoryEntry.prototype.destroy = function destroy() {};
 
-module.exports = LinkEntry;
+module.exports = DirectoryEntry;
