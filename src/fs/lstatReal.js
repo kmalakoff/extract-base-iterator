@@ -1,4 +1,4 @@
-var fs = require('graceful-fs');
+const fs = require('graceful-fs');
 
 module.exports = function lstatReal(path, callback) {
   fs.realpath(path, function realpathCallback(err, realpath) {
