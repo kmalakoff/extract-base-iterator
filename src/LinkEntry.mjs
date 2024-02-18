@@ -1,19 +1,19 @@
-const path = require('path');
-const assign = require('just-extend');
-const fs = require('graceful-fs');
-const mkpath = require('mkpath');
-const rimraf = require('rimraf');
-const Queue = require('queue-cb');
+import path from 'path';
+import fs from 'graceful-fs';
+import assign from 'just-extend';
+import mkpath from 'mkpath';
+import Queue from 'queue-cb';
+import rimraf from 'rimraf';
 
-const chmod = require('./fs/chmod');
-const chown = require('./fs/chown');
-const utimes = require('./fs/utimes');
-const stripPath = require('./stripPath.cjs');
-const validateAttributes = require('./validateAttributes.cjs');
+import chmod from './fs/chmod.mjs';
+import chown from './fs/chown.mjs';
+import utimes from './fs/utimes.mjs';
+import stripPath from './stripPath.mjs';
+import validateAttributes from './validateAttributes.mjs';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
-function LinkEntry(attributes, _type) {
+export default function LinkEntry(attributes, _type) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
   assign(this, attributes);
   if (this.basename === undefined) this.basename = path.basename(this.path);
@@ -62,5 +62,3 @@ LinkEntry.prototype.create = function create(dest, options, callback) {
 };
 
 LinkEntry.prototype.destroy = function destroy() {};
-
-module.exports = LinkEntry;

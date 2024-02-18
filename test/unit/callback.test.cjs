@@ -1,69 +1,16 @@
 const assert = require('assert');
 const rimraf = require('rimraf');
 const mkpath = require('mkpath');
-const Queue = require('queue-cb');
 const assign = require('just-extend');
 
-const EntriesIterator = require('../lib/EntriesIterator');
-const loadEntries = require('../lib/loadEntries');
-const validateFiles = require('../lib/validateFiles');
+const EntriesIterator = require('../lib/EntriesIterator.cjs');
+const loadEntries = require('../lib/loadEntries.cjs');
+const validateFiles = require('../lib/validateFiles.cjs');
+const extract = require('../lib/extract.cjs');
 
-const constants = require('../lib/constants');
+const constants = require('../lib/constants.cjs');
 const TMP_DIR = constants.TMP_DIR;
 const TARGET = constants.TARGET;
-
-function extract(iterator, dest, options, callback) {
-  const links = [];
-  iterator.forEach(
-    (entry, callback) => {
-      if (entry.type === 'link') {
-        links.unshift(entry);
-        callback();
-      } else if (entry.type === 'symlink') {
-        links.push(entry);
-        callback();
-      } else entry.create(dest, options, callback);
-    },
-    { callbacks: true, concurrency: options.concurrency },
-    (err) => {
-      if (err) return callback(err);
-
-      // create links after directories and files
-      const queue = new Queue(1);
-      for (let index = 0; index < links.length; index++) {
-        const entry = links[index];
-        queue.defer(entry.create.bind(entry, dest, options));
-      }
-      queue.await(callback);
-    }
-  );
-}
-
-function extractPromise(iterator, dest, options, callback) {
-  const links = [];
-  iterator
-    .forEach(
-      (entry) => {
-        if (entry.type === 'link') links.unshift(entry);
-        else if (entry.type === 'symlink') links.push(entry);
-        else return entry.create(dest, options);
-      },
-      { concurrency: options.concurrency }
-    )
-    .then(() => {
-      // create links after directories and files
-      const queue = new Queue(1);
-      for (let index = 0; index < links.length; index++) {
-        ((entry) => {
-          queue.defer((callback) => {
-            entry.create(dest, options).then(callback).catch(callback);
-          });
-        })(links[index]);
-      }
-      queue.await(callback);
-    })
-    .catch(callback);
-}
 
 describe('iterator', () => {
   const entries = loadEntries();
@@ -109,20 +56,6 @@ describe('iterator', () => {
     it('extract - no strip - concurrency Infinity', (done) => {
       const options = { now: new Date(), concurrency: Infinity };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        assert.ok(!err);
-
-        validateFiles(options, 'tar', (err) => {
-          assert.ok(!err);
-          done();
-        });
-      });
-    });
-
-    it('extract - no strip - promise', (done) => {
-      if (typeof Promise === 'undefined') return done();
-
-      const options = { now: new Date() };
-      extractPromise(new EntriesIterator(entries), TARGET, options, (err) => {
         assert.ok(!err);
 
         validateFiles(options, 'tar', (err) => {

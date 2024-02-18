@@ -1,7 +1,7 @@
-const fs = require('graceful-fs');
+import fs from 'graceful-fs';
 
-module.exports = function lstatReal(path, callback) {
+export default function lstatReal(path, callback) {
   fs.realpath(path, function realpathCallback(err, realpath) {
     err ? callback(err) : fs.lstat(realpath, callback);
   });
-};
+}

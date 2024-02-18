@@ -1,17 +1,17 @@
-const path = require('path');
-const assign = require('just-extend');
-const fs = require('graceful-fs');
-const mkpath = require('mkpath');
-const rimraf = require('rimraf');
-const Queue = require('queue-cb');
-const isAbsolute = require('is-absolute');
+import path from 'path';
+import fs from 'graceful-fs';
+import isAbsolute from 'is-absolute';
+import assign from 'just-extend';
+import mkpath from 'mkpath';
+import Queue from 'queue-cb';
+import rimraf from 'rimraf';
 
-const chmod = require('./fs/chmod');
-const chown = require('./fs/chown');
-const utimes = require('./fs/utimes');
-const lstatReal = require('./fs/lstatReal');
-const stripPath = require('./stripPath.cjs');
-const validateAttributes = require('./validateAttributes.cjs');
+import chmod from './fs/chmod.mjs';
+import chown from './fs/chown.mjs';
+import lstatReal from './fs/lstatReal.mjs';
+import utimes from './fs/utimes.mjs';
+import stripPath from './stripPath.mjs';
+import validateAttributes from './validateAttributes.mjs';
 
 function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
   lstatReal(linkFullPath, (err, targetStat) => {
@@ -24,7 +24,7 @@ const isWindows = process.platform === 'win32';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
-function SymbolicLinkEntry(attributes) {
+export default function SymbolicLinkEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
   assign(this, attributes);
   if (this.basename === undefined) this.basename = path.basename(this.path);
@@ -79,5 +79,3 @@ SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
 };
 
 SymbolicLinkEntry.prototype.destroy = function destroy() {};
-
-module.exports = SymbolicLinkEntry;
