@@ -1,18 +1,18 @@
-const path = require('path');
-const mkpath = require('mkpath');
-const Queue = require('queue-cb');
-const assign = require('just-extend');
+import path from 'path';
+import assign from 'just-extend';
+import mkpath from 'mkpath';
+import Queue from 'queue-cb';
 
-const chmod = require('./fs/chmod');
-const chown = require('./fs/chown');
-const rimraf = require('rimraf');
-const utimes = require('./fs/utimes');
-const stripPath = require('./stripPath.cjs');
-const validateAttributes = require('./validateAttributes.cjs');
+import rimraf from 'rimraf';
+import chmod from './fs/chmod.mjs';
+import chown from './fs/chown.mjs';
+import utimes from './fs/utimes.mjs';
+import stripPath from './stripPath.mjs';
+import validateAttributes from './validateAttributes.mjs';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
-function FileEntry(attributes) {
+export default function FileEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
   assign(this, attributes);
   if (this.basename === undefined) this.basename = path.basename(this.path);
@@ -60,5 +60,3 @@ FileEntry.prototype.create = function create(dest, options, callback) {
 };
 
 FileEntry.prototype.destroy = function destroy() {};
-
-module.exports = FileEntry;

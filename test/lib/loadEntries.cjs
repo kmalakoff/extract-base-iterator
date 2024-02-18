@@ -3,7 +3,7 @@ const path = require('path');
 const inherits = require('inherits');
 const find = require('lodash.find');
 
-const BaseIterator = require('extract-base-iterator').default;
+const BaseIterator = require('extract-base-iterator');
 
 const DirectoryEntry = BaseIterator.DirectoryEntry;
 function FileEntry(attributes, contents) {
@@ -17,7 +17,7 @@ FileEntry.prototype._writeFile = function _writeFile(fullPath, _options, callbac
 const LinkEntry = BaseIterator.LinkEntry;
 const SymbolicLinkEntry = BaseIterator.SymbolicLinkEntry;
 
-const constants = require('./constants');
+const constants = require('./constants.cjs');
 const CONTENTS = constants.CONTENTS;
 const STRUCTURE = {
   'data/fixture.js': CONTENTS,
