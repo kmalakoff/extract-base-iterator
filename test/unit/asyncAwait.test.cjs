@@ -1,13 +1,15 @@
+const HAS_ASYNC_AWAIT = typeof Symbol !== 'undefined' && Symbol.asyncIterator;
+
 const assert = require('assert');
 const rimraf = require('rimraf');
 const mkpath = require('mkpath');
 const assign = require('just-extend');
 
-const EntriesIterator = require('../lib/EntriesIterator');
-const loadEntries = require('../lib/loadEntries');
-const validateFiles = require('../lib/validateFiles');
+const EntriesIterator = require('../lib/EntriesIterator.cjs');
+const loadEntries = require('../lib/loadEntries.cjs');
+const validateFiles = require('../lib/validateFiles.cjs');
 
-const constants = require('../lib/constants');
+const constants = require('../lib/constants.cjs');
 const TMP_DIR = constants.TMP_DIR;
 const TARGET = constants.TARGET;
 
@@ -41,6 +43,8 @@ async function extractForEach(iterator, dest, options) {
 }
 
 describe('asyncAwait', () => {
+  if (!HAS_ASYNC_AWAIT) return;
+
   const entries = loadEntries();
   beforeEach((callback) => {
     rimraf(TMP_DIR, (err) => {
