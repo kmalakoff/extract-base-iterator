@@ -1,17 +1,17 @@
-const path = require('path');
-const mkpath = require('mkpath');
-const Queue = require('queue-cb');
-const assign = require('just-extend');
+import path from 'path';
+import assign from 'just-extend';
+import mkpath from 'mkpath';
+import Queue from 'queue-cb';
 
-const chmod = require('./fs/chmod');
-const chown = require('./fs/chown');
-const utimes = require('./fs/utimes');
-const stripPath = require('./stripPath.cjs');
-const validateAttributes = require('./validateAttributes.cjs');
+import chmod from './fs/chmod.mjs';
+import chown from './fs/chown.mjs';
+import utimes from './fs/utimes.mjs';
+import stripPath from './stripPath.mjs';
+import validateAttributes from './validateAttributes.mjs';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
-function DirectoryEntry(attributes) {
+export default function DirectoryEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
   assign(this, attributes);
   if (this.type === undefined) this.type = 'directory';
@@ -51,5 +51,3 @@ DirectoryEntry.prototype.create = function create(dest, options, callback) {
 };
 
 DirectoryEntry.prototype.destroy = function destroy() {};
-
-module.exports = DirectoryEntry;

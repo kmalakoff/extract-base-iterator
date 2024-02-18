@@ -1,6 +1,6 @@
 // adapted from https://github.com/mafintosh/tar-fs
 
-const fs = require('graceful-fs');
+import fs from 'graceful-fs';
 
 const UMASK = process.umask ? process.umask() : null;
 const DMODE = parseInt(755, 8);
@@ -8,7 +8,7 @@ const FMODE = parseInt(644, 8);
 const SMODE = parseInt(755, 8);
 const LMODE = parseInt(644, 8);
 
-module.exports = function chmodFn(fullPath, entry, _options, callback) {
+export default function chmodFn(fullPath, entry, _options, callback) {
   const chmod = entry.type === 'symlink' ? fs.lchmod : fs.chmod;
   if (!chmod || UMASK === null) return callback();
 
@@ -30,4 +30,4 @@ module.exports = function chmodFn(fullPath, entry, _options, callback) {
     }
   }
   chmod(fullPath, mode & ~UMASK, callback);
-};
+}
