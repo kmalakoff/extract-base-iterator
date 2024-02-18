@@ -1,22 +1,36 @@
 "use strict";
-var path = require("path");
-var assign = require("just-extend");
-var fs = require("graceful-fs");
-var mkpath = require("mkpath");
-var rimraf = require("rimraf");
-var Queue = require("queue-cb");
-var isAbsolute = require("is-absolute");
-var chmod = require("./fs/chmod");
-var chown = require("./fs/chown");
-var utimes = require("./fs/utimes");
-var lstatReal = require("./fs/lstatReal");
-var stripPath = require("./stripPath.js");
-var validateAttributes = require("./validateAttributes.js");
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "default", {
+    enumerable: true,
+    get: function() {
+        return SymbolicLinkEntry;
+    }
+});
+var _path = /*#__PURE__*/ _interop_require_default(require("path"));
+var _gracefulfs = /*#__PURE__*/ _interop_require_default(require("graceful-fs"));
+var _isabsolute = /*#__PURE__*/ _interop_require_default(require("is-absolute"));
+var _justextend = /*#__PURE__*/ _interop_require_default(require("just-extend"));
+var _mkpath = /*#__PURE__*/ _interop_require_default(require("mkpath"));
+var _queuecb = /*#__PURE__*/ _interop_require_default(require("queue-cb"));
+var _rimraf = /*#__PURE__*/ _interop_require_default(require("rimraf"));
+var _chmod = /*#__PURE__*/ _interop_require_default(require("./fs/chmod.js"));
+var _chown = /*#__PURE__*/ _interop_require_default(require("./fs/chown.js"));
+var _lstatReal = /*#__PURE__*/ _interop_require_default(require("./fs/lstatReal.js"));
+var _utimes = /*#__PURE__*/ _interop_require_default(require("./fs/utimes.js"));
+var _stripPath = /*#__PURE__*/ _interop_require_default(require("./stripPath.js"));
+var _validateAttributes = /*#__PURE__*/ _interop_require_default(require("./validateAttributes.js"));
+function _interop_require_default(obj) {
+    return obj && obj.__esModule ? obj : {
+        default: obj
+    };
+}
 function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
-    lstatReal(linkFullPath, function(err, targetStat) {
+    (0, _lstatReal.default)(linkFullPath, function(err, targetStat) {
         if (err || !targetStat) return callback(err || new Error("Symlink path does not exist".concat(linkFullPath)));
         var type = targetStat.isDirectory() ? "dir" : "file";
-        fs.symlink(linkpath, fullPath, type, callback);
+        _gracefulfs.default.symlink(linkpath, fullPath, type, callback);
     });
 }
 var isWindows = process.platform === "win32";
@@ -27,9 +41,9 @@ var MANDATORY_ATTRIBUTES = [
     "linkpath"
 ];
 function SymbolicLinkEntry(attributes) {
-    validateAttributes(attributes, MANDATORY_ATTRIBUTES);
-    assign(this, attributes);
-    if (this.basename === undefined) this.basename = path.basename(this.path);
+    (0, _validateAttributes.default)(attributes, MANDATORY_ATTRIBUTES);
+    (0, _justextend.default)(this, attributes);
+    if (this.basename === undefined) this.basename = _path.default.basename(this.path);
     if (this.type === undefined) this.type = "symlink";
 }
 SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
@@ -41,29 +55,29 @@ SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
     if (typeof callback === "function") {
         options = options || {};
         try {
-            var normalizedPath = path.normalize(self.path);
-            var fullPath = path.join(dest, stripPath(normalizedPath, options));
-            var normalizedLinkpath = path.normalize(self.linkpath);
-            var linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
-            if (!isAbsolute(normalizedLinkpath)) {
-                var linkRelativePath = path.join(path.dirname(normalizedPath), self.linkpath);
-                linkFullPath = path.join(dest, stripPath(linkRelativePath, options));
-                normalizedLinkpath = path.relative(path.dirname(fullPath), linkFullPath);
+            var normalizedPath = _path.default.normalize(self.path);
+            var fullPath = _path.default.join(dest, (0, _stripPath.default)(normalizedPath, options));
+            var normalizedLinkpath = _path.default.normalize(self.linkpath);
+            var linkFullPath = _path.default.join(dest, (0, _stripPath.default)(normalizedLinkpath, options));
+            if (!(0, _isabsolute.default)(normalizedLinkpath)) {
+                var linkRelativePath = _path.default.join(_path.default.dirname(normalizedPath), self.linkpath);
+                linkFullPath = _path.default.join(dest, (0, _stripPath.default)(linkRelativePath, options));
+                normalizedLinkpath = _path.default.relative(_path.default.dirname(fullPath), linkFullPath);
             }
-            var queue = new Queue(1);
+            var queue = new _queuecb.default(1);
             if (options.force) {
                 queue.defer(function(callback) {
-                    rimraf(fullPath, function(err) {
+                    (0, _rimraf.default)(fullPath, function(err) {
                         err && err.code !== "ENOENT" ? callback(err) : callback();
                     });
                 });
             }
-            queue.defer(mkpath.bind(null, path.dirname(fullPath)));
+            queue.defer(_mkpath.default.bind(null, _path.default.dirname(fullPath)));
             if (isWindows) queue.defer(symlinkWin32.bind(null, linkFullPath, normalizedLinkpath, fullPath));
-            else queue.defer(fs.symlink.bind(fs, normalizedLinkpath, fullPath));
-            queue.defer(chmod.bind(null, fullPath, self, options));
-            queue.defer(chown.bind(null, fullPath, self, options));
-            queue.defer(utimes.bind(null, fullPath, self, options));
+            else queue.defer(_gracefulfs.default.symlink.bind(_gracefulfs.default, normalizedLinkpath, fullPath));
+            queue.defer(_chmod.default.bind(null, fullPath, self, options));
+            queue.defer(_chown.default.bind(null, fullPath, self, options));
+            queue.defer(_utimes.default.bind(null, fullPath, self, options));
             return queue.await(callback);
         } catch (err) {
             return callback(err);
@@ -76,10 +90,4 @@ SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
     });
 };
 SymbolicLinkEntry.prototype.destroy = function destroy() {};
-module.exports = SymbolicLinkEntry;
-
-if ((typeof exports.default === 'function' || (typeof exports.default === 'object' && exports.default !== null)) && typeof exports.default.__esModule === 'undefined') {
-  Object.defineProperty(exports.default, '__esModule', { value: true });
-  for (var key in exports) exports.default[key] = exports[key];
-  module.exports = exports.default;
-}
+/* CJS INTEROP */ if (exports.__esModule && exports.default) { module.exports = exports.default; for (var key in exports) module.exports[key] = exports[key]; }

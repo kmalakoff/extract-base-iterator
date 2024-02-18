@@ -1,11 +1,7 @@
 import StackBaseIterator from 'stack-base-iterator';
-import DirectoryEntry from './DirectoryEntry.cjs';
-import FileEntry from './FileEntry.cjs';
-import LinkEntry from './LinkEntry.cjs';
-import SymbolicLinkEntry from './SymbolicLinkEntry.cjs';
 
-StackBaseIterator.DirectoryEntry = DirectoryEntry;
-StackBaseIterator.FileEntry = FileEntry;
-StackBaseIterator.LinkEntry = LinkEntry;
-StackBaseIterator.SymbolicLinkEntry = SymbolicLinkEntry;
 export default StackBaseIterator;
+export { default as DirectoryEntry } from './DirectoryEntry.mjs';
+export { default as FileEntry } from './FileEntry.mjs';
+export { default as LinkEntry } from './LinkEntry.mjs';
+export { default as SymbolicLinkEntry } from './SymbolicLinkEntry.mjs';

@@ -1,23 +1,37 @@
 "use strict";
-var path = require("path");
-var mkpath = require("mkpath");
-var Queue = require("queue-cb");
-var assign = require("just-extend");
-var chmod = require("./fs/chmod");
-var chown = require("./fs/chown");
-var utimes = require("./fs/utimes");
-var stripPath = require("./stripPath.js");
-var validateAttributes = require("./validateAttributes.js");
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "default", {
+    enumerable: true,
+    get: function() {
+        return DirectoryEntry;
+    }
+});
+var _path = /*#__PURE__*/ _interop_require_default(require("path"));
+var _justextend = /*#__PURE__*/ _interop_require_default(require("just-extend"));
+var _mkpath = /*#__PURE__*/ _interop_require_default(require("mkpath"));
+var _queuecb = /*#__PURE__*/ _interop_require_default(require("queue-cb"));
+var _chmod = /*#__PURE__*/ _interop_require_default(require("./fs/chmod.js"));
+var _chown = /*#__PURE__*/ _interop_require_default(require("./fs/chown.js"));
+var _utimes = /*#__PURE__*/ _interop_require_default(require("./fs/utimes.js"));
+var _stripPath = /*#__PURE__*/ _interop_require_default(require("./stripPath.js"));
+var _validateAttributes = /*#__PURE__*/ _interop_require_default(require("./validateAttributes.js"));
+function _interop_require_default(obj) {
+    return obj && obj.__esModule ? obj : {
+        default: obj
+    };
+}
 var MANDATORY_ATTRIBUTES = [
     "mode",
     "mtime",
     "path"
 ];
 function DirectoryEntry(attributes) {
-    validateAttributes(attributes, MANDATORY_ATTRIBUTES);
-    assign(this, attributes);
+    (0, _validateAttributes.default)(attributes, MANDATORY_ATTRIBUTES);
+    (0, _justextend.default)(this, attributes);
     if (this.type === undefined) this.type = "directory";
-    if (this.basename === undefined) this.basename = path.basename(this.path);
+    if (this.basename === undefined) this.basename = _path.default.basename(this.path);
 }
 DirectoryEntry.prototype.create = function create(dest, options, callback) {
     if (typeof options === "function") {
@@ -28,14 +42,14 @@ DirectoryEntry.prototype.create = function create(dest, options, callback) {
     if (typeof callback === "function") {
         options = options || {};
         try {
-            var normalizedPath = path.normalize(self.path);
-            var fullPath = path.join(dest, stripPath(normalizedPath, options));
+            var normalizedPath = _path.default.normalize(self.path);
+            var fullPath = _path.default.join(dest, (0, _stripPath.default)(normalizedPath, options));
             // do not check for the existence of the directory but allow out-of-order calling
-            var queue = new Queue(1);
-            queue.defer(mkpath.bind(null, fullPath));
-            queue.defer(chmod.bind(null, fullPath, self, options));
-            queue.defer(chown.bind(null, fullPath, self, options));
-            queue.defer(utimes.bind(null, fullPath, self, options));
+            var queue = new _queuecb.default(1);
+            queue.defer(_mkpath.default.bind(null, fullPath));
+            queue.defer(_chmod.default.bind(null, fullPath, self, options));
+            queue.defer(_chown.default.bind(null, fullPath, self, options));
+            queue.defer(_utimes.default.bind(null, fullPath, self, options));
             return queue.await(callback);
         } catch (err) {
             return callback(err);
@@ -48,10 +62,4 @@ DirectoryEntry.prototype.create = function create(dest, options, callback) {
     });
 };
 DirectoryEntry.prototype.destroy = function destroy() {};
-module.exports = DirectoryEntry;
-
-if ((typeof exports.default === 'function' || (typeof exports.default === 'object' && exports.default !== null)) && typeof exports.default.__esModule === 'undefined') {
-  Object.defineProperty(exports.default, '__esModule', { value: true });
-  for (var key in exports) exports.default[key] = exports[key];
-  module.exports = exports.default;
-}
+/* CJS INTEROP */ if (exports.__esModule && exports.default) { module.exports = exports.default; for (var key in exports) module.exports[key] = exports[key]; }
