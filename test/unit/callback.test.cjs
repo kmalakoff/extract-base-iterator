@@ -1,7 +1,6 @@
 const assert = require('assert');
 const rimraf = require('rimraf');
 const mkpath = require('mkpath');
-const assign = require('just-extend');
 
 const EntriesIterator = require('../lib/EntriesIterator.cjs');
 const loadEntries = require('../lib/loadEntries.cjs');
@@ -88,7 +87,7 @@ describe('iterator', () => {
           extract(new EntriesIterator(entries), TARGET, options, (err) => {
             assert.ok(err);
 
-            extract(new EntriesIterator(entries), TARGET, assign({ force: true }, options), (err) => {
+            extract(new EntriesIterator(entries), TARGET, Object.assign({ force: true }, options), (err) => {
               assert.ok(!err);
 
               validateFiles(options, 'tar', (err) => {
