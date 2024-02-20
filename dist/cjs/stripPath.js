@@ -22,4 +22,4 @@ function stripPath(relativePath, options) {
     if (parts.length < strip) throw new Error("You cannot strip more levels than there are directories. Strip: ".concat(strip, ". Path: ").concat(relativePath));
     return parts.slice(strip).join(_path.default.sep);
 }
-/* CJS INTEROP */ if (exports.__esModule && exports.default) { module.exports = exports.default; for (var key in exports) module.exports[key] = exports[key]; }
+/* CJS INTEROP */ if (exports.__esModule && exports.default) { Object.defineProperty(exports.default, '__esModule', { value: true }); for (var key in exports) exports.default[key] = exports[key]; module.exports = exports.default; }

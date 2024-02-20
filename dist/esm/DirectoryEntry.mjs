@@ -1,5 +1,4 @@
 import path from 'path';
-import assign from 'just-extend';
 import mkpath from 'mkpath';
 import Queue from 'queue-cb';
 import chmod from './fs/chmod.mjs';
@@ -14,7 +13,7 @@ const MANDATORY_ATTRIBUTES = [
 ];
 export default function DirectoryEntry(attributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
-    assign(this, attributes);
+    Object.assign(this, attributes);
     if (this.type === undefined) this.type = 'directory';
     if (this.basename === undefined) this.basename = path.basename(this.path);
 }

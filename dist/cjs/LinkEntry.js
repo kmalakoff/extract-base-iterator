@@ -10,7 +10,6 @@ Object.defineProperty(exports, "default", {
 });
 var _path = /*#__PURE__*/ _interop_require_default(require("path"));
 var _gracefulfs = /*#__PURE__*/ _interop_require_default(require("graceful-fs"));
-var _justextend = /*#__PURE__*/ _interop_require_default(require("just-extend"));
 var _mkpath = /*#__PURE__*/ _interop_require_default(require("mkpath"));
 var _queuecb = /*#__PURE__*/ _interop_require_default(require("queue-cb"));
 var _rimraf = /*#__PURE__*/ _interop_require_default(require("rimraf"));
@@ -32,7 +31,7 @@ var MANDATORY_ATTRIBUTES = [
 ];
 function LinkEntry(attributes, _type) {
     (0, _validateAttributes.default)(attributes, MANDATORY_ATTRIBUTES);
-    (0, _justextend.default)(this, attributes);
+    Object.assign(this, attributes);
     if (this.basename === undefined) this.basename = _path.default.basename(this.path);
     if (this.type === undefined) this.type = "link";
 }
@@ -74,4 +73,4 @@ LinkEntry.prototype.create = function create(dest, options, callback) {
     });
 };
 LinkEntry.prototype.destroy = function destroy() {};
-/* CJS INTEROP */ if (exports.__esModule && exports.default) { module.exports = exports.default; for (var key in exports) module.exports[key] = exports[key]; }
+/* CJS INTEROP */ if (exports.__esModule && exports.default) { Object.defineProperty(exports.default, '__esModule', { value: true }); for (var key in exports) exports.default[key] = exports[key]; module.exports = exports.default; }

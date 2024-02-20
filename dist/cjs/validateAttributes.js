@@ -15,4 +15,4 @@ function validateAttributes(attributes, keys) {
         if (attributes[key] === undefined) throw new Error("Missing attribute ".concat(key, ".Attributes ").concat(JSON.stringify(attributes)));
     }
 }
-/* CJS INTEROP */ if (exports.__esModule && exports.default) { module.exports = exports.default; for (var key in exports) module.exports[key] = exports[key]; }
+/* CJS INTEROP */ if (exports.__esModule && exports.default) { Object.defineProperty(exports.default, '__esModule', { value: true }); for (var key in exports) exports.default[key] = exports[key]; module.exports = exports.default; }
