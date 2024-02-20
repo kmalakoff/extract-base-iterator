@@ -1,5 +1,4 @@
 import path from 'path';
-import assign from 'just-extend';
 import mkpath from 'mkpath';
 import Queue from 'queue-cb';
 
@@ -14,7 +13,7 @@ const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
 export default function FileEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
-  assign(this, attributes);
+  Object.assign(this, attributes);
   if (this.basename === undefined) this.basename = path.basename(this.path);
   if (this.type === undefined) this.type = 'file';
   if (this._writeFile === undefined) throw new Error('File self missing _writeFile. Please implement this method in your subclass');

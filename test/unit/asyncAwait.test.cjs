@@ -1,9 +1,6 @@
-const HAS_ASYNC_AWAIT = typeof Symbol !== 'undefined' && Symbol.asyncIterator;
-
 const assert = require('assert');
 const rimraf = require('rimraf');
 const mkpath = require('mkpath');
-const assign = require('just-extend');
 
 const EntriesIterator = require('../lib/EntriesIterator.cjs');
 const loadEntries = require('../lib/loadEntries.cjs');
@@ -43,7 +40,7 @@ async function extractForEach(iterator, dest, options) {
 }
 
 describe('asyncAwait', () => {
-  if (!HAS_ASYNC_AWAIT) return;
+  if (typeof Symbol === 'undefined' || !Symbol.asyncIterator) return;
 
   const entries = loadEntries();
   beforeEach((callback) => {
@@ -105,7 +102,7 @@ describe('asyncAwait', () => {
         } catch (err) {
           assert.ok(err);
         }
-        await extract(new EntriesIterator(entries), TARGET, assign({ force: true }, options));
+        await extract(new EntriesIterator(entries), TARGET, Object.assign({ force: true }, options));
         await validateFiles(options, 'tar');
       } catch (err) {
         assert.ok(!err);

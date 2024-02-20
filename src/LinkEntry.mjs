@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'graceful-fs';
-import assign from 'just-extend';
 import mkpath from 'mkpath';
 import Queue from 'queue-cb';
 import rimraf from 'rimraf';
@@ -15,7 +14,7 @@ const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
 export default function LinkEntry(attributes, _type) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
-  assign(this, attributes);
+  Object.assign(this, attributes);
   if (this.basename === undefined) this.basename = path.basename(this.path);
   if (this.type === undefined) this.type = 'link';
 }
