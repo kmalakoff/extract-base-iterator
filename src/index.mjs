@@ -1,3 +1,4 @@
+import './polyfills.cjs';
 import StackBaseIterator from 'stack-base-iterator';
 
 export default StackBaseIterator;
