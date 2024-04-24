@@ -44,7 +44,7 @@
     "version": "tsds version"
   },
   "dependencies": {
-    "core-js": "^3.36.0",
+    "core-js": "^3.37.0",
     "fs-access-compat": "^1.0.3",
     "graceful-fs": "^4.2.11",
     "is-absolute": "^1.0.0",
@@ -55,16 +55,16 @@
     "stack-base-iterator": "^1.1.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.5.3",
+    "@biomejs/biome": "^1.7.1",
     "@types/mocha": "^10.0.6",
-    "@types/node": "^20.11.19",
+    "@types/node": "^20.12.7",
     "cr": "^0.1.0",
     "depcheck": "^1.4.7",
     "fs-iterator": "^5.0.1",
     "fs-stats-spys": "^1.0.2",
     "inherits": "^2.0.4",
     "lodash.find": "^4.6.0",
-    "ts-dev-stack": "^0.14.9"
+    "ts-dev-stack": "^0.15.8"
   },
   "engines": {
     "node": ">=0.8"
