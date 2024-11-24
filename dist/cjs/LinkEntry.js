@@ -24,24 +24,24 @@ function _interop_require_default(obj) {
     };
 }
 var MANDATORY_ATTRIBUTES = [
-    "mode",
-    "mtime",
-    "path",
-    "linkpath"
+    'mode',
+    'mtime',
+    'path',
+    'linkpath'
 ];
 function LinkEntry(attributes, _type) {
     (0, _validateAttributes.default)(attributes, MANDATORY_ATTRIBUTES);
     Object.assign(this, attributes);
     if (this.basename === undefined) this.basename = _path.default.basename(this.path);
-    if (this.type === undefined) this.type = "link";
+    if (this.type === undefined) this.type = 'link';
 }
 LinkEntry.prototype.create = function create(dest, options, callback) {
-    if (typeof options === "function") {
+    if (typeof options === 'function') {
         callback = options;
         options = null;
     }
     var self = this;
-    if (typeof callback === "function") {
+    if (typeof callback === 'function') {
         options = options || {};
         try {
             var normalizedPath = _path.default.normalize(self.path);
@@ -52,7 +52,7 @@ LinkEntry.prototype.create = function create(dest, options, callback) {
             if (options.force) {
                 queue.defer(function(callback) {
                     (0, _rimraf.default)(fullPath, function(err) {
-                        err && err.code !== "ENOENT" ? callback(err) : callback();
+                        err && err.code !== 'ENOENT' ? callback(err) : callback();
                     });
                 });
             }

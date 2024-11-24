@@ -21,21 +21,21 @@ var FMODE = parseInt(644, 8);
 var SMODE = parseInt(755, 8);
 var LMODE = parseInt(644, 8);
 function chmodFn(fullPath, entry, _options, callback) {
-    var chmod = entry.type === "symlink" ? _gracefulfs.default.lchmod : _gracefulfs.default.chmod;
+    var chmod = entry.type === 'symlink' ? _gracefulfs.default.lchmod : _gracefulfs.default.chmod;
     if (!chmod || UMASK === null) return callback();
     var mode = entry.mode;
     if (!mode) {
         switch(entry.type){
-            case "directory":
+            case 'directory':
                 mode = DMODE;
                 break;
-            case "file":
+            case 'file':
                 mode = FMODE;
                 break;
-            case "symlink":
+            case 'symlink':
                 mode = SMODE;
                 break;
-            case "link":
+            case 'link':
                 mode = LMODE;
                 break;
         }

@@ -28,30 +28,30 @@ function _interop_require_default(obj) {
 function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
     (0, _lstatReal.default)(linkFullPath, function(err, targetStat) {
         if (err || !targetStat) return callback(err || new Error("Symlink path does not exist".concat(linkFullPath)));
-        var type = targetStat.isDirectory() ? "dir" : "file";
+        var type = targetStat.isDirectory() ? 'dir' : 'file';
         _gracefulfs.default.symlink(linkpath, fullPath, type, callback);
     });
 }
-var isWindows = process.platform === "win32";
+var isWindows = process.platform === 'win32';
 var MANDATORY_ATTRIBUTES = [
-    "mode",
-    "mtime",
-    "path",
-    "linkpath"
+    'mode',
+    'mtime',
+    'path',
+    'linkpath'
 ];
 function SymbolicLinkEntry(attributes) {
     (0, _validateAttributes.default)(attributes, MANDATORY_ATTRIBUTES);
     Object.assign(this, attributes);
     if (this.basename === undefined) this.basename = _path.default.basename(this.path);
-    if (this.type === undefined) this.type = "symlink";
+    if (this.type === undefined) this.type = 'symlink';
 }
 SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
-    if (typeof options === "function") {
+    if (typeof options === 'function') {
         callback = options;
         options = null;
     }
     var self = this;
-    if (typeof callback === "function") {
+    if (typeof callback === 'function') {
         options = options || {};
         try {
             var normalizedPath = _path.default.normalize(self.path);
@@ -67,7 +67,7 @@ SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
             if (options.force) {
                 queue.defer(function(callback) {
                     (0, _rimraf.default)(fullPath, function(err) {
-                        err && err.code !== "ENOENT" ? callback(err) : callback();
+                        err && err.code !== 'ENOENT' ? callback(err) : callback();
                     });
                 });
             }
