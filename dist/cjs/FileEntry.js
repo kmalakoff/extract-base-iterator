@@ -11,7 +11,7 @@ Object.defineProperty(exports, "default", {
 var _path = /*#__PURE__*/ _interop_require_default(require("path"));
 var _mkpath = /*#__PURE__*/ _interop_require_default(require("mkpath"));
 var _queuecb = /*#__PURE__*/ _interop_require_default(require("queue-cb"));
-var _rimraf = /*#__PURE__*/ _interop_require_default(require("rimraf"));
+var _rimraf2 = /*#__PURE__*/ _interop_require_default(require("rimraf2"));
 var _chmod = /*#__PURE__*/ _interop_require_default(require("./fs/chmod.js"));
 var _chown = /*#__PURE__*/ _interop_require_default(require("./fs/chown.js"));
 var _utimes = /*#__PURE__*/ _interop_require_default(require("./fs/utimes.js"));
@@ -23,24 +23,24 @@ function _interop_require_default(obj) {
     };
 }
 var MANDATORY_ATTRIBUTES = [
-    "mode",
-    "mtime",
-    "path"
+    'mode',
+    'mtime',
+    'path'
 ];
 function FileEntry(attributes) {
     (0, _validateAttributes.default)(attributes, MANDATORY_ATTRIBUTES);
     Object.assign(this, attributes);
     if (this.basename === undefined) this.basename = _path.default.basename(this.path);
-    if (this.type === undefined) this.type = "file";
-    if (this._writeFile === undefined) throw new Error("File self missing _writeFile. Please implement this method in your subclass");
+    if (this.type === undefined) this.type = 'file';
+    if (this._writeFile === undefined) throw new Error('File self missing _writeFile. Please implement this method in your subclass');
 }
 FileEntry.prototype.create = function create(dest, options, callback) {
-    if (typeof options === "function") {
+    if (typeof options === 'function') {
         callback = options;
         options = null;
     }
     var self = this;
-    if (typeof callback === "function") {
+    if (typeof callback === 'function') {
         options = options || {};
         try {
             var normalizedPath = _path.default.normalize(self.path);
@@ -48,8 +48,10 @@ FileEntry.prototype.create = function create(dest, options, callback) {
             var queue = new _queuecb.default(1);
             if (options.force) {
                 queue.defer(function(callback) {
-                    (0, _rimraf.default)(fullPath, function(err) {
-                        err && err.code !== "ENOENT" ? callback(err) : callback();
+                    (0, _rimraf2.default)(fullPath, {
+                        disableGlob: true
+                    }, function(err) {
+                        err && err.code !== 'ENOENT' ? callback(err) : callback();
                     });
                 });
             }

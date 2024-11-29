@@ -22,23 +22,23 @@ function _interop_require_default(obj) {
     };
 }
 var MANDATORY_ATTRIBUTES = [
-    "mode",
-    "mtime",
-    "path"
+    'mode',
+    'mtime',
+    'path'
 ];
 function DirectoryEntry(attributes) {
     (0, _validateAttributes.default)(attributes, MANDATORY_ATTRIBUTES);
     Object.assign(this, attributes);
-    if (this.type === undefined) this.type = "directory";
+    if (this.type === undefined) this.type = 'directory';
     if (this.basename === undefined) this.basename = _path.default.basename(this.path);
 }
 DirectoryEntry.prototype.create = function create(dest, options, callback) {
-    if (typeof options === "function") {
+    if (typeof options === 'function') {
         callback = options;
         options = null;
     }
     var self = this;
-    if (typeof callback === "function") {
+    if (typeof callback === 'function') {
         options = options || {};
         try {
             var normalizedPath = _path.default.normalize(self.path);

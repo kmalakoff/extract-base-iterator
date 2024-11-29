@@ -16,9 +16,9 @@ function _interop_require_default(obj) {
     };
 }
 var UID = process.getuid ? process.getuid() : -1;
-var OWN = process.platform !== "win32" && UID === 0;
+var OWN = process.platform !== 'win32' && UID === 0;
 function chownFn(fullPath, entry, _options, callback) {
-    var chown = entry.type === "symlink" ? _gracefulfs.default.lchown : _gracefulfs.default.chown;
+    var chown = entry.type === 'symlink' ? _gracefulfs.default.lchown : _gracefulfs.default.chown;
     if (!chown || !OWN || !entry.uid || !entry.gid) return callback();
     chown(fullPath, entry.uid, entry.gid, callback);
 }
