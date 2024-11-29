@@ -1,5 +1,5 @@
 const assert = require('assert');
-const rimraf = require('rimraf');
+const rimraf2 = require('rimraf2');
 const mkpath = require('mkpath');
 const Queue = require('queue-cb');
 
@@ -42,7 +42,7 @@ describe('promise', () => {
 
   const entries = loadEntries();
   beforeEach((callback) => {
-    rimraf(TMP_DIR, (err) => {
+    rimraf2(TMP_DIR, { disableGlob: true }, (err) => {
       if (err && err.code !== 'EEXIST') return callback(err);
       mkpath(TMP_DIR, callback);
     });
