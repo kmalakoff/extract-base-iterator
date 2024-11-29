@@ -2,7 +2,7 @@ import path from 'path';
 import mkpath from 'mkpath';
 import Queue from 'queue-cb';
 
-import rimraf from 'rimraf';
+import rimraf2 from 'rimraf2';
 import chmod from './fs/chmod.mjs';
 import chown from './fs/chown.mjs';
 import utimes from './fs/utimes.mjs';
@@ -35,7 +35,7 @@ FileEntry.prototype.create = function create(dest, options, callback) {
       const queue = new Queue(1);
       if (options.force) {
         queue.defer((callback) => {
-          rimraf(fullPath, (err) => {
+          rimraf2(fullPath, { disableGlob: true }, (err) => {
             err && err.code !== 'ENOENT' ? callback(err) : callback();
           });
         });
