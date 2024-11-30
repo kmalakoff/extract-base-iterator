@@ -51,7 +51,7 @@
     "lodash.compact": "^3.0.1",
     "mkpath": "^1.0.0",
     "queue-cb": "^1.2.1",
-    "rimraf2": "^2.7.1",
+    "rimraf2": "^2.8.1",
     "stack-base-iterator": "^1.1.2"
   },
   "devDependencies": {
@@ -60,11 +60,11 @@
     "@types/node": "^22.10.1",
     "cr": "^0.1.0",
     "depcheck": "^1.4.7",
-    "fs-iterator": "^5.1.0",
+    "fs-iterator": "^5.1.1",
     "fs-stats-spys": "^1.0.2",
     "inherits": "^2.0.4",
     "lodash.find": "^4.6.0",
-    "ts-dev-stack": "^0.16.2"
+    "ts-dev-stack": "^0.17.0"
   },
   "engines": {
     "node": ">=0.8"
