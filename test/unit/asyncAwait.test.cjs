@@ -57,7 +57,7 @@ describe('asyncAwait', () => {
         await extract(new EntriesIterator(entries), TARGET, options);
         await validateFiles(options, 'tar');
       } catch (err) {
-        assert.ok(!err);
+        assert.ok(!err, err ? err.message : '');
       }
     });
 
@@ -67,7 +67,7 @@ describe('asyncAwait', () => {
         await extract(new EntriesIterator(entries), TARGET, options);
         await validateFiles(options, 'tar');
       } catch (err) {
-        assert.ok(!err);
+        assert.ok(!err, err ? err.message : '');
       }
     });
 
@@ -77,7 +77,7 @@ describe('asyncAwait', () => {
         await extractForEach(new EntriesIterator(entries), TARGET, options);
         await validateFiles(options, 'tar');
       } catch (err) {
-        assert.ok(!err);
+        assert.ok(!err, err ? err.message : '');
       }
     });
 
@@ -87,7 +87,7 @@ describe('asyncAwait', () => {
         await extract(new EntriesIterator(entries), TARGET, options);
         await validateFiles(options, 'tar');
       } catch (err) {
-        assert.ok(!err);
+        assert.ok(!err, err ? err.message : '');
       }
     });
 
@@ -105,7 +105,7 @@ describe('asyncAwait', () => {
         await extract(new EntriesIterator(entries), TARGET, Object.assign({ force: true }, options));
         await validateFiles(options, 'tar');
       } catch (err) {
-        assert.ok(!err);
+        assert.ok(!err, err ? err.message : '');
       }
     });
   });
