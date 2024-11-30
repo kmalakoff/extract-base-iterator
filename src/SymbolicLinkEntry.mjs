@@ -19,7 +19,7 @@ function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
     fs.symlink(linkpath, fullPath, type, callback);
   });
 }
-const isWindows = process.platform === 'win32';
+const isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE);
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
