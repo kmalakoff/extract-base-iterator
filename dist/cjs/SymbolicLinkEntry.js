@@ -32,7 +32,7 @@ function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
         _gracefulfs.default.symlink(linkpath, fullPath, type, callback);
     });
 }
-var isWindows = process.platform === 'win32';
+var isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE);
 var MANDATORY_ATTRIBUTES = [
     'mode',
     'mtime',
