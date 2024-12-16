@@ -1,6 +1,6 @@
 {
   "name": "extract-base-iterator",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Base iterator for extract iterators like tar-iterator and zip-iterator",
   "keywords": [
     "extract",
