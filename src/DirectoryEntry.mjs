@@ -1,5 +1,5 @@
 import path from 'path';
-import mkpath from 'mkpath';
+import mkdirp from 'mkdirp-classic';
 import Queue from 'queue-cb';
 
 import chmod from './fs/chmod.mjs';
@@ -32,7 +32,7 @@ DirectoryEntry.prototype.create = function create(dest, options, callback) {
 
       // do not check for the existence of the directory but allow out-of-order calling
       const queue = new Queue(1);
-      queue.defer(mkpath.bind(null, fullPath));
+      queue.defer(mkdirp.bind(null, fullPath));
       queue.defer(chmod.bind(null, fullPath, self, options));
       queue.defer(chown.bind(null, fullPath, self, options));
       queue.defer(utimes.bind(null, fullPath, self, options));

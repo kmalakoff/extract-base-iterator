@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'graceful-fs';
 import isAbsolute from 'is-absolute';
-import mkpath from 'mkpath';
+import mkdirp from 'mkdirp-classic';
 import Queue from 'queue-cb';
 import rimraf2 from 'rimraf2';
 
@@ -58,7 +58,7 @@ SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
           });
         });
       }
-      queue.defer(mkpath.bind(null, path.dirname(fullPath)));
+      queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
       if (isWindows) queue.defer(symlinkWin32.bind(null, linkFullPath, normalizedLinkpath, fullPath));
       else queue.defer(fs.symlink.bind(fs, normalizedLinkpath, fullPath));
       queue.defer(chmod.bind(null, fullPath, self, options));

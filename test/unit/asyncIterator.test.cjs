@@ -1,6 +1,6 @@
 const assert = require('assert');
 const rimraf2 = require('rimraf2');
-const mkpath = require('mkpath');
+const mkdirp-classic = require('mkdirp-classic');
 
 const EntriesIterator = require('../lib/EntriesIterator.cjs');
 const loadEntries = require('../lib/loadEntries.cjs');
@@ -29,7 +29,7 @@ describe('asyncIterator', () => {
   beforeEach((callback) => {
     rimraf2(TMP_DIR, { disableGlob: true }, (err) => {
       if (err && err.code !== 'EEXIST') return callback(err);
-      mkpath(TMP_DIR, callback);
+      mkdirp-classic(TMP_DIR, callback);
     });
   });
 

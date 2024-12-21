@@ -1,5 +1,5 @@
 import path from 'path';
-import mkpath from 'mkpath';
+import mkdirp from 'mkdirp-classic';
 import Queue from 'queue-cb';
 
 import rimraf2 from 'rimraf2';
@@ -40,7 +40,7 @@ FileEntry.prototype.create = function create(dest, options, callback) {
           });
         });
       }
-      queue.defer(mkpath.bind(null, path.dirname(fullPath)));
+      queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
       queue.defer(this._writeFile.bind(this, fullPath, options));
       queue.defer(chmod.bind(null, fullPath, self, options));
       queue.defer(chown.bind(null, fullPath, self, options));
