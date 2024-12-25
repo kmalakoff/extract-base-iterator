@@ -1,6 +1,6 @@
 const assert = require('assert');
 const rimraf2 = require('rimraf2');
-const mkpath = require('mkpath');
+const mkdirp = require('mkdirp-classic');
 
 const EntriesIterator = require('../lib/EntriesIterator.cjs');
 const loadEntries = require('../lib/loadEntries.cjs');
@@ -14,9 +14,8 @@ const TARGET = constants.TARGET;
 describe('iterator', () => {
   const entries = loadEntries();
   beforeEach((callback) => {
-    rimraf2(TMP_DIR, { disableGlob: true }, (err) => {
-      if (err && err.code !== 'EEXIST') return callback(err);
-      mkpath(TMP_DIR, callback);
+    rimraf2(TMP_DIR, { disableGlob: true }, () => {
+      mkdirp(TMP_DIR, callback);
     });
   });
 
@@ -87,7 +86,7 @@ describe('iterator', () => {
           extract(new EntriesIterator(entries), TARGET, options, (err) => {
             assert.ok(err);
 
-            extract(new EntriesIterator(entries), TARGET, Object.assign({ force: true }, options), (err) => {
+            extract(new EntriesIterator(entries), TARGET, { force: true, ...options }, (err) => {
               assert.ok(!err, err ? err.message : '');
 
               validateFiles(options, 'tar', (err) => {

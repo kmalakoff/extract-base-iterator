@@ -1,5 +1,6 @@
 import path from 'path';
-import mkpath from 'mkpath';
+import mkdirp from 'mkdirp-classic';
+import objectAssign from 'object-assign';
 import Queue from 'queue-cb';
 
 import rimraf2 from 'rimraf2';
@@ -13,7 +14,7 @@ const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
 export default function FileEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
-  Object.assign(this, attributes);
+  objectAssign(this, attributes);
   if (this.basename === undefined) this.basename = path.basename(this.path);
   if (this.type === undefined) this.type = 'file';
   if (this._writeFile === undefined) throw new Error('File self missing _writeFile. Please implement this method in your subclass');
@@ -40,7 +41,7 @@ FileEntry.prototype.create = function create(dest, options, callback) {
           });
         });
       }
-      queue.defer(mkpath.bind(null, path.dirname(fullPath)));
+      queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
       queue.defer(this._writeFile.bind(this, fullPath, options));
       queue.defer(chmod.bind(null, fullPath, self, options));
       queue.defer(chown.bind(null, fullPath, self, options));
