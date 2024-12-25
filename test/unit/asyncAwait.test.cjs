@@ -1,6 +1,6 @@
 const assert = require('assert');
 const rimraf2 = require('rimraf2');
-const mkpath = require('mkpath');
+const mkdirp = require('mkdirp-classic');
 
 const EntriesIterator = require('../lib/EntriesIterator.cjs');
 const loadEntries = require('../lib/loadEntries.cjs');
@@ -41,12 +41,19 @@ async function extractForEach(iterator, dest, options) {
 
 describe('asyncAwait', () => {
   if (typeof Symbol === 'undefined' || !Symbol.asyncIterator) return;
+  let globalPromise;
+  before(() => {
+    globalPromise = global.Promise;
+    global.Promise = require('pinkie-promise');
+  });
+  after(() => {
+    global.Promise = globalPromise;
+  });
 
   const entries = loadEntries();
   beforeEach((callback) => {
-    rimraf2(TMP_DIR, { disableGlob: true }, (err) => {
-      if (err && err.code !== 'EEXIST') return callback(err);
-      mkpath(TMP_DIR, callback);
+    rimraf2(TMP_DIR, { disableGlob: true }, () => {
+      mkdirp(TMP_DIR, callback);
     });
   });
 
@@ -102,7 +109,7 @@ describe('asyncAwait', () => {
         } catch (err) {
           assert.ok(err);
         }
-        await extract(new EntriesIterator(entries), TARGET, Object.assign({ force: true }, options));
+        await extract(new EntriesIterator(entries), TARGET, { force: true, ...options });
         await validateFiles(options, 'tar');
       } catch (err) {
         assert.ok(!err, err ? err.message : '');
