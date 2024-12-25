@@ -1,6 +1,8 @@
 import path from 'path';
 import mkdirp from 'mkdirp-classic';
 import objectAssign from 'object-assign';
+// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
+import Promise from 'pinkie-promise';
 import Queue from 'queue-cb';
 
 import rimraf2 from 'rimraf2';
