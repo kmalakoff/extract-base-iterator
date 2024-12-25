@@ -1,5 +1,6 @@
 import path from 'path';
-import mkpath from 'mkpath';
+import mkdirp from 'mkdirp-classic';
+import objectAssign from 'object-assign';
 import Queue from 'queue-cb';
 
 import chmod from './fs/chmod.mjs';
@@ -12,7 +13,7 @@ const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
 export default function DirectoryEntry(attributes) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
-  Object.assign(this, attributes);
+  objectAssign(this, attributes);
   if (this.type === undefined) this.type = 'directory';
   if (this.basename === undefined) this.basename = path.basename(this.path);
 }
@@ -32,7 +33,7 @@ DirectoryEntry.prototype.create = function create(dest, options, callback) {
 
       // do not check for the existence of the directory but allow out-of-order calling
       const queue = new Queue(1);
-      queue.defer(mkpath.bind(null, fullPath));
+      queue.defer(mkdirp.bind(null, fullPath));
       queue.defer(chmod.bind(null, fullPath, self, options));
       queue.defer(chown.bind(null, fullPath, self, options));
       queue.defer(utimes.bind(null, fullPath, self, options));

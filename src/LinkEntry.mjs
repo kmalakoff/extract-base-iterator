@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'graceful-fs';
-import mkpath from 'mkpath';
+import mkdirp from 'mkdirp-classic';
+import objectAssign from 'object-assign';
 import Queue from 'queue-cb';
 import rimraf2 from 'rimraf2';
 
@@ -14,7 +15,7 @@ const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
 export default function LinkEntry(attributes, _type) {
   validateAttributes(attributes, MANDATORY_ATTRIBUTES);
-  Object.assign(this, attributes);
+  objectAssign(this, attributes);
   if (this.basename === undefined) this.basename = path.basename(this.path);
   if (this.type === undefined) this.type = 'link';
 }
@@ -42,7 +43,7 @@ LinkEntry.prototype.create = function create(dest, options, callback) {
           });
         });
       }
-      queue.defer(mkpath.bind(null, path.dirname(fullPath)));
+      queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
       queue.defer(fs.link.bind(fs, linkFullPath, fullPath));
       queue.defer(chmod.bind(null, fullPath, self, options));
       queue.defer(chown.bind(null, fullPath, self, options));
