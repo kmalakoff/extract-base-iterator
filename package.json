@@ -50,6 +50,7 @@
     "lodash.compact": "^3.0.1",
     "mkdirp-classic": "^0.5.3",
     "object-assign": "^4.1.1",
+    "pinkie-promise": "^2.0.1",
     "queue-cb": "^1.4.4",
     "rimraf2": "^2.8.2",
     "stack-base-iterator": "^1.1.4"
@@ -64,7 +65,6 @@
     "fs-stats-spys": "^1.1.0",
     "inherits": "^2.0.4",
     "lodash.find": "^4.6.0",
-    "pinkie-promise": "^2.0.1",
     "ts-dev-stack": "^1.5.4"
   },
   "packageManager": "npm@11.0.0+sha512.11dff29565d2297c74e7c594a9762581bde969f0aa5cbe6f5b3644bf008a16c065ece61094d9ffbb81125be38df8e1ba43eb8244b3d30c61eb797e9a2440e3ec",
