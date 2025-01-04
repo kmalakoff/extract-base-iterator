@@ -16,7 +16,7 @@
   "homepage": "https://github.com/kmalakoff/extract-base-iterator",
   "repository": {
     "type": "git",
-    "url": "git@github.com:kmalakoff/extract-base-iterator.git"
+    "url": "git+ssh://git@github.com/kmalakoff/extract-base-iterator.git"
   },
   "license": "MIT",
   "author": "Kevin Malakoff <kmalakoff@gmail.com> (https://github.com/kmalakoff)",
@@ -51,9 +51,9 @@
     "lodash.compact": "^3.0.1",
     "mkdirp-classic": "^0.5.3",
     "object-assign": "^4.1.1",
-    "queue-cb": "^1.4.7",
+    "queue-cb": "^1.4.8",
     "rimraf2": "^2.8.2",
-    "stack-base-iterator": "^1.1.6"
+    "stack-base-iterator": "^1.1.8"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
