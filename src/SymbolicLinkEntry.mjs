@@ -72,9 +72,7 @@ SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
   }
 
   return new Promise(function createPromise(resolve, reject) {
-    self.create(dest, options, function createCallback(err, done) {
-      err ? reject(err) : resolve(done);
-    });
+    self.create(dest, options, (err, done) => (err ? reject(err) : resolve(done)));
   });
 };
 
