@@ -53,7 +53,7 @@
     "object-assign": "^4.1.1",
     "queue-cb": "^1.4.9",
     "rimraf2": "^2.8.2",
-    "stack-base-iterator": "^1.1.9"
+    "stack-base-iterator": "^1.1.10"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
