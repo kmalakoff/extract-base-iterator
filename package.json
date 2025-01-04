@@ -51,9 +51,9 @@
     "lodash.compact": "^3.0.1",
     "mkdirp-classic": "^0.5.3",
     "object-assign": "^4.1.1",
-    "queue-cb": "^1.4.8",
+    "queue-cb": "^1.4.9",
     "rimraf2": "^2.8.2",
-    "stack-base-iterator": "^1.1.8"
+    "stack-base-iterator": "^1.1.9"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
