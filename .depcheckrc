@@ -1,1 +1,1 @@
-ignores: ["extract-base-iterator", "@types/*", "@biomejs/*"]
+ignores: ["@types/*", "extract-base-iterator", "@biomejs/*"]
