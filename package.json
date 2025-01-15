@@ -45,20 +45,19 @@
     "lodash.compact": "^3.0.1",
     "mkdirp-classic": "^0.5.3",
     "object-assign": "^4.1.1",
-    "queue-cb": "^1.4.12",
+    "queue-cb": "^1.4.13",
     "rimraf2": "^2.8.2",
-    "stack-base-iterator": "^1.1.13"
+    "stack-base-iterator": "^1.1.14"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "^22.10.6",
-    "cr": "^0.1.0",
-    "fs-iterator": "^5.2.12",
-    "fs-stats-spys": "^1.1.9",
-    "inherits": "^2.0.4",
-    "lodash.find": "^4.6.0",
-    "pinkie-promise": "^2.0.1"
+    "@types/mocha": "*",
+    "@types/node": "*",
+    "cr": "*",
+    "fs-iterator": "*",
+    "fs-stats-spys": "*",
+    "inherits": "*",
+    "lodash.find": "*",
+    "pinkie-promise": "*"
   },
   "engines": {
     "node": ">=0.8"
