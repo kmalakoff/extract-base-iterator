@@ -47,7 +47,7 @@
     "object-assign": "^4.1.1",
     "queue-cb": "^1.4.16",
     "rimraf2": "^2.8.2",
-    "stack-base-iterator": "^1.1.19"
+    "stack-base-iterator": "^1.1.20"
   },
   "devDependencies": {
     "@types/mocha": "*",
