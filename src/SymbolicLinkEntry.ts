@@ -23,6 +23,7 @@ function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
 const isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE);
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
+import type { LinkAttributes } from './types.js';
 
 export default class SymbolicLinkEntry {
   path: string;
@@ -30,7 +31,7 @@ export default class SymbolicLinkEntry {
   type: string;
   linkpath: string;
 
-  constructor(attributes) {
+  constructor(attributes: LinkAttributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
     objectAssign(this, attributes);
     if (this.basename === undefined) this.basename = path.basename(this.path);
