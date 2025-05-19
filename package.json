@@ -23,12 +23,12 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.mjs",
-      "require": "./dist/cjs/index.cjs"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     },
     "./package.json": "./package.json"
   },
-  "main": "dist/cjs/index.cjs",
+  "main": "dist/cjs/index.js",
   "types": "dist/cjs/index.d.cts",
   "files": [
     "dist"
@@ -46,9 +46,9 @@
     "lodash.compact": "^3.0.1",
     "mkdirp-classic": "^0.5.3",
     "object-assign": "^4.1.1",
-    "queue-cb": "^1.4.17",
+    "queue-cb": "^1.5.0",
     "rimraf2": "^2.8.2",
-    "stack-base-iterator": "^1.1.21"
+    "stack-base-iterator": "^1.2.1"
   },
   "devDependencies": {
     "@types/mocha": "*",
@@ -64,6 +64,6 @@
     "node": ">=0.8"
   },
   "tsds": {
-    "source": "src/index.mjs"
+    "source": "src/index.ts"
   }
 }

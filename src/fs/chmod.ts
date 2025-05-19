@@ -3,10 +3,10 @@
 import fs from 'graceful-fs';
 
 const UMASK = process.umask ? process.umask() : null;
-const DMODE = parseInt(755, 8);
-const FMODE = parseInt(644, 8);
-const SMODE = parseInt(755, 8);
-const LMODE = parseInt(644, 8);
+const DMODE = 0o755;
+const FMODE = 0o644;
+const SMODE = 0o755;
+const LMODE = 0o644;
 
 export default function chmodFn(fullPath, entry, _options, callback) {
   const chmod = entry.type === 'symlink' ? fs.lchmod : fs.chmod;
