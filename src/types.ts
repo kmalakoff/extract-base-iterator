@@ -1,5 +1,9 @@
 import type { Mode } from 'fs';
 
+import type { StackOptions } from 'stack-base-iterator';
+
+export interface ExtractOptions extends StackOptions {}
+
 export type Callback = (error?: Error) => void;
 export type WriteFileFn = (path: string, options: object, callback: Callback) => void;
 
