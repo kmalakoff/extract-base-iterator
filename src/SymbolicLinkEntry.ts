@@ -24,56 +24,62 @@ const isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
-export default function SymbolicLinkEntry(attributes) {
-  validateAttributes(attributes, MANDATORY_ATTRIBUTES);
-  objectAssign(this, attributes);
-  if (this.basename === undefined) this.basename = path.basename(this.path);
-  if (this.type === undefined) this.type = 'symlink';
-}
+export default class SymbolicLinkEntry {
+  path: string;
+  basename: string;
+  type: string;
+  linkpath: string;
 
-SymbolicLinkEntry.prototype.create = function create(dest, options, callback) {
-  if (typeof options === 'function') {
-    callback = options;
-    options = null;
+  constructor(attributes) {
+    validateAttributes(attributes, MANDATORY_ATTRIBUTES);
+    objectAssign(this, attributes);
+    if (this.basename === undefined) this.basename = path.basename(this.path);
+    if (this.type === undefined) this.type = 'symlink';
   }
 
-  const self = this;
-  if (typeof callback === 'function') {
-    options = options || {};
-    try {
-      const normalizedPath = path.normalize(self.path);
-      const fullPath = path.join(dest, stripPath(normalizedPath, options));
-      let normalizedLinkpath = path.normalize(self.linkpath);
-      let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
-      if (!isAbsolute(normalizedLinkpath)) {
-        const linkRelativePath = path.join(path.dirname(normalizedPath), self.linkpath);
-        linkFullPath = path.join(dest, stripPath(linkRelativePath, options));
-        normalizedLinkpath = path.relative(path.dirname(fullPath), linkFullPath);
-      }
-
-      const queue = new Queue(1);
-      if (options.force) {
-        queue.defer((callback) => {
-          rimraf2(fullPath, { disableGlob: true }, (err) => {
-            err && err.code !== 'ENOENT' ? callback(err) : callback();
-          });
-        });
-      }
-      queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
-      if (isWindows) queue.defer(symlinkWin32.bind(null, linkFullPath, normalizedLinkpath, fullPath));
-      else queue.defer(fs.symlink.bind(fs, normalizedLinkpath, fullPath));
-      queue.defer(chmod.bind(null, fullPath, self, options));
-      queue.defer(chown.bind(null, fullPath, self, options));
-      queue.defer(utimes.bind(null, fullPath, self, options));
-      return queue.await(callback);
-    } catch (err) {
-      return callback(err);
+  create(dest, options, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = null;
     }
+
+    if (typeof callback === 'function') {
+      options = options || {};
+      try {
+        const normalizedPath = path.normalize(this.path);
+        const fullPath = path.join(dest, stripPath(normalizedPath, options));
+        let normalizedLinkpath = path.normalize(this.linkpath);
+        let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
+        if (!isAbsolute(normalizedLinkpath)) {
+          const linkRelativePath = path.join(path.dirname(normalizedPath), this.linkpath);
+          linkFullPath = path.join(dest, stripPath(linkRelativePath, options));
+          normalizedLinkpath = path.relative(path.dirname(fullPath), linkFullPath);
+        }
+
+        const queue = new Queue(1);
+        if (options.force) {
+          queue.defer((callback) => {
+            rimraf2(fullPath, { disableGlob: true }, (err) => {
+              err && err.code !== 'ENOENT' ? callback(err) : callback();
+            });
+          });
+        }
+        queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
+        if (isWindows) queue.defer(symlinkWin32.bind(null, linkFullPath, normalizedLinkpath, fullPath));
+        else queue.defer(fs.symlink.bind(fs, normalizedLinkpath, fullPath));
+        queue.defer(chmod.bind(null, fullPath, this, options));
+        queue.defer(chown.bind(null, fullPath, this, options));
+        queue.defer(utimes.bind(null, fullPath, this, options));
+        return queue.await(callback);
+      } catch (err) {
+        return callback(err);
+      }
+    }
+
+    return new Promise((resolve, reject) => {
+      this.create(dest, options, (err, done) => (err ? reject(err) : resolve(done)));
+    });
   }
 
-  return new Promise(function createPromise(resolve, reject) {
-    self.create(dest, options, (err, done) => (err ? reject(err) : resolve(done)));
-  });
-};
-
-SymbolicLinkEntry.prototype.destroy = function destroy() {};
+  destroy() {}
+}
