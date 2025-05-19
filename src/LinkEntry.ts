@@ -19,7 +19,7 @@ export default class LinkEntry {
   type: string;
   linkpath: string;
 
-  constructor(attributes, _type) {
+  constructor(attributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
     objectAssign(this, attributes);
     if (this.basename === undefined) this.basename = path.basename(this.path);
