@@ -10,13 +10,14 @@ import stripPath from './stripPath.js';
 import validateAttributes from './validateAttributes.js';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
+import type { DirectoryAttributes } from './types.js';
 
 export default class DirectoryEntry {
   path: string;
   basename: string;
   type: string;
 
-  constructor(attributes) {
+  constructor(attributes: DirectoryAttributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
     objectAssign(this, attributes);
     if (this.type === undefined) this.type = 'directory';
