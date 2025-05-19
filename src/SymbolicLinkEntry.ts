@@ -6,12 +6,12 @@ import objectAssign from 'object-assign';
 import Queue from 'queue-cb';
 import rimraf2 from 'rimraf2';
 
-import chmod from './fs/chmod.mjs';
-import chown from './fs/chown.mjs';
-import lstatReal from './fs/lstatReal.mjs';
-import utimes from './fs/utimes.mjs';
-import stripPath from './stripPath.mjs';
-import validateAttributes from './validateAttributes.mjs';
+import chmod from './fs/chmod.js';
+import chown from './fs/chown.js';
+import lstatReal from './fs/lstatReal.js';
+import utimes from './fs/utimes.js';
+import stripPath from './stripPath.js';
+import validateAttributes from './validateAttributes.js';
 
 function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
   lstatReal(linkFullPath, (err, targetStat) => {
