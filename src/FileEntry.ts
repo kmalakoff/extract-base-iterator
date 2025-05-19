@@ -11,6 +11,7 @@ import stripPath from './stripPath.js';
 import validateAttributes from './validateAttributes.js';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
+import type { FileAttributes } from './types.js';
 
 import type { WriteFileFn } from './types.js';
 interface AbstractFileEntry {
@@ -22,7 +23,7 @@ export default class FileEntry {
   basename: string;
   type: string;
 
-  constructor(attributes) {
+  constructor(attributes: FileAttributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
     objectAssign(this, attributes);
     if (this.basename === undefined) this.basename = path.basename(this.path);
