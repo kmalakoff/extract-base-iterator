@@ -11,14 +11,16 @@ import stripPath from './stripPath.js';
 import validateAttributes from './validateAttributes.js';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
-import type { FileAttributes } from './types.js';
+import type { Mode } from 'fs';
+import type { ExtractOptions, FileAttributes, NoParamCallback, WriteFileFn } from './types.js';
 
-import type { WriteFileFn } from './types.js';
 interface AbstractFileEntry {
   _writeFile: WriteFileFn;
 }
 
 export default class FileEntry {
+  mode: Mode;
+  mtime: number;
   path: string;
   basename: string;
   type: string;
@@ -31,7 +33,7 @@ export default class FileEntry {
     if ((this as unknown as AbstractFileEntry)._writeFile === undefined) throw new Error('File this missing _writeFile. Please implement this method in your subclass');
   }
 
-  create(dest, options, callback) {
+  create(dest: string, options: ExtractOptions | NoParamCallback, callback?: NoParamCallback): undefined | Promise<boolean> {
     if (typeof options === 'function') {
       callback = options;
       options = null;
@@ -41,10 +43,10 @@ export default class FileEntry {
       options = options || {};
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, options));
+        const fullPath = path.join(dest, stripPath(normalizedPath, options as ExtractOptions));
 
         const queue = new Queue(1);
-        if (options.force) {
+        if ((options as ExtractOptions).force) {
           queue.defer((callback) => {
             rimraf2(fullPath, { disableGlob: true }, (err) => {
               err && err.code !== 'ENOENT' ? callback(err) : callback();
@@ -56,14 +58,16 @@ export default class FileEntry {
         queue.defer(chmod.bind(null, fullPath, this, options));
         queue.defer(chown.bind(null, fullPath, this, options));
         queue.defer(utimes.bind(null, fullPath, this, options));
-        return queue.await(callback);
+        queue.await(callback);
+        return;
       } catch (err) {
-        return callback(err);
+        callback(err);
+        return;
       }
     }
 
     return new Promise((resolve, reject) => {
-      this.create(dest, options, (err, done) => (err ? reject(err) : resolve(done)));
+      this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
     });
   }
 

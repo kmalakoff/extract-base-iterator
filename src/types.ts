@@ -2,10 +2,14 @@ import type { Mode } from 'fs';
 
 import type { StackOptions } from 'stack-base-iterator';
 
-export interface ExtractOptions extends StackOptions {}
+export interface ExtractOptions extends StackOptions {
+  force?: boolean;
+  strip?: number;
+  now?: Date;
+}
 
-export type Callback = (error?: Error) => void;
-export type WriteFileFn = (path: string, options: object, callback: Callback) => void;
+export type NoParamCallback = (error?: Error) => void;
+export type WriteFileFn = (path: string, options: object, callback: NoParamCallback) => void;
 
 export interface FileAttributes {
   mode: Mode;
@@ -24,4 +28,15 @@ export interface LinkAttributes {
   mtime: number;
   path: string;
   linkpath: string;
+}
+
+export interface Entry {
+  mode: Mode;
+  mtime: number;
+  path: string;
+  basename: string;
+  type: string;
+  linkpath?: string;
+  uid?: number;
+  gid?: number;
 }
