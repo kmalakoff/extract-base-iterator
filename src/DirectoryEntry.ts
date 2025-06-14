@@ -10,9 +10,12 @@ import stripPath from './stripPath.js';
 import validateAttributes from './validateAttributes.js';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
-import type { DirectoryAttributes } from './types.js';
+import type { Mode } from 'fs';
+import type { DirectoryAttributes, ExtractOptions, NoParamCallback } from './types.js';
 
 export default class DirectoryEntry {
+  mode: Mode;
+  mtime: number;
   path: string;
   basename: string;
   type: string;
@@ -24,7 +27,7 @@ export default class DirectoryEntry {
     if (this.basename === undefined) this.basename = path.basename(this.path);
   }
 
-  create(dest, options, callback) {
+  create(dest: string, options: ExtractOptions | NoParamCallback, callback?: NoParamCallback): undefined | Promise<boolean> {
     if (typeof options === 'function') {
       callback = options;
       options = null;
@@ -34,7 +37,7 @@ export default class DirectoryEntry {
       options = options || {};
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, options));
+        const fullPath = path.join(dest, stripPath(normalizedPath, options as ExtractOptions));
 
         // do not check for the existence of the directory but allow out-of-order calling
         const queue = new Queue(1);
@@ -42,14 +45,16 @@ export default class DirectoryEntry {
         queue.defer(chmod.bind(null, fullPath, this, options));
         queue.defer(chown.bind(null, fullPath, this, options));
         queue.defer(utimes.bind(null, fullPath, this, options));
-        return queue.await(callback);
+        queue.await(callback);
+        return;
       } catch (err) {
-        return callback(err);
+        callback(err);
+        return;
       }
     }
 
     return new Promise((resolve, reject) => {
-      this.create(dest, options, (err, done) => (err ? reject(err) : resolve(done)));
+      this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
     });
   }
 

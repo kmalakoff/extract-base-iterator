@@ -2,15 +2,21 @@
 
 import fs from 'graceful-fs';
 
+import type { NoParamCallback } from 'fs';
+import type { Entry, ExtractOptions } from '../types.js';
+
 const UMASK = process.umask ? process.umask() : null;
 const DMODE = 0o755;
 const FMODE = 0o644;
 const SMODE = 0o755;
 const LMODE = 0o644;
 
-export default function chmodFn(fullPath, entry, _options, callback) {
+export default function chmodFn(fullPath: string, entry: Entry, _options: ExtractOptions, callback: NoParamCallback) {
   const chmod = entry.type === 'symlink' ? fs.lchmod : fs.chmod;
-  if (!chmod || UMASK === null) return callback();
+  if (!chmod || UMASK === null) {
+    callback(null);
+    return;
+  }
 
   let mode = entry.mode;
   if (!mode) {
@@ -29,5 +35,5 @@ export default function chmodFn(fullPath, entry, _options, callback) {
         break;
     }
   }
-  chmod(fullPath, mode & ~UMASK, callback);
+  chmod(fullPath, (mode as number) & ~UMASK, callback);
 }
