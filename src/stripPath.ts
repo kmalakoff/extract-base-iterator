@@ -1,7 +1,9 @@
 import path from 'path';
 import compact from 'lodash.compact';
 
-export default function stripPath(relativePath, options) {
+import type { ExtractOptions } from './types.js';
+
+export default function stripPath(relativePath: string, options: ExtractOptions): string {
   const strip = options.strip || 0;
   if (!strip) return relativePath;
   const parts = compact(relativePath.split(path.sep));

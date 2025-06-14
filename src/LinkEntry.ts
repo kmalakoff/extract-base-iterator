@@ -12,13 +12,16 @@ import stripPath from './stripPath.js';
 import validateAttributes from './validateAttributes.js';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
-import type { LinkAttributes } from './types.js';
+import type { Mode } from 'fs';
+import type { ExtractOptions, LinkAttributes, NoParamCallback } from './types.js';
 
 export default class LinkEntry {
+  mode: Mode;
+  mtime: number;
   path: string;
+  linkpath: string;
   basename: string;
   type: string;
-  linkpath: string;
 
   constructor(attributes: LinkAttributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
@@ -27,7 +30,7 @@ export default class LinkEntry {
     if (this.type === undefined) this.type = 'link';
   }
 
-  create(dest, options, callback) {
+  create(dest: string, options: ExtractOptions | NoParamCallback, callback?: NoParamCallback): undefined | Promise<boolean> {
     if (typeof options === 'function') {
       callback = options;
       options = null;
@@ -37,12 +40,12 @@ export default class LinkEntry {
       options = options || {};
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, options));
+        const fullPath = path.join(dest, stripPath(normalizedPath, options as ExtractOptions));
         const normalizedLinkpath = path.normalize(this.linkpath);
-        const linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
+        const linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options as ExtractOptions));
 
         const queue = new Queue(1);
-        if (options.force) {
+        if ((options as ExtractOptions).force) {
           queue.defer((callback) => {
             rimraf2(fullPath, { disableGlob: true }, (err) => {
               err && err.code !== 'ENOENT' ? callback(err) : callback();
@@ -54,14 +57,16 @@ export default class LinkEntry {
         queue.defer(chmod.bind(null, fullPath, this, options));
         queue.defer(chown.bind(null, fullPath, this, options));
         queue.defer(utimes.bind(null, fullPath, this, options));
-        return queue.await(callback);
+        queue.await(callback);
+        return;
       } catch (err) {
-        return callback(err);
+        callback(err);
+        return;
       }
     }
 
     return new Promise((resolve, reject) => {
-      this.create(dest, options, (err, done) => (err ? reject(err) : resolve(done)));
+      this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
     });
   }
 
