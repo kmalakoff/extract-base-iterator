@@ -1,5 +1,4 @@
 import type { Mode } from 'fs';
-
 import type { StackOptions } from 'stack-base-iterator';
 
 export interface ExtractOptions extends StackOptions {
@@ -30,7 +29,13 @@ export interface LinkAttributes {
   linkpath: string;
 }
 
-export interface Entry {
+import type { default as DirectoryEntry } from './DirectoryEntry.js';
+import type { default as FileEntry } from './FileEntry.js';
+import type { default as LinkEntry } from './LinkEntry.js';
+import type { default as SymbolicLinkEntry } from './SymbolicLinkEntry.js';
+export type Entry = DirectoryEntry | FileEntry | LinkEntry | SymbolicLinkEntry;
+
+export interface AbstractEntry {
   mode: Mode;
   mtime: number;
   path: string;
