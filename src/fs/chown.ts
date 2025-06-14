@@ -2,12 +2,12 @@
 
 import type { NoParamCallback } from 'fs';
 import fs from 'graceful-fs';
-import type { Entry, ExtractOptions } from '../types.js';
+import type { AbstractEntry, ExtractOptions } from '../types.js';
 
 const UID = process.getuid ? process.getuid() : -1;
 const OWN = process.platform !== 'win32' && UID === 0;
 
-export default function chownFn(fullPath: string, entry: Entry, _options: ExtractOptions, callback: NoParamCallback) {
+export default function chownFn(fullPath: string, entry: AbstractEntry, _options: ExtractOptions, callback: NoParamCallback) {
   const chown = entry.type === 'symlink' ? fs.lchown : fs.chown;
   if (!chown || !OWN || !entry.uid || !entry.gid) {
     callback(null);

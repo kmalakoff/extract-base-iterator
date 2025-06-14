@@ -3,7 +3,7 @@
 import fs from 'graceful-fs';
 
 import type { NoParamCallback } from 'fs';
-import type { Entry, ExtractOptions } from '../types.js';
+import type { AbstractEntry, ExtractOptions } from '../types.js';
 
 const UMASK = process.umask ? process.umask() : null;
 const DMODE = 0o755;
@@ -11,7 +11,7 @@ const FMODE = 0o644;
 const SMODE = 0o755;
 const LMODE = 0o644;
 
-export default function chmodFn(fullPath: string, entry: Entry, _options: ExtractOptions, callback: NoParamCallback) {
+export default function chmodFn(fullPath: string, entry: AbstractEntry, _options: ExtractOptions, callback: NoParamCallback) {
   const chmod = entry.type === 'symlink' ? fs.lchmod : fs.chmod;
   if (!chmod || UMASK === null) {
     callback(null);
