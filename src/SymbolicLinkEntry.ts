@@ -8,28 +8,24 @@ import rimraf2 from 'rimraf2';
 
 import chmod from './fs/chmod.js';
 import chown from './fs/chown.js';
-import lstatReal from './fs/lstatReal.js';
+import symlinkWin32 from './fs/symlinkWin32.js';
 import utimes from './fs/utimes.js';
 import stripPath from './stripPath.js';
 import validateAttributes from './validateAttributes.js';
 
-function symlinkWin32(linkFullPath, linkpath, fullPath, callback) {
-  lstatReal(linkFullPath, (err, targetStat) => {
-    if (err || !targetStat) return callback(err || new Error(`Symlink path does not exist${linkFullPath}`));
-    const type = targetStat.isDirectory() ? 'dir' : 'file';
-    fs.symlink(linkpath, fullPath, type, callback);
-  });
-}
 const isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE);
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
-import type { LinkAttributes } from './types.js';
+import type { Mode } from 'fs';
+import type { ExtractOptions, LinkAttributes, NoParamCallback } from './types.js';
 
 export default class SymbolicLinkEntry {
+  mode: Mode;
+  mtime: number;
   path: string;
+  linkpath: string;
   basename: string;
   type: string;
-  linkpath: string;
 
   constructor(attributes: LinkAttributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
@@ -38,7 +34,7 @@ export default class SymbolicLinkEntry {
     if (this.type === undefined) this.type = 'symlink';
   }
 
-  create(dest, options, callback) {
+  create(dest: string, options: ExtractOptions | NoParamCallback, callback?: NoParamCallback): undefined | Promise<boolean> {
     if (typeof options === 'function') {
       callback = options;
       options = null;
@@ -48,17 +44,17 @@ export default class SymbolicLinkEntry {
       options = options || {};
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, options));
+        const fullPath = path.join(dest, stripPath(normalizedPath, options as ExtractOptions));
         let normalizedLinkpath = path.normalize(this.linkpath);
-        let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
+        let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options as ExtractOptions));
         if (!isAbsolute(normalizedLinkpath)) {
           const linkRelativePath = path.join(path.dirname(normalizedPath), this.linkpath);
-          linkFullPath = path.join(dest, stripPath(linkRelativePath, options));
+          linkFullPath = path.join(dest, stripPath(linkRelativePath, options as ExtractOptions));
           normalizedLinkpath = path.relative(path.dirname(fullPath), linkFullPath);
         }
 
         const queue = new Queue(1);
-        if (options.force) {
+        if ((options as ExtractOptions).force) {
           queue.defer((callback) => {
             rimraf2(fullPath, { disableGlob: true }, (err) => {
               err && err.code !== 'ENOENT' ? callback(err) : callback();
@@ -71,14 +67,16 @@ export default class SymbolicLinkEntry {
         queue.defer(chmod.bind(null, fullPath, this, options));
         queue.defer(chown.bind(null, fullPath, this, options));
         queue.defer(utimes.bind(null, fullPath, this, options));
-        return queue.await(callback);
+        queue.await(callback);
+        return;
       } catch (err) {
-        return callback(err);
+        callback(err);
+        return;
       }
     }
 
     return new Promise((resolve, reject) => {
-      this.create(dest, options, (err, done) => (err ? reject(err) : resolve(done)));
+      this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
     });
   }
 
