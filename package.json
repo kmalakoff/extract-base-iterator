@@ -45,10 +45,11 @@
     "is-absolute": "^1.0.0",
     "lodash.compact": "^3.0.1",
     "mkdirp-classic": "^0.5.3",
+    "next-tick": "^1.1.0",
     "object-assign": "^4.1.1",
     "queue-cb": "^1.5.2",
     "rimraf2": "^2.8.2",
-    "stack-base-iterator": "^1.2.12"
+    "stack-base-iterator": "^1.2.13"
   },
   "devDependencies": {
     "@types/mocha": "*",

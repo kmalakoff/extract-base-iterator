@@ -1,1 +1,1 @@
-ignores: ["extract-base-iterator"]
+ignores: ["extract-base-iterator", "next-tick"]
