@@ -51,7 +51,10 @@ describe('asyncIterator', () => {
         await extract(new EntriesIterator(entries), TARGET, options);
         await validateFiles(options, 'tar');
       } catch (err) {
-        if (err) return done(err.message);
+        if (err) {
+          done(err.message);
+          return;
+        }
       }
     });
 
@@ -61,7 +64,10 @@ describe('asyncIterator', () => {
         await extract(new EntriesIterator(entries), TARGET, options);
         await validateFiles(options, 'tar');
       } catch (err) {
-        if (err) return done(err.message);
+        if (err) {
+          done(err.message);
+          return;
+        }
       }
     });
 
@@ -79,7 +85,10 @@ describe('asyncIterator', () => {
         await extract(new EntriesIterator(entries), TARGET, { force: true, ...options });
         await validateFiles(options, 'tar');
       } catch (err) {
-        if (err) return done(err.message);
+        if (err) {
+          done(err.message);
+          return;
+        }
       }
     });
   });
