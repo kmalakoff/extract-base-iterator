@@ -12,12 +12,13 @@ const TARGET = constants.TARGET;
 
 async function extract(iterator, dest, options) {
   const links = [];
-  let entry = await iterator.next();
-  while (entry) {
+  let value = await iterator.next();
+  while (!value.done) {
+    const entry = value.value;
     if (entry.type === 'link') links.unshift(entry);
     else if (entry.type === 'symlink') links.push(entry);
     else await entry.create(dest, options);
-    entry = await iterator.next();
+    value = await iterator.next();
   }
 
   // create links then symlinks after directories and files
@@ -64,42 +65,26 @@ describe('asyncAwait', () => {
   describe('happy path', () => {
     it('extract - no strip - concurrency 1', async () => {
       const options = { now: new Date(), concurrency: 1 };
-      try {
-        await extract(new EntriesIterator(entries), TARGET, options);
-        await validateFiles(options, 'tar');
-      } catch (err) {
-        if (err) return done(err.message);
-      }
+      await extract(new EntriesIterator(entries), TARGET, options);
+      await validateFiles(options, 'tar');
     });
 
     it('extract - no strip - concurrency Infinity', async () => {
       const options = { now: new Date(), concurrency: Infinity };
-      try {
-        await extract(new EntriesIterator(entries), TARGET, options);
-        await validateFiles(options, 'tar');
-      } catch (err) {
-        if (err) return done(err.message);
-      }
+      await extract(new EntriesIterator(entries), TARGET, options);
+      await validateFiles(options, 'tar');
     });
 
     it('extract - no strip - forEach', async () => {
       const options = { now: new Date(), concurrency: Infinity };
-      try {
-        await extractForEach(new EntriesIterator(entries), TARGET, options);
-        await validateFiles(options, 'tar');
-      } catch (err) {
-        if (err) return done(err.message);
-      }
+      await extractForEach(new EntriesIterator(entries), TARGET, options);
+      await validateFiles(options, 'tar');
     });
 
     it('extract - strip 1', async () => {
       const options = { now: new Date(), strip: 1 };
-      try {
-        await extract(new EntriesIterator(entries), TARGET, options);
-        await validateFiles(options, 'tar');
-      } catch (err) {
-        if (err) return done(err.message);
-      }
+      await extract(new EntriesIterator(entries), TARGET, options);
+      await validateFiles(options, 'tar');
     });
 
     it('extract multiple times', async () => {
@@ -116,7 +101,10 @@ describe('asyncAwait', () => {
         await extract(new EntriesIterator(entries), TARGET, { force: true, ...options });
         await validateFiles(options, 'tar');
       } catch (err) {
-        if (err) return done(err.message);
+        if (err) {
+          done(err.message);
+          return;
+        }
       }
     });
   });
