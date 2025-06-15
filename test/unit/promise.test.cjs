@@ -72,7 +72,10 @@ describe('promise', () => {
           entry.destroy();
         },
         (err) => {
-          if (err) return done(err.message);
+          if (err) {
+            done(err.message);
+            return;
+          }
           done();
         }
       );
@@ -81,10 +84,16 @@ describe('promise', () => {
     it('extract - no strip - concurrency 1', (done) => {
       const options = { now: new Date(), concurrency: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) return done(err.message);
+        if (err) {
+          done(err.message);
+          return;
+        }
 
         validateFiles(options, 'tar', (err) => {
-          if (err) return done(err.message);
+          if (err) {
+            done(err.message);
+            return;
+          }
           done();
         });
       });
@@ -93,10 +102,16 @@ describe('promise', () => {
     it('extract - no strip - concurrency Infinity', (done) => {
       const options = { now: new Date(), concurrency: Infinity };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) return done(err.message);
+        if (err) {
+          done(err.message);
+          return;
+        }
 
         validateFiles(options, 'tar', (err) => {
-          if (err) return done(err.message);
+          if (err) {
+            done(err.message);
+            return;
+          }
           done();
         });
       });
@@ -105,10 +120,16 @@ describe('promise', () => {
     it('extract - strip 1', (done) => {
       const options = { now: new Date(), strip: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) return done(err.message);
+        if (err) {
+          done(err.message);
+          return;
+        }
 
         validateFiles(options, 'tar', (err) => {
-          if (err) return done(err.message);
+          if (err) {
+            done(err.message);
+            return;
+          }
           done();
         });
       });
@@ -117,19 +138,31 @@ describe('promise', () => {
     it('extract multiple times', (done) => {
       const options = { now: new Date(), strip: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) return done(err.message);
+        if (err) {
+          done(err.message);
+          return;
+        }
 
         validateFiles(options, 'tar', (err) => {
-          if (err) return done(err.message);
+          if (err) {
+            done(err.message);
+            return;
+          }
 
           extract(new EntriesIterator(entries), TARGET, options, (err) => {
             assert.ok(err);
 
             extract(new EntriesIterator(entries), TARGET, { force: true, ...options }, (err) => {
-              if (err) return done(err.message);
+              if (err) {
+                done(err.message);
+                return;
+              }
 
               validateFiles(options, 'tar', (err) => {
-                if (err) return done(err.message);
+                if (err) {
+                  done(err.message);
+                  return;
+                }
                 done();
               });
             });
