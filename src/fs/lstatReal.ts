@@ -1,4 +1,4 @@
-import fs, { type Stats, type BigIntStats } from 'fs';
+import fs, { type BigIntStats, type Stats } from 'fs';
 
 export type Callback = (err: NodeJS.ErrnoException | null, stats?: Stats | BigIntStats) => void;
 

@@ -1,6 +1,6 @@
-import path from 'path';
 import mkdirp from 'mkdirp-classic';
 import objectAssign from 'object-assign';
+import path from 'path';
 import Queue from 'queue-cb';
 
 import chmod from './fs/chmod.js';
@@ -10,6 +10,7 @@ import stripPath from './stripPath.js';
 import validateAttributes from './validateAttributes.js';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
+
 import type { Mode } from 'fs';
 import type { DirectoryAttributes, ExtractOptions, NoParamCallback } from './types.js';
 

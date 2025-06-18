@@ -1,6 +1,6 @@
-import path from 'path';
 import mkdirp from 'mkdirp-classic';
 import objectAssign from 'object-assign';
+import path from 'path';
 import Queue from 'queue-cb';
 
 import rimraf2 from 'rimraf2';
@@ -11,6 +11,7 @@ import stripPath from './stripPath.js';
 import validateAttributes from './validateAttributes.js';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
+
 import type { Mode } from 'fs';
 import type { ExtractOptions, FileAttributes, NoParamCallback, WriteFileFn } from './types.js';
 
