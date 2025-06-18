@@ -1,5 +1,5 @@
-import path from 'path';
 import compact from 'lodash.compact';
+import path from 'path';
 
 import type { ExtractOptions } from './types.js';
 

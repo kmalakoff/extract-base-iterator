@@ -1,8 +1,8 @@
-import path from 'path';
 import fs from 'graceful-fs';
 import isAbsolute from 'is-absolute';
 import mkdirp from 'mkdirp-classic';
 import objectAssign from 'object-assign';
+import path from 'path';
 import Queue from 'queue-cb';
 import rimraf2 from 'rimraf2';
 
@@ -16,6 +16,7 @@ import validateAttributes from './validateAttributes.js';
 const isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE);
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
+
 import type { Mode } from 'fs';
 import type { ExtractOptions, LinkAttributes, NoParamCallback } from './types.js';
 
