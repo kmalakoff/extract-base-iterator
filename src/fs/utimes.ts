@@ -1,8 +1,7 @@
 // adapted from https://github.com/mafintosh/tar-fs
 
-import fs from 'graceful-fs';
-
 import type { NoParamCallback } from 'fs';
+import fs from 'graceful-fs';
 import type { AbstractEntry, ExtractOptions } from '../types.js';
 
 export default function utimes(fullPath: string, entry: AbstractEntry, options: ExtractOptions, callback: NoParamCallback): undefined {
