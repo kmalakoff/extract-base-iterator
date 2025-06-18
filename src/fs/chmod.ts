@@ -1,8 +1,7 @@
 // adapted from https://github.com/mafintosh/tar-fs
 
-import fs from 'graceful-fs';
-
 import type { NoParamCallback } from 'fs';
+import fs from 'graceful-fs';
 import type { AbstractEntry, ExtractOptions } from '../types.js';
 
 const UMASK = process.umask ? process.umask() : null;
