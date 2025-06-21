@@ -5,16 +5,16 @@ import path from 'path';
 import Queue from 'queue-cb';
 import rimraf2 from 'rimraf2';
 
-import chmod from './fs/chmod.js';
-import chown from './fs/chown.js';
-import utimes from './fs/utimes.js';
-import stripPath from './stripPath.js';
-import validateAttributes from './validateAttributes.js';
+import chmod from './fs/chmod.ts';
+import chown from './fs/chown.ts';
+import utimes from './fs/utimes.ts';
+import stripPath from './stripPath.ts';
+import validateAttributes from './validateAttributes.ts';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
 import type { Mode } from 'fs';
-import type { ExtractOptions, LinkAttributes, NoParamCallback } from './types.js';
+import type { ExtractOptions, LinkAttributes, NoParamCallback } from './types.ts';
 
 export default class LinkEntry {
   mode: Mode;

@@ -2,7 +2,7 @@
 
 import type { NoParamCallback } from 'fs';
 import fs from 'graceful-fs';
-import type { AbstractEntry, ExtractOptions } from '../types.js';
+import type { AbstractEntry, ExtractOptions } from '../types.ts';
 
 const UMASK = process.umask ? process.umask() : null;
 const DMODE = 0o755;
