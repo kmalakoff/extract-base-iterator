@@ -47,9 +47,9 @@
     "mkdirp-classic": "^0.5.3",
     "next-tick": "^1.1.0",
     "object-assign": "^4.1.1",
-    "queue-cb": "^1.5.4",
+    "queue-cb": "^1.5.5",
     "rimraf2": "^2.8.2",
-    "stack-base-iterator": "2.0.2"
+    "stack-base-iterator": "2.0.3"
   },
   "devDependencies": {
     "@types/mocha": "*",
