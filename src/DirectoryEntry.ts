@@ -3,16 +3,16 @@ import objectAssign from 'object-assign';
 import path from 'path';
 import Queue from 'queue-cb';
 
-import chmod from './fs/chmod.js';
-import chown from './fs/chown.js';
-import utimes from './fs/utimes.js';
-import stripPath from './stripPath.js';
-import validateAttributes from './validateAttributes.js';
+import chmod from './fs/chmod.ts';
+import chown from './fs/chown.ts';
+import utimes from './fs/utimes.ts';
+import stripPath from './stripPath.ts';
+import validateAttributes from './validateAttributes.ts';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
 import type { Mode } from 'fs';
-import type { DirectoryAttributes, ExtractOptions, NoParamCallback } from './types.js';
+import type { DirectoryAttributes, ExtractOptions, NoParamCallback } from './types.ts';
 
 export default class DirectoryEntry {
   mode: Mode;

@@ -29,10 +29,10 @@ export interface LinkAttributes {
   linkpath: string;
 }
 
-import type { default as DirectoryEntry } from './DirectoryEntry.js';
-import type { default as FileEntry } from './FileEntry.js';
-import type { default as LinkEntry } from './LinkEntry.js';
-import type { default as SymbolicLinkEntry } from './SymbolicLinkEntry.js';
+import type { default as DirectoryEntry } from './DirectoryEntry.ts';
+import type { default as FileEntry } from './FileEntry.ts';
+import type { default as LinkEntry } from './LinkEntry.ts';
+import type { default as SymbolicLinkEntry } from './SymbolicLinkEntry.ts';
 export type Entry = DirectoryEntry | FileEntry | LinkEntry | SymbolicLinkEntry;
 
 export interface AbstractEntry {
