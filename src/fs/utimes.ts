@@ -2,7 +2,7 @@
 
 import type { NoParamCallback } from 'fs';
 import fs from 'graceful-fs';
-import type { AbstractEntry, ExtractOptions } from '../types.js';
+import type { AbstractEntry, ExtractOptions } from '../types.ts';
 
 export default function utimes(fullPath: string, entry: AbstractEntry, options: ExtractOptions, callback: NoParamCallback): undefined {
   const now = options.now || new Date();

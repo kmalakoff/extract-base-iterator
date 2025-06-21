@@ -1,6 +1,6 @@
 import type { NoParamCallback } from 'fs';
 import fs from 'graceful-fs';
-import lstatReal from './lstatReal.js';
+import lstatReal from './lstatReal.ts';
 
 export default function symlinkWin32(linkFullPath: string, linkpath: string, fullPath: string, callback: NoParamCallback) {
   lstatReal(linkFullPath, (err, targetStat) => {
