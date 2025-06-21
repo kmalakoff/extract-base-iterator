@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import type { NoParamCallback } from './types.js';
+import type { NoParamCallback } from './types.ts';
 
 export default function waitForAccess(fullPath: string, callback: NoParamCallback): undefined {
   fs.stat(fullPath, (err) => {

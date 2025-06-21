@@ -2,7 +2,7 @@
 
 import type { NoParamCallback } from 'fs';
 import fs from 'graceful-fs';
-import type { AbstractEntry, ExtractOptions } from '../types.js';
+import type { AbstractEntry, ExtractOptions } from '../types.ts';
 
 const UID = process.getuid ? process.getuid() : -1;
 const OWN = process.platform !== 'win32' && UID === 0;
