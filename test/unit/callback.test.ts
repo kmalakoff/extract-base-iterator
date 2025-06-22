@@ -1,15 +1,11 @@
-const assert = require('assert');
-const rimraf2 = require('rimraf2');
-const mkdirp = require('mkdirp-classic');
-
-const EntriesIterator = require('../lib/EntriesIterator.cjs');
-const loadEntries = require('../lib/loadEntries.cjs');
-const validateFiles = require('../lib/validateFiles.cjs');
-const extract = require('../lib/extract.cjs');
-
-const constants = require('../lib/constants.cjs');
-const TMP_DIR = constants.TMP_DIR;
-const TARGET = constants.TARGET;
+import assert from 'assert';
+import mkdirp from 'mkdirp-classic';
+import rimraf2 from 'rimraf2';
+import { TARGET, TMP_DIR } from '../lib/constants.ts';
+import EntriesIterator from '../lib/EntriesIterator.ts';
+import extract from '../lib/extract.ts';
+import loadEntries from '../lib/loadEntries.ts';
+import validateFiles from '../lib/validateFiles.ts';
 
 describe('iterator', () => {
   const entries = loadEntries();
@@ -29,7 +25,7 @@ describe('iterator', () => {
     it('destroy entries', (done) => {
       const iterator = new EntriesIterator(entries);
       iterator.forEach(
-        (entry) => {
+        (entry): undefined => {
           entry.destroy();
         },
         (err) => {
