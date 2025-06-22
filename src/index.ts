@@ -1,6 +1,10 @@
 import './polyfills.ts';
+import StackBaseIterator from 'stack-base-iterator';
 
-export { default } from 'stack-base-iterator';
+import type { Entry } from './types.ts';
+
+export default class ExtractBaseIterator extends StackBaseIterator<Entry> {}
+
 export { default as DirectoryEntry } from './DirectoryEntry.ts';
 export { default as FileEntry } from './FileEntry.ts';
 export { default as LinkEntry } from './LinkEntry.ts';

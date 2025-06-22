@@ -18,7 +18,7 @@ export interface FileAttributes {
 
 export interface DirectoryAttributes {
   mode: Mode;
-  mtime: number;
+  mtime: number | Date;
   path: string;
 }
 

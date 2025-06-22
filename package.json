@@ -57,7 +57,6 @@
     "cr": "*",
     "fs-iterator": "*",
     "fs-stats-spys": "*",
-    "inherits": "*",
     "lodash.find": "*",
     "pinkie-promise": "*"
   },
