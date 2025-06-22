@@ -1,6 +1,6 @@
 {
   "name": "extract-base-iterator",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Base iterator for extract iterators like tar-iterator and zip-iterator",
   "keywords": [
     "extract",
@@ -57,7 +57,6 @@
     "cr": "*",
     "fs-iterator": "*",
     "fs-stats-spys": "*",
-    "inherits": "*",
     "lodash.find": "*",
     "pinkie-promise": "*"
   },

@@ -1,15 +1,11 @@
-const assert = require('assert');
-const rimraf2 = require('rimraf2');
-const mkdirp = require('mkdirp-classic');
-const Pinkie = require('pinkie-promise');
-
-const EntriesIterator = require('../lib/EntriesIterator.cjs');
-const loadEntries = require('../lib/loadEntries.cjs');
-const validateFiles = require('../lib/validateFiles.cjs');
-
-const constants = require('../lib/constants.cjs');
-const TMP_DIR = constants.TMP_DIR;
-const TARGET = constants.TARGET;
+import assert from 'assert';
+import mkdirp from 'mkdirp-classic';
+import Pinkie from 'pinkie-promise';
+import rimraf2 from 'rimraf2';
+import { TARGET, TMP_DIR } from '../lib/constants.ts';
+import EntriesIterator from '../lib/EntriesIterator.ts';
+import loadEntries from '../lib/loadEntries.ts';
+import validateFiles from '../lib/validateFiles.ts';
 
 async function extract(iterator, dest, options) {
   const links = [];
@@ -47,49 +43,28 @@ describe('asyncIterator', () => {
   describe('happy path', () => {
     it('extract - no strip', async () => {
       const options = { now: new Date() };
-      try {
-        await extract(new EntriesIterator(entries), TARGET, options);
-        await validateFiles(options, 'tar');
-      } catch (err) {
-        if (err) {
-          done(err.message);
-          return;
-        }
-      }
+      await extract(new EntriesIterator(entries), TARGET, options);
+      await validateFiles(options, 'tar');
     });
 
     it('extract - strip 1', async () => {
       const options = { now: new Date(), strip: 1 };
-      try {
-        await extract(new EntriesIterator(entries), TARGET, options);
-        await validateFiles(options, 'tar');
-      } catch (err) {
-        if (err) {
-          done(err.message);
-          return;
-        }
-      }
+      await extract(new EntriesIterator(entries), TARGET, options);
+      await validateFiles(options, 'tar');
     });
 
     it('extract multiple times', async () => {
       const options = { now: new Date(), strip: 1 };
+      await extract(new EntriesIterator(entries), TARGET, options);
+      await validateFiles(options, 'tar');
       try {
         await extract(new EntriesIterator(entries), TARGET, options);
-        await validateFiles(options, 'tar');
-        try {
-          await extract(new EntriesIterator(entries), TARGET, options);
-          assert.ok(false);
-        } catch (err) {
-          assert.ok(err);
-        }
-        await extract(new EntriesIterator(entries), TARGET, { force: true, ...options });
-        await validateFiles(options, 'tar');
+        assert.ok(false);
       } catch (err) {
-        if (err) {
-          done(err.message);
-          return;
-        }
+        assert.ok(err);
       }
+      await extract(new EntriesIterator(entries), TARGET, { force: true, ...options });
+      await validateFiles(options, 'tar');
     });
   });
 
