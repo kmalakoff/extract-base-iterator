@@ -1,6 +1,16 @@
-const Queue = require('queue-cb');
+// @ts-ignore
+import type BaseIterator from 'extract-base-iterator';
+import Queue from 'queue-cb';
 
-module.exports = function extract(iterator, dest, options, callback) {
+export interface Options {
+  concurrency?: number;
+  now?: Date;
+  strip?: number;
+  force?: boolean;
+}
+export type NoParamsCallback = (error?: Error) => undefined;
+
+export default function extract(iterator: BaseIterator, dest: string, options: Options, callback: NoParamsCallback): undefined {
   const links = [];
   iterator.forEach(
     (entry, callback) => {
@@ -25,4 +35,4 @@ module.exports = function extract(iterator, dest, options, callback) {
       queue.await(callback);
     }
   );
-};
+}
