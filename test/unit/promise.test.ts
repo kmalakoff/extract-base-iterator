@@ -11,6 +11,7 @@ import validateFiles from '../lib/validateFiles.ts';
 function extract(iterator, dest, options, callback) {
   const links = [];
   iterator
+    // biome-ignore lint/suspicious/useIterableCallbackReturn: Not an iterable
     .forEach(
       (entry) => {
         if (entry.type === 'link') links.unshift(entry);

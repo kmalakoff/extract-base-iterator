@@ -1,4 +1,3 @@
-// @ts-ignore
 import ExtractBaseIterator, { type Entry, type ExtractOptions } from 'extract-base-iterator';
 
 export default class EntryIterator extends ExtractBaseIterator {
