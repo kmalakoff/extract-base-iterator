@@ -1,4 +1,3 @@
-// @ts-ignore
 import type BaseIterator from 'extract-base-iterator';
 import Queue from 'queue-cb';
 
