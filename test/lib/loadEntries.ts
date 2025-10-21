@@ -1,4 +1,3 @@
-// @ts-ignore
 import { FileEntry as BaseFileEntry, DirectoryEntry, LinkEntry, SymbolicLinkEntry } from 'extract-base-iterator';
 import fs from 'graceful-fs';
 import find from 'lodash.find';
