@@ -49,6 +49,7 @@
     "next-tick": "*",
     "object-assign": "*",
     "queue-cb": "*",
+    "readable-stream": "^2.3.8",
     "rimraf2": "*",
     "stack-base-iterator": "*"
   },
