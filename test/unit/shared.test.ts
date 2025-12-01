@@ -1,6 +1,6 @@
 import assert from 'assert';
 // biome-ignore lint/suspicious/noShadowRestrictedNames: Legacy compatibility
-import { allocBuffer, allocBufferUnsafe, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, crc32, crc32Region, isNaN, readUInt64LE, verifyCrc32, verifyCrc32Region, writeUInt64LE } from 'extract-base-iterator';
+import { allocBuffer, allocBufferUnsafe, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, crc32, crc32Region, EntryStream, isNaN, readUInt64LE, verifyCrc32, verifyCrc32Region, writeUInt64LE } from 'extract-base-iterator';
 
 describe('shared utilities', () => {
   describe('compat', () => {
@@ -257,6 +257,114 @@ describe('shared utilities', () => {
         assert.strictEqual(verifyCrc32Region(buf, 2, 5, 0x3610a686), true);
         assert.strictEqual(verifyCrc32Region(buf, 2, 5, 0x12345678), false);
       });
+    });
+  });
+
+  describe('EntryStream', () => {
+    it('should emit data when resumed', (done) => {
+      var stream = new EntryStream();
+      var chunks: Buffer[] = [];
+
+      stream.on('data', (chunk) => {
+        chunks.push(chunk);
+      });
+
+      stream.on('end', () => {
+        assert.strictEqual(chunks.length, 2);
+        assert.strictEqual(chunks[0].toString(), 'hello');
+        assert.strictEqual(chunks[1].toString(), 'world');
+        done();
+      });
+
+      stream.push(bufferFrom('hello'));
+      stream.push(bufferFrom('world'));
+      stream.end();
+      stream.resume();
+    });
+
+    it('should buffer data when paused', (done) => {
+      var stream = new EntryStream();
+      var chunks: Buffer[] = [];
+
+      stream.push(bufferFrom('hello'));
+      stream.push(bufferFrom('world'));
+
+      stream.on('data', (chunk) => {
+        chunks.push(chunk);
+      });
+
+      stream.on('end', () => {
+        assert.strictEqual(chunks.length, 2);
+        done();
+      });
+
+      // Data should be buffered until resume
+      assert.strictEqual(chunks.length, 0);
+
+      stream.end();
+      stream.resume();
+    });
+
+    it('should emit end after flush when stream ended while paused', (done) => {
+      var stream = new EntryStream();
+      var dataReceived = false;
+
+      stream.push(bufferFrom('data'));
+      stream.end();
+
+      stream.on('data', () => {
+        dataReceived = true;
+      });
+
+      stream.on('end', () => {
+        assert.strictEqual(dataReceived, true);
+        done();
+      });
+
+      stream.resume();
+    });
+
+    it('should handle pause and resume', (done) => {
+      var stream = new EntryStream();
+      var chunks: Buffer[] = [];
+
+      stream.on('data', (chunk) => {
+        chunks.push(chunk);
+        stream.pause();
+        // Resume after a tick
+        setTimeout(() => {
+          stream.resume();
+        }, 0);
+      });
+
+      stream.on('end', () => {
+        assert.strictEqual(chunks.length, 2);
+        done();
+      });
+
+      stream.push(bufferFrom('one'));
+      stream.push(bufferFrom('two'));
+      stream.end();
+      stream.resume();
+    });
+
+    it('should report ended state', () => {
+      var stream = new EntryStream();
+      assert.strictEqual(stream.ended, false);
+      stream.end();
+      assert.strictEqual(stream.ended, true);
+    });
+
+    it('should receive errors via emit', (done) => {
+      var stream = new EntryStream();
+      var testError = new Error('test error');
+
+      stream.on('error', (err) => {
+        assert.strictEqual(err, testError);
+        done();
+      });
+
+      stream.emit('error', testError);
     });
   });
 });
