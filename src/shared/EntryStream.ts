@@ -25,12 +25,6 @@ const ReadableBase: typeof Stream.Readable = major > 0 ? Stream.Readable : (Stre
 export default class EntryStream extends ReadableBase {
   protected _ended = false;
 
-  constructor() {
-    // Use a large highWaterMark since data is pushed externally (not from _read)
-    // This prevents backpressure issues when pushing synchronously
-    super({ highWaterMark: 1024 * 1024 }); // 1MB buffer
-  }
-
   /**
    * Signal end of stream by pushing null
    */
