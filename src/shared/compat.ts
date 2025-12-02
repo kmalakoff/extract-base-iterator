@@ -243,11 +243,13 @@ export function inflateRaw(input: Buffer): Buffer {
  * @returns A Transform stream that decompresses raw DEFLATE data
  */
 // Check for native streaming inflate (Node 0.11.12+ has createInflateRaw)
+// biome-ignore lint/suspicious/noExplicitAny: createInflateRaw not in older TS definitions
 var hasNativeStreamingInflate = zlib !== null && typeof (zlib as any).createInflateRaw === 'function';
 
 export function createInflateRawStream(): NodeJS.ReadWriteStream {
   if (hasNativeStreamingInflate && zlib) {
     // Use native zlib streaming Transform
+    // biome-ignore lint/suspicious/noExplicitAny: createInflateRaw not in older TS definitions
     return (zlib as any).createInflateRaw();
   }
 
@@ -262,18 +264,18 @@ export function createInflateRawStream(): NodeJS.ReadWriteStream {
   var ended = false;
 
   // Pako calls onData synchronously during push()
-  inflate.onData = function(chunk: Uint8Array) {
+  inflate.onData = (chunk: Uint8Array) => {
     pendingChunks.push(bufferFrom(chunk));
   };
 
-  inflate.onEnd = function(status: number) {
+  inflate.onEnd = (status: number) => {
     ended = true;
     if (status !== 0) {
-      transform.emit('error', new Error('Inflate error: ' + (inflate.msg || 'unknown')));
+      transform.emit('error', new Error(`Inflate error: ${inflate.msg || 'unknown'}`));
     }
   };
 
-  transform._transform = function(chunk: Buffer, _encoding: string, callback: (err?: Error) => void) {
+  transform._transform = function (chunk: Buffer, _encoding: string, callback: (err?: Error) => void) {
     try {
       inflate.push(chunk, false);
       // Push any pending decompressed chunks
@@ -286,7 +288,7 @@ export function createInflateRawStream(): NodeJS.ReadWriteStream {
     }
   };
 
-  transform._flush = function(callback: (err?: Error) => void) {
+  transform._flush = function (callback: (err?: Error) => void) {
     try {
       inflate.push(new Uint8Array(0), true); // Signal end
       // Push any remaining decompressed chunks
@@ -294,7 +296,7 @@ export function createInflateRawStream(): NodeJS.ReadWriteStream {
         this.push(pendingChunks.shift());
       }
       if (ended && inflate.err) {
-        callback(new Error('Inflate error: ' + (inflate.msg || 'unknown')));
+        callback(new Error(`Inflate error: ${inflate.msg || 'unknown'}`));
       } else {
         callback();
       }
