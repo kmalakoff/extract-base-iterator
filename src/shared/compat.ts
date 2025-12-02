@@ -232,3 +232,76 @@ export function inflateRaw(input: Buffer): Buffer {
   var pako = _require('pako');
   return bufferFrom(pako.inflateRaw(input));
 }
+
+/**
+ * Create a streaming raw DEFLATE decompressor (Transform stream)
+ * Decompresses data incrementally to avoid holding full output in memory.
+ *
+ * - Uses native zlib.createInflateRaw() on Node 0.11.12+
+ * - Falls back to pako-based Transform for Node 0.8-0.10
+ *
+ * @returns A Transform stream that decompresses raw DEFLATE data
+ */
+// Check for native streaming inflate (Node 0.11.12+ has createInflateRaw)
+var hasNativeStreamingInflate = zlib !== null && typeof (zlib as any).createInflateRaw === 'function';
+
+export function createInflateRawStream(): NodeJS.ReadWriteStream {
+  if (hasNativeStreamingInflate && zlib) {
+    // Use native zlib streaming Transform
+    return (zlib as any).createInflateRaw();
+  }
+
+  // Fallback to pako-based Transform for Node 0.8-0.10
+  // Use readable-stream for Node 0.8 compatibility
+  var Transform = _require('readable-stream').Transform;
+  var pako = _require('pako');
+
+  var inflate = new pako.Inflate({ raw: true, chunkSize: 16384 });
+  var transform = new Transform();
+  var pendingChunks: Buffer[] = [];
+  var ended = false;
+
+  // Pako calls onData synchronously during push()
+  inflate.onData = function(chunk: Uint8Array) {
+    pendingChunks.push(bufferFrom(chunk));
+  };
+
+  inflate.onEnd = function(status: number) {
+    ended = true;
+    if (status !== 0) {
+      transform.emit('error', new Error('Inflate error: ' + (inflate.msg || 'unknown')));
+    }
+  };
+
+  transform._transform = function(chunk: Buffer, _encoding: string, callback: (err?: Error) => void) {
+    try {
+      inflate.push(chunk, false);
+      // Push any pending decompressed chunks
+      while (pendingChunks.length > 0) {
+        this.push(pendingChunks.shift());
+      }
+      callback();
+    } catch (err) {
+      callback(err as Error);
+    }
+  };
+
+  transform._flush = function(callback: (err?: Error) => void) {
+    try {
+      inflate.push(new Uint8Array(0), true); // Signal end
+      // Push any remaining decompressed chunks
+      while (pendingChunks.length > 0) {
+        this.push(pendingChunks.shift());
+      }
+      if (ended && inflate.err) {
+        callback(new Error('Inflate error: ' + (inflate.msg || 'unknown')));
+      } else {
+        callback();
+      }
+    } catch (err) {
+      callback(err as Error);
+    }
+  };
+
+  return transform;
+}
