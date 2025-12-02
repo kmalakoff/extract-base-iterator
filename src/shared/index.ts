@@ -19,6 +19,7 @@ export {
   bufferEquals,
   bufferFrom,
   bufferSliceCopy,
+  createInflateRawStream,
   inflateRaw,
   isNaN,
   readUInt64LE,
