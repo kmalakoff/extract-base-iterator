@@ -48,7 +48,7 @@
     "mkdirp-classic": "*",
     "next-tick": "*",
     "object-assign": "*",
-    "pako": "*",
+    "pako": "~1.0.11",
     "queue-cb": "*",
     "readable-stream": "^2.3.8",
     "rimraf2": "*",
