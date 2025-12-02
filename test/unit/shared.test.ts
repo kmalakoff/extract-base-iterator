@@ -1,7 +1,7 @@
 import assert from 'assert';
-import zlib from 'zlib';
 // biome-ignore lint/suspicious/noShadowRestrictedNames: Legacy compatibility
 import { allocBuffer, allocBufferUnsafe, BufferList, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, crc32, crc32Region, createInflateRawStream, EntryStream, inflateRaw, isNaN, readUInt64LE, verifyCrc32, verifyCrc32Region, writeUInt64LE } from 'extract-base-iterator';
+import zlib from 'zlib';
 
 describe('shared utilities', () => {
   describe('compat', () => {
@@ -276,11 +276,11 @@ describe('shared utilities', () => {
         var inflate = createInflateRawStream();
         var chunks: Buffer[] = [];
 
-        inflate.on('data', function (chunk: Buffer) {
+        inflate.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
         });
 
-        inflate.on('end', function () {
+        inflate.on('end', () => {
           var result = Buffer.concat(chunks);
           assert.strictEqual(result.toString(), original.toString());
           done();
@@ -303,11 +303,11 @@ describe('shared utilities', () => {
         var inflate = createInflateRawStream();
         var chunks: Buffer[] = [];
 
-        inflate.on('data', function (chunk: Buffer) {
+        inflate.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
         });
 
-        inflate.on('end', function () {
+        inflate.on('end', () => {
           var result = Buffer.concat(chunks);
           assert.strictEqual(result.toString(), original.toString());
           done();
@@ -346,11 +346,11 @@ describe('shared utilities', () => {
         var inflate = createInflateRawStream();
         var chunks: Buffer[] = [];
 
-        inflate.on('data', function (chunk: Buffer) {
+        inflate.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
         });
 
-        inflate.on('end', function () {
+        inflate.on('end', () => {
           var streamResult = Buffer.concat(chunks);
           assert.strictEqual(streamResult.length, syncResult.length);
           assert.strictEqual(streamResult.toString(), syncResult.toString());
@@ -381,11 +381,11 @@ describe('shared utilities', () => {
         var inflate = createInflateRawStream();
         var chunks: Buffer[] = [];
 
-        inflate.on('data', function (chunk: Buffer) {
+        inflate.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
         });
 
-        inflate.on('end', function () {
+        inflate.on('end', () => {
           var result = Buffer.concat(chunks);
           assert.strictEqual(result.length, 0);
           done();
