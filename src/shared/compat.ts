@@ -12,6 +12,11 @@
  * Solution: Feature detection with graceful fallback in both directions.
  */
 
+// ESM-compatible require - works in both CJS and ESM
+import Module from 'module';
+
+var _require = typeof require === 'undefined' ? Module.createRequire(import.meta.url) : require;
+
 // Feature detection (runs once at module load)
 var hasBufferAlloc = typeof Buffer.alloc === 'function';
 var hasBufferAllocUnsafe = typeof Buffer.allocUnsafe === 'function';
@@ -199,4 +204,31 @@ export function bufferConcat(list: (Buffer | Uint8Array)[], totalLength?: number
 export function isNaN(value: number): boolean {
   // biome-ignore lint/suspicious/noSelfCompare: NaN check pattern
   return value !== value;
+}
+
+/**
+ * Decompress raw DEFLATE data (no zlib/gzip header)
+ * - Uses native zlib.inflateRawSync() on Node 0.11.12+
+ * - Falls back to pako for Node 0.8-0.10
+ *
+ * Version history:
+ * - Node 0.8-0.10: No zlib sync methods, use pako
+ * - Node 0.11.12+: zlib.inflateRawSync available
+ */
+// Feature detection for native zlib sync methods (Node 0.11.12+)
+var zlib: typeof import('zlib') | null = null;
+try {
+  zlib = _require('zlib');
+} catch (_e) {
+  // zlib not available (shouldn't happen in Node.js)
+}
+var hasNativeInflateRaw = zlib !== null && typeof zlib.inflateRawSync === 'function';
+
+export function inflateRaw(input: Buffer): Buffer {
+  if (hasNativeInflateRaw && zlib) {
+    return zlib.inflateRawSync(input);
+  }
+  // Fallback to pako for Node 0.8-0.10
+  var pako = _require('pako');
+  return bufferFrom(pako.inflateRaw(input));
 }
