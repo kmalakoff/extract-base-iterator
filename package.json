@@ -37,7 +37,7 @@
     "build": "tsds build",
     "format": "biome check --write --unsafe",
     "prepublishOnly": "tsds validate",
-    "test": "mocha --no-timeouts test/**/*.test.*",
+    "test": "tsds test:node --no-timeouts",
     "test:engines": "nvu engines tsds test:node --no-timeouts",
     "version": "tsds version"
   },
@@ -48,19 +48,23 @@
     "mkdirp-classic": "*",
     "next-tick": "*",
     "object-assign": "*",
+    "pako": "*",
     "queue-cb": "*",
     "readable-stream": "^2.3.8",
     "rimraf2": "*",
     "stack-base-iterator": "*"
   },
   "devDependencies": {
+    "@biomejs/biome": "*",
     "@types/mocha": "*",
     "@types/node": "*",
     "cr": "*",
     "fs-iterator": "*",
     "fs-stats-spys": "*",
     "lodash.find": "*",
-    "pinkie-promise": "*"
+    "node-version-use": "*",
+    "pinkie-promise": "*",
+    "ts-dev-stack": "*"
   },
   "engines": {
     "node": ">=0.8"

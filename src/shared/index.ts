@@ -10,6 +10,7 @@
  * All utilities support Node.js 0.8+
  */
 
+export { default as BufferList } from './BufferList.ts';
 export {
   allocBuffer,
   allocBufferUnsafe,
@@ -18,11 +19,10 @@ export {
   bufferEquals,
   bufferFrom,
   bufferSliceCopy,
+  inflateRaw,
   isNaN,
   readUInt64LE,
   writeUInt64LE,
 } from './compat.ts';
-
 export { crc32, crc32Region, verifyCrc32, verifyCrc32Region } from './crc32.ts';
-
 export { default as EntryStream } from './EntryStream.ts';

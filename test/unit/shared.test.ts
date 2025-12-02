@@ -1,6 +1,6 @@
 import assert from 'assert';
 // biome-ignore lint/suspicious/noShadowRestrictedNames: Legacy compatibility
-import { allocBuffer, allocBufferUnsafe, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, crc32, crc32Region, EntryStream, isNaN, readUInt64LE, verifyCrc32, verifyCrc32Region, writeUInt64LE } from 'extract-base-iterator';
+import { allocBuffer, allocBufferUnsafe, BufferList, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, crc32, crc32Region, EntryStream, isNaN, readUInt64LE, verifyCrc32, verifyCrc32Region, writeUInt64LE } from 'extract-base-iterator';
 
 describe('shared utilities', () => {
   describe('compat', () => {
@@ -365,6 +365,280 @@ describe('shared utilities', () => {
       });
 
       stream.emit('error', testError);
+    });
+  });
+
+  describe('BufferList', () => {
+    describe('append and length', () => {
+      it('should start empty', () => {
+        var list = new BufferList();
+        assert.strictEqual(list.length, 0);
+      });
+
+      it('should track length after append', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+        assert.strictEqual(list.length, 5);
+        list.append(bufferFrom(' world'));
+        assert.strictEqual(list.length, 11);
+      });
+
+      it('should ignore empty buffers', () => {
+        var list = new BufferList();
+        list.append(bufferFrom(''));
+        assert.strictEqual(list.length, 0);
+      });
+    });
+
+    describe('consume', () => {
+      it('should consume bytes from front', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+        list.append(bufferFrom(' world'));
+
+        var result = list.consume(5);
+        assert.strictEqual(result.toString(), 'hello');
+        assert.strictEqual(list.length, 6);
+      });
+
+      it('should consume across chunk boundaries', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hel'));
+        list.append(bufferFrom('lo'));
+
+        var result = list.consume(5);
+        assert.strictEqual(result.toString(), 'hello');
+        assert.strictEqual(list.length, 0);
+      });
+
+      it('should handle consuming zero bytes', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+
+        var result = list.consume(0);
+        assert.strictEqual(result.length, 0);
+        assert.strictEqual(list.length, 5);
+      });
+
+      it('should consume partial chunk', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello world'));
+
+        var result = list.consume(5);
+        assert.strictEqual(result.toString(), 'hello');
+        assert.strictEqual(list.length, 6);
+
+        var result2 = list.consume(6);
+        assert.strictEqual(result2.toString(), ' world');
+        assert.strictEqual(list.length, 0);
+      });
+    });
+
+    describe('has', () => {
+      it('should return true when enough bytes available', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+
+        assert.strictEqual(list.has(5), true);
+        assert.strictEqual(list.has(3), true);
+        assert.strictEqual(list.has(0), true);
+      });
+
+      it('should return false when not enough bytes', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+
+        assert.strictEqual(list.has(6), false);
+        assert.strictEqual(list.has(100), false);
+      });
+    });
+
+    describe('clear', () => {
+      it('should clear all data', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+        list.append(bufferFrom(' world'));
+
+        list.clear();
+        assert.strictEqual(list.length, 0);
+      });
+    });
+
+    describe('prepend', () => {
+      it('should add data to front', () => {
+        var list = new BufferList();
+        list.append(bufferFrom(' world'));
+        list.prepend(bufferFrom('hello'));
+
+        var result = list.consume(11);
+        assert.strictEqual(result.toString(), 'hello world');
+      });
+
+      it('should ignore empty buffers', () => {
+        var list = new BufferList();
+        list.prepend(bufferFrom(''));
+        assert.strictEqual(list.length, 0);
+      });
+    });
+
+    describe('slice', () => {
+      it('should return copy of region without consuming', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello world'));
+
+        var slice = list.slice(0, 5);
+        assert.strictEqual(slice.toString(), 'hello');
+        assert.strictEqual(list.length, 11); // unchanged
+      });
+
+      it('should slice across chunk boundaries', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hel'));
+        list.append(bufferFrom('lo '));
+        list.append(bufferFrom('wor'));
+        list.append(bufferFrom('ld'));
+
+        var slice = list.slice(3, 8);
+        assert.strictEqual(slice.toString(), 'lo wo');
+      });
+
+      it('should handle empty slice', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+
+        var slice = list.slice(0, 0);
+        assert.strictEqual(slice.length, 0);
+      });
+    });
+
+    describe('readByte', () => {
+      it('should read byte at offset', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+
+        assert.strictEqual(list.readByte(0), 104); // 'h'
+        assert.strictEqual(list.readByte(4), 111); // 'o'
+      });
+
+      it('should read across chunks', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hel'));
+        list.append(bufferFrom('lo'));
+
+        assert.strictEqual(list.readByte(3), 108); // 'l' in second chunk
+        assert.strictEqual(list.readByte(4), 111); // 'o'
+      });
+
+      it('should return -1 for out of bounds', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+
+        assert.strictEqual(list.readByte(-1), -1);
+        assert.strictEqual(list.readByte(5), -1);
+        assert.strictEqual(list.readByte(100), -1);
+      });
+    });
+
+    describe('indexOf', () => {
+      it('should find signature at start', () => {
+        var list = new BufferList();
+        list.append(bufferFrom([0x50, 0x4b, 0x03, 0x04])); // ZIP signature
+
+        assert.strictEqual(list.indexOf([0x50, 0x4b]), 0);
+      });
+
+      it('should find signature in middle', () => {
+        var list = new BufferList();
+        list.append(bufferFrom([0x00, 0x00, 0x50, 0x4b, 0x03, 0x04]));
+
+        assert.strictEqual(list.indexOf([0x50, 0x4b]), 2);
+      });
+
+      it('should return -1 when not found', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+
+        assert.strictEqual(list.indexOf([0x50, 0x4b]), -1);
+      });
+
+      it('should search from startOffset', () => {
+        var list = new BufferList();
+        list.append(bufferFrom([0x50, 0x4b, 0x00, 0x50, 0x4b]));
+
+        assert.strictEqual(list.indexOf([0x50, 0x4b], 1), 3);
+      });
+    });
+
+    describe('skip', () => {
+      it('should skip bytes without returning them', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello world'));
+
+        list.skip(6);
+        assert.strictEqual(list.length, 5);
+
+        var result = list.consume(5);
+        assert.strictEqual(result.toString(), 'world');
+      });
+
+      it('should handle skip of zero', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+
+        list.skip(0);
+        assert.strictEqual(list.length, 5);
+      });
+
+      it('should handle skip larger than length', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+
+        list.skip(100);
+        assert.strictEqual(list.length, 0);
+      });
+    });
+
+    describe('startsWith', () => {
+      it('should return true for matching prefix', () => {
+        var list = new BufferList();
+        list.append(bufferFrom([0x50, 0x4b, 0x03, 0x04]));
+
+        assert.strictEqual(list.startsWith([0x50, 0x4b]), true);
+        assert.strictEqual(list.startsWith([0x50, 0x4b, 0x03, 0x04]), true);
+      });
+
+      it('should return false for non-matching prefix', () => {
+        var list = new BufferList();
+        list.append(bufferFrom([0x50, 0x4b, 0x03, 0x04]));
+
+        assert.strictEqual(list.startsWith([0x00, 0x00]), false);
+      });
+
+      it('should return false if signature longer than buffer', () => {
+        var list = new BufferList();
+        list.append(bufferFrom([0x50, 0x4b]));
+
+        assert.strictEqual(list.startsWith([0x50, 0x4b, 0x03, 0x04]), false);
+      });
+    });
+
+    describe('toBuffer', () => {
+      it('should return consolidated buffer', () => {
+        var list = new BufferList();
+        list.append(bufferFrom('hello'));
+        list.append(bufferFrom(' '));
+        list.append(bufferFrom('world'));
+
+        var result = list.toBuffer();
+        assert.strictEqual(result.toString(), 'hello world');
+        assert.strictEqual(list.length, 11); // unchanged
+      });
+
+      it('should return empty buffer for empty list', () => {
+        var list = new BufferList();
+        var result = list.toBuffer();
+        assert.strictEqual(result.length, 0);
+      });
     });
   });
 });
