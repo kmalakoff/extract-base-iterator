@@ -1,6 +1,7 @@
 import assert from 'assert';
+import zlib from 'zlib';
 // biome-ignore lint/suspicious/noShadowRestrictedNames: Legacy compatibility
-import { allocBuffer, allocBufferUnsafe, BufferList, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, crc32, crc32Region, EntryStream, isNaN, readUInt64LE, verifyCrc32, verifyCrc32Region, writeUInt64LE } from 'extract-base-iterator';
+import { allocBuffer, allocBufferUnsafe, BufferList, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, crc32, crc32Region, createInflateRawStream, EntryStream, inflateRaw, isNaN, readUInt64LE, verifyCrc32, verifyCrc32Region, writeUInt64LE } from 'extract-base-iterator';
 
 describe('shared utilities', () => {
   describe('compat', () => {
@@ -196,6 +197,204 @@ describe('shared utilities', () => {
         assert.strictEqual(isNaN(-1), false);
         assert.strictEqual(isNaN(Infinity), false);
         assert.strictEqual(isNaN(-Infinity), false);
+      });
+    });
+
+    describe('inflateRaw', () => {
+      // Helper to create raw DEFLATE compressed data
+      function deflateRaw(data: Buffer): Buffer {
+        // Use native zlib if available, otherwise skip test
+        if (typeof zlib.deflateRawSync !== 'function') {
+          // For Node 0.8, we'd need pako to create test data
+          // Skip by returning empty buffer which will cause test to be skipped
+          return bufferFrom([]);
+        }
+        return zlib.deflateRawSync(data);
+      }
+
+      it('should decompress simple data', function () {
+        var original = bufferFrom('hello world');
+        var compressed = deflateRaw(original);
+        if (compressed.length === 0) {
+          this.skip();
+          return;
+        }
+
+        var result = inflateRaw(compressed);
+        assert.strictEqual(result.toString(), 'hello world');
+      });
+
+      it('should decompress larger data', function () {
+        // Create 10KB of repeated text
+        var text = 'The quick brown fox jumps over the lazy dog. ';
+        var repeated = '';
+        for (var i = 0; i < 200; i++) {
+          repeated += text;
+        }
+        var original = bufferFrom(repeated);
+        var compressed = deflateRaw(original);
+        if (compressed.length === 0) {
+          this.skip();
+          return;
+        }
+
+        var result = inflateRaw(compressed);
+        assert.strictEqual(result.length, original.length);
+        assert.strictEqual(result.toString(), original.toString());
+      });
+
+      it('should handle empty data', function () {
+        var original = bufferFrom('');
+        var compressed = deflateRaw(original);
+        if (compressed.length === 0) {
+          this.skip();
+          return;
+        }
+
+        var result = inflateRaw(compressed);
+        assert.strictEqual(result.length, 0);
+      });
+    });
+
+    describe('createInflateRawStream', () => {
+      // Helper to create raw DEFLATE compressed data
+      function deflateRaw(data: Buffer): Buffer {
+        if (typeof zlib.deflateRawSync !== 'function') {
+          return bufferFrom([]);
+        }
+        return zlib.deflateRawSync(data);
+      }
+
+      it('should decompress data via stream', function (done) {
+        var original = bufferFrom('hello world streaming test');
+        var compressed = deflateRaw(original);
+        if (compressed.length === 0) {
+          this.skip();
+          return;
+        }
+
+        var inflate = createInflateRawStream();
+        var chunks: Buffer[] = [];
+
+        inflate.on('data', function (chunk: Buffer) {
+          chunks.push(chunk);
+        });
+
+        inflate.on('end', function () {
+          var result = Buffer.concat(chunks);
+          assert.strictEqual(result.toString(), original.toString());
+          done();
+        });
+
+        inflate.on('error', done);
+
+        inflate.write(compressed);
+        inflate.end();
+      });
+
+      it('should handle chunked input', function (done) {
+        var original = bufferFrom('This is a test of chunked streaming decompression.');
+        var compressed = deflateRaw(original);
+        if (compressed.length === 0) {
+          this.skip();
+          return;
+        }
+
+        var inflate = createInflateRawStream();
+        var chunks: Buffer[] = [];
+
+        inflate.on('data', function (chunk: Buffer) {
+          chunks.push(chunk);
+        });
+
+        inflate.on('end', function () {
+          var result = Buffer.concat(chunks);
+          assert.strictEqual(result.toString(), original.toString());
+          done();
+        });
+
+        inflate.on('error', done);
+
+        // Write compressed data in small chunks
+        var offset = 0;
+        var chunkSize = 5;
+        while (offset < compressed.length) {
+          var end = Math.min(offset + chunkSize, compressed.length);
+          inflate.write(compressed.slice(offset, end));
+          offset = end;
+        }
+        inflate.end();
+      });
+
+      it('should produce same output as sync inflateRaw', function (done) {
+        // Create moderately sized data (50KB)
+        var text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ';
+        var repeated = '';
+        for (var i = 0; i < 1000; i++) {
+          repeated += text;
+        }
+        var original = bufferFrom(repeated);
+        var compressed = deflateRaw(original);
+        if (compressed.length === 0) {
+          this.skip();
+          return;
+        }
+
+        // Get sync result for comparison
+        var syncResult = inflateRaw(compressed);
+
+        var inflate = createInflateRawStream();
+        var chunks: Buffer[] = [];
+
+        inflate.on('data', function (chunk: Buffer) {
+          chunks.push(chunk);
+        });
+
+        inflate.on('end', function () {
+          var streamResult = Buffer.concat(chunks);
+          assert.strictEqual(streamResult.length, syncResult.length);
+          assert.strictEqual(streamResult.toString(), syncResult.toString());
+          done();
+        });
+
+        inflate.on('error', done);
+
+        // Write in realistic chunks (4KB at a time)
+        var offset = 0;
+        var chunkSize = 4096;
+        while (offset < compressed.length) {
+          var end = Math.min(offset + chunkSize, compressed.length);
+          inflate.write(compressed.slice(offset, end));
+          offset = end;
+        }
+        inflate.end();
+      });
+
+      it('should handle empty stream', function (done) {
+        var original = bufferFrom('');
+        var compressed = deflateRaw(original);
+        if (compressed.length === 0) {
+          this.skip();
+          return;
+        }
+
+        var inflate = createInflateRawStream();
+        var chunks: Buffer[] = [];
+
+        inflate.on('data', function (chunk: Buffer) {
+          chunks.push(chunk);
+        });
+
+        inflate.on('end', function () {
+          var result = Buffer.concat(chunks);
+          assert.strictEqual(result.length, 0);
+          done();
+        });
+
+        inflate.on('error', done);
+
+        inflate.write(compressed);
+        inflate.end();
       });
     });
   });
