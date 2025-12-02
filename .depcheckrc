@@ -1,1 +1,1 @@
-ignores: ["extract-base-iterator", "next-tick"]
+ignores: ["node-version-use", "ts-dev-stack", "@biomejs/biome", "extract-base-iterator", "next-tick", "pako"]
