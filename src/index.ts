@@ -1,4 +1,3 @@
-import './polyfills.ts';
 import StackBaseIterator from 'stack-base-iterator';
 
 import type { Entry } from './types.ts';
