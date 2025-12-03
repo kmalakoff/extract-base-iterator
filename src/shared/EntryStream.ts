@@ -11,12 +11,16 @@
  * - Any other archive iterator library
  */
 
-import StreamCompat from 'readable-stream';
 import Stream from 'stream';
 
 // Use native streams when available, readable-stream only for Node 0.x
 const major = +process.versions.node.split('.')[0];
-const ReadableBase: typeof Stream.Readable = major > 0 ? Stream.Readable : (StreamCompat.Readable as typeof Stream.Readable);
+let ReadableBase: typeof Stream.Readable;
+if (major > 0) {
+  ReadableBase = Stream.Readable;
+} else {
+  ReadableBase = require('readable-stream').Readable;
+}
 
 /**
  * Base stream class for archive entry content.
