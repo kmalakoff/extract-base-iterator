@@ -307,3 +307,36 @@ export function createInflateRawStream(): NodeJS.ReadWriteStream {
 
   return transform;
 }
+
+/**
+ * setImmediate wrapper for Node.js 0.8+
+ * - Uses native setImmediate on Node 0.10+
+ * - Falls back to next-tick for Node 0.8
+ */
+var hasSetImmediate = typeof setImmediate === 'function';
+var _nextTick: (fn: () => void) => void = hasSetImmediate ? setImmediate : _require('next-tick');
+
+export function setImmediateFn(fn: () => void): void {
+  _nextTick(fn);
+}
+
+/**
+ * Object.assign wrapper for Node.js 0.8+
+ * - Uses native Object.assign on Node 4.0+
+ * - Falls back to manual property copy on Node 0.8-3.x
+ */
+var hasObjectAssign = typeof Object.assign === 'function';
+var _hasOwnProperty = Object.prototype.hasOwnProperty;
+
+export function objectAssign<T, U>(target: T, source: U): T & U {
+  if (hasObjectAssign) {
+    return Object.assign(target, source);
+  }
+  for (var key in source) {
+    if (_hasOwnProperty.call(source, key)) {
+      // biome-ignore lint/suspicious/noExplicitAny: Generic object assignment for Node 0.8 compat
+      (target as any)[key] = (source as any)[key];
+    }
+  }
+  return target as T & U;
+}
