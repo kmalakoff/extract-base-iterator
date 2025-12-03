@@ -1,11 +1,10 @@
 import mkdirp from 'mkdirp-classic';
-import objectAssign from 'object-assign';
 import path from 'path';
 import Queue from 'queue-cb';
-
 import chmod from './fs/chmod.ts';
 import chown from './fs/chown.ts';
 import utimes from './fs/utimes.ts';
+import { objectAssign } from './shared/index.ts';
 import stripPath from './stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
 
