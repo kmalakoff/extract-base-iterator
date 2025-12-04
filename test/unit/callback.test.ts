@@ -1,6 +1,6 @@
 import assert from 'assert';
+import { safeRm } from 'fs-remove-compat';
 import mkdirp from 'mkdirp-classic';
-import rimraf2 from 'rimraf2';
 import { TARGET, TMP_DIR } from '../lib/constants.ts';
 import EntriesIterator from '../lib/EntriesIterator.ts';
 import extract from '../lib/extract.ts';
@@ -10,7 +10,7 @@ import validateFiles from '../lib/validateFiles.ts';
 describe('iterator', () => {
   const entries = loadEntries();
   beforeEach((callback) => {
-    rimraf2(TMP_DIR, { disableGlob: true }, () => {
+    safeRm(TMP_DIR, () => {
       mkdirp(TMP_DIR, callback);
     });
   });
