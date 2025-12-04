@@ -1,7 +1,7 @@
+import { rm } from 'fs-remove-compat';
 import mkdirp from 'mkdirp-classic';
 import path from 'path';
 import Queue from 'queue-cb';
-import rimraf2 from 'rimraf2';
 import chmod from './fs/chmod.ts';
 import chown from './fs/chown.ts';
 import utimes from './fs/utimes.ts';
@@ -48,7 +48,7 @@ export default class FileEntry {
         const queue = new Queue(1);
         if ((options as ExtractOptions).force) {
           queue.defer((callback) => {
-            rimraf2(fullPath, { disableGlob: true }, (err) => {
+            rm(fullPath, (err) => {
               err && err.code !== 'ENOENT' ? callback(err) : callback();
             });
           });
