@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { rm } from 'fs-remove-compat';
 import mkdirp from 'mkdirp-classic';
 import path from 'path';
@@ -50,6 +51,22 @@ export default class FileEntry {
           queue.defer((callback) => {
             rm(fullPath, (err) => {
               err && err.code !== 'ENOENT' ? callback(err) : callback();
+            });
+          });
+        } else {
+          // Check if file exists - throw EEXIST if it does
+          queue.defer((callback) => {
+            fs.stat(fullPath, (err) => {
+              if (!err) {
+                const existsErr = new Error(`EEXIST: file already exists, open '${fullPath}'`) as NodeJS.ErrnoException;
+                existsErr.code = 'EEXIST';
+                existsErr.path = fullPath;
+                return callback(existsErr);
+              }
+              // ENOENT means file doesn't exist - that's what we want
+              if (err.code === 'ENOENT') return callback();
+              // Other errors should be reported
+              callback(err);
             });
           });
         }
