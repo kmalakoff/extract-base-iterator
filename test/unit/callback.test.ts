@@ -30,7 +30,7 @@ describe('iterator', () => {
         },
         (err) => {
           if (err) {
-            done(err.message);
+            done(err);
             return;
           }
           done();
@@ -42,13 +42,13 @@ describe('iterator', () => {
       const options = { now: new Date(), concurrency: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
         if (err) {
-          done(err.message);
+          done(err);
           return;
         }
 
         validateFiles(options, 'tar', (err) => {
           if (err) {
-            done(err.message);
+            done(err);
             return;
           }
           done();
@@ -60,13 +60,13 @@ describe('iterator', () => {
       const options = { now: new Date(), concurrency: Infinity };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
         if (err) {
-          done(err.message);
+          done(err);
           return;
         }
 
         validateFiles(options, 'tar', (err) => {
           if (err) {
-            done(err.message);
+            done(err);
             return;
           }
           done();
@@ -78,13 +78,13 @@ describe('iterator', () => {
       const options = { now: new Date(), strip: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
         if (err) {
-          done(err.message);
+          done(err);
           return;
         }
 
         validateFiles(options, 'tar', (err) => {
           if (err) {
-            done(err.message);
+            done(err);
             return;
           }
           done();
@@ -96,13 +96,13 @@ describe('iterator', () => {
       const options = { now: new Date(), strip: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
         if (err) {
-          done(err.message);
+          done(err);
           return;
         }
 
         validateFiles(options, 'tar', (err) => {
           if (err) {
-            done(err.message);
+            done(err);
             return;
           }
 
@@ -111,13 +111,13 @@ describe('iterator', () => {
 
             extract(new EntriesIterator(entries), TARGET, { force: true, ...options }, (err) => {
               if (err) {
-                done(err.message);
+                done(err);
                 return;
               }
 
               validateFiles(options, 'tar', (err) => {
                 if (err) {
-                  done(err.message);
+                  done(err);
                   return;
                 }
                 done();
