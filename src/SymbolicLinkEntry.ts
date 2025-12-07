@@ -6,8 +6,8 @@ import path from 'path';
 import Queue from 'queue-cb';
 import chmod from './fs/chmod.ts';
 import chown from './fs/chown.ts';
+import lutimes from './fs/lutimes.ts';
 import symlinkWin32 from './fs/symlinkWin32.ts';
-import utimes from './fs/utimes.ts';
 import { objectAssign } from './shared/index.ts';
 import stripPath from './stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
@@ -66,7 +66,7 @@ export default class SymbolicLinkEntry {
         else queue.defer(fs.symlink.bind(fs, normalizedLinkpath, fullPath));
         queue.defer(chmod.bind(null, fullPath, this, options));
         queue.defer(chown.bind(null, fullPath, this, options));
-        queue.defer(utimes.bind(null, fullPath, this, options));
+        queue.defer(lutimes.bind(null, fullPath, this, options));
         queue.await(callback);
         return;
       } catch (err) {

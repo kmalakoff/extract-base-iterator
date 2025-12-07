@@ -1,6 +1,6 @@
 {
   "name": "extract-base-iterator",
-  "version": "2.4.8",
+  "version": "2.4.9",
   "description": "Base iterator for extract iterators like tar-iterator and zip-iterator",
   "keywords": [
     "extract",
@@ -43,28 +43,28 @@
     "version": "tsds version"
   },
   "dependencies": {
-    "fs-remove-compat": "*",
-    "graceful-fs": "*",
-    "is-absolute": "*",
-    "lodash.compact": "*",
-    "mkdirp-classic": "*",
-    "next-tick": "*",
+    "fs-remove-compat": "^0.2.1",
+    "graceful-fs": "^4.2.11",
+    "is-absolute": "^1.0.0",
+    "lodash.compact": "^3.0.1",
+    "mkdirp-classic": "^0.5.3",
+    "next-tick": "^1.1.0",
     "pako": "~1.0.11",
-    "queue-cb": "*",
+    "queue-cb": "^1.6.1",
     "readable-stream": "^2.3.8",
-    "stack-base-iterator": "*"
+    "stack-base-iterator": "^2.1.13"
   },
   "devDependencies": {
-    "@types/mocha": "*",
-    "@types/node": "*",
-    "cr": "*",
-    "fs-iterator": "*",
-    "fs-stats-spys": "*",
-    "lodash.find": "*",
-    "node-version-use": "*",
-    "pinkie-promise": "*",
-    "ts-dev-stack": "*",
-    "tsds-config": "*"
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.10.1",
+    "cr": "^0.1.0",
+    "fs-iterator": "^6.1.10",
+    "fs-stats-spys": "^1.2.7",
+    "lodash.find": "^4.6.0",
+    "node-version-use": "^1.9.7",
+    "pinkie-promise": "^2.0.1",
+    "ts-dev-stack": "^1.21.2",
+    "tsds-config": "^0.2.0"
   },
   "engines": {
     "node": ">=0.8"
