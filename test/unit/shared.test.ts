@@ -7,111 +7,111 @@ describe('shared utilities', () => {
   describe('compat', () => {
     describe('allocBuffer', () => {
       it('should allocate zero-filled buffer', () => {
-        var buf = allocBuffer(10);
+        const buf = allocBuffer(10);
         assert.strictEqual(buf.length, 10);
-        for (var i = 0; i < buf.length; i++) {
+        for (let i = 0; i < buf.length; i++) {
           assert.strictEqual(buf[i], 0);
         }
       });
 
       it('should handle size 0', () => {
-        var buf = allocBuffer(0);
+        const buf = allocBuffer(0);
         assert.strictEqual(buf.length, 0);
       });
     });
 
     describe('allocBufferUnsafe', () => {
       it('should allocate buffer of correct size', () => {
-        var buf = allocBufferUnsafe(10);
+        const buf = allocBufferUnsafe(10);
         assert.strictEqual(buf.length, 10);
       });
 
       it('should handle size 0', () => {
-        var buf = allocBufferUnsafe(0);
+        const buf = allocBufferUnsafe(0);
         assert.strictEqual(buf.length, 0);
       });
     });
 
     describe('bufferFrom', () => {
       it('should create buffer from string', () => {
-        var buf = bufferFrom('hello');
+        const buf = bufferFrom('hello');
         assert.strictEqual(buf.toString(), 'hello');
       });
 
       it('should create buffer from string with encoding', () => {
-        var buf = bufferFrom('68656c6c6f', 'hex');
+        const buf = bufferFrom('68656c6c6f', 'hex');
         assert.strictEqual(buf.toString(), 'hello');
       });
 
       it('should create buffer from array', () => {
-        var buf = bufferFrom([104, 101, 108, 108, 111]);
+        const buf = bufferFrom([104, 101, 108, 108, 111]);
         assert.strictEqual(buf.toString(), 'hello');
       });
 
       it('should create buffer from existing buffer', () => {
-        var original = allocBuffer(5);
+        const original = allocBuffer(5);
         original[0] = 104;
         original[1] = 101;
         original[2] = 108;
         original[3] = 108;
         original[4] = 111;
-        var buf = bufferFrom(original);
+        const buf = bufferFrom(original);
         assert.strictEqual(buf.toString(), 'hello');
       });
     });
 
     describe('bufferCompare', () => {
       it('should return 0 for equal buffers', () => {
-        var a = bufferFrom('hello');
-        var b = bufferFrom('hello');
+        const a = bufferFrom('hello');
+        const b = bufferFrom('hello');
         assert.strictEqual(bufferCompare(a, b), 0);
       });
 
       it('should return negative for lesser buffer', () => {
-        var a = bufferFrom('apple');
-        var b = bufferFrom('banana');
+        const a = bufferFrom('apple');
+        const b = bufferFrom('banana');
         assert.ok(bufferCompare(a, b) < 0);
       });
 
       it('should return positive for greater buffer', () => {
-        var a = bufferFrom('banana');
-        var b = bufferFrom('apple');
+        const a = bufferFrom('banana');
+        const b = bufferFrom('apple');
         assert.ok(bufferCompare(a, b) > 0);
       });
 
       it('should compare regions', () => {
-        var a = bufferFrom('XXhelloXX');
-        var b = bufferFrom('hello');
+        const a = bufferFrom('XXhelloXX');
+        const b = bufferFrom('hello');
         assert.strictEqual(bufferCompare(a, b, 0, 5, 2, 7), 0);
       });
     });
 
     describe('bufferEquals', () => {
       it('should return true for matching bytes', () => {
-        var buf = bufferFrom([0x50, 0x4b, 0x03, 0x04]);
+        const buf = bufferFrom([0x50, 0x4b, 0x03, 0x04]);
         assert.strictEqual(bufferEquals(buf, 0, [0x50, 0x4b, 0x03, 0x04]), true);
       });
 
       it('should return false for non-matching bytes', () => {
-        var buf = bufferFrom([0x50, 0x4b, 0x03, 0x04]);
+        const buf = bufferFrom([0x50, 0x4b, 0x03, 0x04]);
         assert.strictEqual(bufferEquals(buf, 0, [0x50, 0x4b, 0x00, 0x00]), false);
       });
 
       it('should handle offset', () => {
-        var buf = bufferFrom([0x00, 0x00, 0x50, 0x4b]);
+        const buf = bufferFrom([0x00, 0x00, 0x50, 0x4b]);
         assert.strictEqual(bufferEquals(buf, 2, [0x50, 0x4b]), true);
       });
 
       it('should return false if expected extends past buffer', () => {
-        var buf = bufferFrom([0x50, 0x4b]);
+        const buf = bufferFrom([0x50, 0x4b]);
         assert.strictEqual(bufferEquals(buf, 0, [0x50, 0x4b, 0x03, 0x04]), false);
       });
     });
 
     describe('bufferSliceCopy', () => {
       it('should create independent copy', () => {
-        var original = bufferFrom('hello world');
-        var copy = bufferSliceCopy(original, 0, 5);
+        const original = bufferFrom('hello world');
+        const copy = bufferSliceCopy(original, 0, 5);
         assert.strictEqual(copy.toString(), 'hello');
         // Verify it's a copy, not a view
         copy[0] = 72; // 'H'
@@ -119,66 +119,66 @@ describe('shared utilities', () => {
       });
 
       it('should handle middle region', () => {
-        var buf = bufferFrom('hello world');
-        var copy = bufferSliceCopy(buf, 6, 11);
+        const buf = bufferFrom('hello world');
+        const copy = bufferSliceCopy(buf, 6, 11);
         assert.strictEqual(copy.toString(), 'world');
       });
     });
 
     describe('readUInt64LE / writeUInt64LE', () => {
       it('should read/write small values', () => {
-        var buf = allocBuffer(8);
+        const buf = allocBuffer(8);
         writeUInt64LE(buf, 12345, 0);
         assert.strictEqual(readUInt64LE(buf, 0), 12345);
       });
 
       it('should read/write values up to 32-bit max', () => {
-        var buf = allocBuffer(8);
+        const buf = allocBuffer(8);
         writeUInt64LE(buf, 0xffffffff, 0);
         assert.strictEqual(readUInt64LE(buf, 0), 0xffffffff);
       });
 
       it('should read/write values above 32-bit', () => {
-        var buf = allocBuffer(8);
-        var value = 0x100000000; // 2^32
+        const buf = allocBuffer(8);
+        const value = 0x100000000; // 2^32
         writeUInt64LE(buf, value, 0);
         assert.strictEqual(readUInt64LE(buf, 0), value);
       });
 
       it('should read/write large values within safe integer range', () => {
-        var buf = allocBuffer(8);
-        var value = 0x1fffffffffffff; // MAX_SAFE_INTEGER - close to it
+        const buf = allocBuffer(8);
+        const value = 0x1fffffffffffff; // MAX_SAFE_INTEGER - close to it
         writeUInt64LE(buf, value, 0);
         // Due to floating point precision, we allow small differences
-        var read = readUInt64LE(buf, 0);
+        const read = readUInt64LE(buf, 0);
         assert.ok(Math.abs(read - value) <= 1);
       });
     });
 
     describe('bufferConcat', () => {
       it('should concatenate buffers', () => {
-        var a = bufferFrom('hello');
-        var b = bufferFrom(' ');
-        var c = bufferFrom('world');
-        var result = bufferConcat([a, b, c]);
+        const a = bufferFrom('hello');
+        const b = bufferFrom(' ');
+        const c = bufferFrom('world');
+        const result = bufferConcat([a, b, c]);
         assert.strictEqual(result.toString(), 'hello world');
       });
 
       it('should handle empty array', () => {
-        var result = bufferConcat([]);
+        const result = bufferConcat([]);
         assert.strictEqual(result.length, 0);
       });
 
       it('should handle single buffer', () => {
-        var a = bufferFrom('hello');
-        var result = bufferConcat([a]);
+        const a = bufferFrom('hello');
+        const result = bufferConcat([a]);
         assert.strictEqual(result.toString(), 'hello');
       });
 
       it('should respect totalLength parameter', () => {
-        var a = bufferFrom('hello');
-        var b = bufferFrom('world');
-        var result = bufferConcat([a, b], 5);
+        const a = bufferFrom('hello');
+        const b = bufferFrom('world');
+        const result = bufferConcat([a, b], 5);
         assert.strictEqual(result.length, 5);
         assert.strictEqual(result.toString(), 'hello');
       });
@@ -213,45 +213,45 @@ describe('shared utilities', () => {
       }
 
       it('should decompress simple data', function () {
-        var original = bufferFrom('hello world');
-        var compressed = deflateRaw(original);
+        const original = bufferFrom('hello world');
+        const compressed = deflateRaw(original);
         if (compressed.length === 0) {
           this.skip();
           return;
         }
 
-        var result = inflateRaw(compressed);
+        const result = inflateRaw(compressed);
         assert.strictEqual(result.toString(), 'hello world');
       });
 
       it('should decompress larger data', function () {
         // Create 10KB of repeated text
-        var text = 'The quick brown fox jumps over the lazy dog. ';
-        var repeated = '';
-        for (var i = 0; i < 200; i++) {
+        const text = 'The quick brown fox jumps over the lazy dog. ';
+        let repeated = '';
+        for (let i = 0; i < 200; i++) {
           repeated += text;
         }
-        var original = bufferFrom(repeated);
-        var compressed = deflateRaw(original);
+        const original = bufferFrom(repeated);
+        const compressed = deflateRaw(original);
         if (compressed.length === 0) {
           this.skip();
           return;
         }
 
-        var result = inflateRaw(compressed);
+        const result = inflateRaw(compressed);
         assert.strictEqual(result.length, original.length);
         assert.strictEqual(result.toString(), original.toString());
       });
 
       it('should handle empty data', function () {
-        var original = bufferFrom('');
-        var compressed = deflateRaw(original);
+        const original = bufferFrom('');
+        const compressed = deflateRaw(original);
         if (compressed.length === 0) {
           this.skip();
           return;
         }
 
-        var result = inflateRaw(compressed);
+        const result = inflateRaw(compressed);
         assert.strictEqual(result.length, 0);
       });
     });
@@ -266,22 +266,22 @@ describe('shared utilities', () => {
       }
 
       it('should decompress data via stream', function (done) {
-        var original = bufferFrom('hello world streaming test');
-        var compressed = deflateRaw(original);
+        const original = bufferFrom('hello world streaming test');
+        const compressed = deflateRaw(original);
         if (compressed.length === 0) {
           this.skip();
           return;
         }
 
-        var inflate = createInflateRawStream();
-        var chunks: Buffer[] = [];
+        const inflate = createInflateRawStream();
+        const chunks: Buffer[] = [];
 
         inflate.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
         });
 
         inflate.on('end', () => {
-          var result = Buffer.concat(chunks);
+          const result = Buffer.concat(chunks);
           assert.strictEqual(result.toString(), original.toString());
           done();
         });
@@ -293,22 +293,22 @@ describe('shared utilities', () => {
       });
 
       it('should handle chunked input', function (done) {
-        var original = bufferFrom('This is a test of chunked streaming decompression.');
-        var compressed = deflateRaw(original);
+        const original = bufferFrom('This is a test of chunked streaming decompression.');
+        const compressed = deflateRaw(original);
         if (compressed.length === 0) {
           this.skip();
           return;
         }
 
-        var inflate = createInflateRawStream();
-        var chunks: Buffer[] = [];
+        const inflate = createInflateRawStream();
+        const chunks: Buffer[] = [];
 
         inflate.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
         });
 
         inflate.on('end', () => {
-          var result = Buffer.concat(chunks);
+          const result = Buffer.concat(chunks);
           assert.strictEqual(result.toString(), original.toString());
           done();
         });
@@ -316,10 +316,10 @@ describe('shared utilities', () => {
         inflate.on('error', done);
 
         // Write compressed data in small chunks
-        var offset = 0;
-        var chunkSize = 5;
+        let offset = 0;
+        const chunkSize = 5;
         while (offset < compressed.length) {
-          var end = Math.min(offset + chunkSize, compressed.length);
+          const end = Math.min(offset + chunkSize, compressed.length);
           inflate.write(compressed.slice(offset, end));
           offset = end;
         }
@@ -328,30 +328,30 @@ describe('shared utilities', () => {
 
       it('should produce same output as sync inflateRaw', function (done) {
         // Create moderately sized data (50KB)
-        var text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ';
-        var repeated = '';
-        for (var i = 0; i < 1000; i++) {
+        const text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ';
+        let repeated = '';
+        for (let i = 0; i < 1000; i++) {
           repeated += text;
         }
-        var original = bufferFrom(repeated);
-        var compressed = deflateRaw(original);
+        const original = bufferFrom(repeated);
+        const compressed = deflateRaw(original);
         if (compressed.length === 0) {
           this.skip();
           return;
         }
 
         // Get sync result for comparison
-        var syncResult = inflateRaw(compressed);
+        const syncResult = inflateRaw(compressed);
 
-        var inflate = createInflateRawStream();
-        var chunks: Buffer[] = [];
+        const inflate = createInflateRawStream();
+        const chunks: Buffer[] = [];
 
         inflate.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
         });
 
         inflate.on('end', () => {
-          var streamResult = Buffer.concat(chunks);
+          const streamResult = Buffer.concat(chunks);
           assert.strictEqual(streamResult.length, syncResult.length);
           assert.strictEqual(streamResult.toString(), syncResult.toString());
           done();
@@ -360,10 +360,10 @@ describe('shared utilities', () => {
         inflate.on('error', done);
 
         // Write in realistic chunks (4KB at a time)
-        var offset = 0;
-        var chunkSize = 4096;
+        let offset = 0;
+        const chunkSize = 4096;
         while (offset < compressed.length) {
-          var end = Math.min(offset + chunkSize, compressed.length);
+          const end = Math.min(offset + chunkSize, compressed.length);
           inflate.write(compressed.slice(offset, end));
           offset = end;
         }
@@ -371,22 +371,22 @@ describe('shared utilities', () => {
       });
 
       it('should handle empty stream', function (done) {
-        var original = bufferFrom('');
-        var compressed = deflateRaw(original);
+        const original = bufferFrom('');
+        const compressed = deflateRaw(original);
         if (compressed.length === 0) {
           this.skip();
           return;
         }
 
-        var inflate = createInflateRawStream();
-        var chunks: Buffer[] = [];
+        const inflate = createInflateRawStream();
+        const chunks: Buffer[] = [];
 
         inflate.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
         });
 
         inflate.on('end', () => {
-          var result = Buffer.concat(chunks);
+          const result = Buffer.concat(chunks);
           assert.strictEqual(result.length, 0);
           done();
         });
@@ -402,29 +402,29 @@ describe('shared utilities', () => {
   describe('crc32', () => {
     describe('crc32', () => {
       it('should calculate correct CRC32 for empty buffer', () => {
-        var buf = allocBuffer(0);
+        const buf = allocBuffer(0);
         assert.strictEqual(crc32(buf), 0);
       });
 
       it('should calculate correct CRC32 for known values', () => {
         // "123456789" has well-known CRC32 value
-        var buf = bufferFrom('123456789');
+        const buf = bufferFrom('123456789');
         assert.strictEqual(crc32(buf), 0xcbf43926);
       });
 
       it('should calculate correct CRC32 for simple string', () => {
-        var buf = bufferFrom('hello');
+        const buf = bufferFrom('hello');
         // Known CRC32 for "hello"
         assert.strictEqual(crc32(buf), 0x3610a686);
       });
 
       it('should support streaming calculation', () => {
-        var part1 = bufferFrom('hello');
-        var part2 = bufferFrom(' world');
-        var full = bufferFrom('hello world');
+        const part1 = bufferFrom('hello');
+        const part2 = bufferFrom(' world');
+        const full = bufferFrom('hello world');
 
-        var crc1 = crc32(part1);
-        var crc2 = crc32(part2, crc1);
+        const crc1 = crc32(part1);
+        const crc2 = crc32(part2, crc1);
 
         assert.strictEqual(crc2, crc32(full));
       });
@@ -432,27 +432,27 @@ describe('shared utilities', () => {
 
     describe('crc32Region', () => {
       it('should calculate CRC32 of buffer region', () => {
-        var buf = bufferFrom('XXhelloXX');
-        var expected = crc32(bufferFrom('hello'));
+        const buf = bufferFrom('XXhelloXX');
+        const expected = crc32(bufferFrom('hello'));
         assert.strictEqual(crc32Region(buf, 2, 5), expected);
       });
     });
 
     describe('verifyCrc32', () => {
       it('should return true for correct CRC', () => {
-        var buf = bufferFrom('123456789');
+        const buf = bufferFrom('123456789');
         assert.strictEqual(verifyCrc32(buf, 0xcbf43926), true);
       });
 
       it('should return false for incorrect CRC', () => {
-        var buf = bufferFrom('123456789');
+        const buf = bufferFrom('123456789');
         assert.strictEqual(verifyCrc32(buf, 0x12345678), false);
       });
     });
 
     describe('verifyCrc32Region', () => {
       it('should verify CRC32 of buffer region', () => {
-        var buf = bufferFrom('XXhelloXX');
+        const buf = bufferFrom('XXhelloXX');
         assert.strictEqual(verifyCrc32Region(buf, 2, 5, 0x3610a686), true);
         assert.strictEqual(verifyCrc32Region(buf, 2, 5, 0x12345678), false);
       });
@@ -461,8 +461,8 @@ describe('shared utilities', () => {
 
   describe('EntryStream', () => {
     it('should emit data when resumed', (done) => {
-      var stream = new EntryStream();
-      var chunks: Buffer[] = [];
+      const stream = new EntryStream();
+      const chunks: Buffer[] = [];
 
       stream.on('data', (chunk) => {
         chunks.push(chunk);
@@ -482,8 +482,8 @@ describe('shared utilities', () => {
     });
 
     it('should buffer data when paused', (done) => {
-      var stream = new EntryStream();
-      var chunks: Buffer[] = [];
+      const stream = new EntryStream();
+      const chunks: Buffer[] = [];
 
       stream.push(bufferFrom('hello'));
       stream.push(bufferFrom('world'));
@@ -505,8 +505,8 @@ describe('shared utilities', () => {
     });
 
     it('should emit end after flush when stream ended while paused', (done) => {
-      var stream = new EntryStream();
-      var dataReceived = false;
+      const stream = new EntryStream();
+      let dataReceived = false;
 
       stream.push(bufferFrom('data'));
       stream.end();
@@ -524,8 +524,8 @@ describe('shared utilities', () => {
     });
 
     it('should handle pause and resume', (done) => {
-      var stream = new EntryStream();
-      var chunks: Buffer[] = [];
+      const stream = new EntryStream();
+      const chunks: Buffer[] = [];
 
       stream.on('data', (chunk) => {
         chunks.push(chunk);
@@ -548,15 +548,15 @@ describe('shared utilities', () => {
     });
 
     it('should report ended state', () => {
-      var stream = new EntryStream();
+      const stream = new EntryStream();
       assert.strictEqual(stream.ended, false);
       stream.end();
       assert.strictEqual(stream.ended, true);
     });
 
     it('should receive errors via emit', (done) => {
-      var stream = new EntryStream();
-      var testError = new Error('test error');
+      const stream = new EntryStream();
+      const testError = new Error('test error');
 
       stream.on('error', (err) => {
         assert.strictEqual(err, testError);
@@ -570,12 +570,12 @@ describe('shared utilities', () => {
   describe('BufferList', () => {
     describe('append and length', () => {
       it('should start empty', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         assert.strictEqual(list.length, 0);
       });
 
       it('should track length after append', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
         assert.strictEqual(list.length, 5);
         list.append(bufferFrom(' world'));
@@ -583,7 +583,7 @@ describe('shared utilities', () => {
       });
 
       it('should ignore empty buffers', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom(''));
         assert.strictEqual(list.length, 0);
       });
@@ -591,43 +591,43 @@ describe('shared utilities', () => {
 
     describe('consume', () => {
       it('should consume bytes from front', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
         list.append(bufferFrom(' world'));
 
-        var result = list.consume(5);
+        const result = list.consume(5);
         assert.strictEqual(result.toString(), 'hello');
         assert.strictEqual(list.length, 6);
       });
 
       it('should consume across chunk boundaries', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hel'));
         list.append(bufferFrom('lo'));
 
-        var result = list.consume(5);
+        const result = list.consume(5);
         assert.strictEqual(result.toString(), 'hello');
         assert.strictEqual(list.length, 0);
       });
 
       it('should handle consuming zero bytes', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
 
-        var result = list.consume(0);
+        const result = list.consume(0);
         assert.strictEqual(result.length, 0);
         assert.strictEqual(list.length, 5);
       });
 
       it('should consume partial chunk', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello world'));
 
-        var result = list.consume(5);
+        const result = list.consume(5);
         assert.strictEqual(result.toString(), 'hello');
         assert.strictEqual(list.length, 6);
 
-        var result2 = list.consume(6);
+        const result2 = list.consume(6);
         assert.strictEqual(result2.toString(), ' world');
         assert.strictEqual(list.length, 0);
       });
@@ -635,7 +635,7 @@ describe('shared utilities', () => {
 
     describe('has', () => {
       it('should return true when enough bytes available', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
 
         assert.strictEqual(list.has(5), true);
@@ -644,7 +644,7 @@ describe('shared utilities', () => {
       });
 
       it('should return false when not enough bytes', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
 
         assert.strictEqual(list.has(6), false);
@@ -654,7 +654,7 @@ describe('shared utilities', () => {
 
     describe('clear', () => {
       it('should clear all data', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
         list.append(bufferFrom(' world'));
 
@@ -665,16 +665,16 @@ describe('shared utilities', () => {
 
     describe('prepend', () => {
       it('should add data to front', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom(' world'));
         list.prepend(bufferFrom('hello'));
 
-        var result = list.consume(11);
+        const result = list.consume(11);
         assert.strictEqual(result.toString(), 'hello world');
       });
 
       it('should ignore empty buffers', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.prepend(bufferFrom(''));
         assert.strictEqual(list.length, 0);
       });
@@ -682,37 +682,37 @@ describe('shared utilities', () => {
 
     describe('slice', () => {
       it('should return copy of region without consuming', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello world'));
 
-        var slice = list.slice(0, 5);
+        const slice = list.slice(0, 5);
         assert.strictEqual(slice.toString(), 'hello');
         assert.strictEqual(list.length, 11); // unchanged
       });
 
       it('should slice across chunk boundaries', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hel'));
         list.append(bufferFrom('lo '));
         list.append(bufferFrom('wor'));
         list.append(bufferFrom('ld'));
 
-        var slice = list.slice(3, 8);
+        const slice = list.slice(3, 8);
         assert.strictEqual(slice.toString(), 'lo wo');
       });
 
       it('should handle empty slice', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
 
-        var slice = list.slice(0, 0);
+        const slice = list.slice(0, 0);
         assert.strictEqual(slice.length, 0);
       });
     });
 
     describe('readByte', () => {
       it('should read byte at offset', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
 
         assert.strictEqual(list.readByte(0), 104); // 'h'
@@ -720,7 +720,7 @@ describe('shared utilities', () => {
       });
 
       it('should read across chunks', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hel'));
         list.append(bufferFrom('lo'));
 
@@ -729,7 +729,7 @@ describe('shared utilities', () => {
       });
 
       it('should return -1 for out of bounds', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
 
         assert.strictEqual(list.readByte(-1), -1);
@@ -740,28 +740,28 @@ describe('shared utilities', () => {
 
     describe('indexOf', () => {
       it('should find signature at start', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom([0x50, 0x4b, 0x03, 0x04])); // ZIP signature
 
         assert.strictEqual(list.indexOf([0x50, 0x4b]), 0);
       });
 
       it('should find signature in middle', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom([0x00, 0x00, 0x50, 0x4b, 0x03, 0x04]));
 
         assert.strictEqual(list.indexOf([0x50, 0x4b]), 2);
       });
 
       it('should return -1 when not found', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
 
         assert.strictEqual(list.indexOf([0x50, 0x4b]), -1);
       });
 
       it('should search from startOffset', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom([0x50, 0x4b, 0x00, 0x50, 0x4b]));
 
         assert.strictEqual(list.indexOf([0x50, 0x4b], 1), 3);
@@ -770,18 +770,18 @@ describe('shared utilities', () => {
 
     describe('skip', () => {
       it('should skip bytes without returning them', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello world'));
 
         list.skip(6);
         assert.strictEqual(list.length, 5);
 
-        var result = list.consume(5);
+        const result = list.consume(5);
         assert.strictEqual(result.toString(), 'world');
       });
 
       it('should handle skip of zero', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
 
         list.skip(0);
@@ -789,7 +789,7 @@ describe('shared utilities', () => {
       });
 
       it('should handle skip larger than length', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
 
         list.skip(100);
@@ -799,7 +799,7 @@ describe('shared utilities', () => {
 
     describe('startsWith', () => {
       it('should return true for matching prefix', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom([0x50, 0x4b, 0x03, 0x04]));
 
         assert.strictEqual(list.startsWith([0x50, 0x4b]), true);
@@ -807,14 +807,14 @@ describe('shared utilities', () => {
       });
 
       it('should return false for non-matching prefix', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom([0x50, 0x4b, 0x03, 0x04]));
 
         assert.strictEqual(list.startsWith([0x00, 0x00]), false);
       });
 
       it('should return false if signature longer than buffer', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom([0x50, 0x4b]));
 
         assert.strictEqual(list.startsWith([0x50, 0x4b, 0x03, 0x04]), false);
@@ -823,19 +823,19 @@ describe('shared utilities', () => {
 
     describe('toBuffer', () => {
       it('should return consolidated buffer', () => {
-        var list = new BufferList();
+        const list = new BufferList();
         list.append(bufferFrom('hello'));
         list.append(bufferFrom(' '));
         list.append(bufferFrom('world'));
 
-        var result = list.toBuffer();
+        const result = list.toBuffer();
         assert.strictEqual(result.toString(), 'hello world');
         assert.strictEqual(list.length, 11); // unchanged
       });
 
       it('should return empty buffer for empty list', () => {
-        var list = new BufferList();
-        var result = list.toBuffer();
+        const list = new BufferList();
+        const result = list.toBuffer();
         assert.strictEqual(result.length, 0);
       });
     });
