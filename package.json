@@ -52,13 +52,13 @@
     "pako": "~1.0.11",
     "queue-cb": "^1.6.2",
     "readable-stream": "^2.3.8",
-    "stack-base-iterator": "^2.1.13"
+    "stack-base-iterator": "^2.1.14"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "^25.0.1",
     "cr": "^0.1.0",
-    "fs-iterator": "^6.1.10",
+    "fs-iterator": "^6.1.11",
     "fs-stats-spys": "^1.2.8",
     "lodash.find": "^4.6.0",
     "node-version-use": "^2.1.5",
