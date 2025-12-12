@@ -15,12 +15,12 @@
 // ESM-compatible require - works in both CJS and ESM
 import Module from 'module';
 
-var _require = typeof require === 'undefined' ? Module.createRequire(import.meta.url) : require;
+const _require = typeof require === 'undefined' ? Module.createRequire(import.meta.url) : require;
 
 // Feature detection (runs once at module load)
-var hasBufferAlloc = typeof Buffer.alloc === 'function';
-var hasBufferAllocUnsafe = typeof Buffer.allocUnsafe === 'function';
-var hasBufferFrom = typeof Buffer.from === 'function' && Buffer.from !== Uint8Array.from;
+const hasBufferAlloc = typeof Buffer.alloc === 'function';
+const hasBufferAllocUnsafe = typeof Buffer.allocUnsafe === 'function';
+const hasBufferFrom = typeof Buffer.from === 'function' && Buffer.from !== Uint8Array.from;
 
 /**
  * Allocate a zero-filled buffer (safe)
@@ -32,7 +32,7 @@ export function allocBuffer(size: number): Buffer {
     return Buffer.alloc(size);
   }
   // Legacy fallback: new Buffer() is uninitialized, must zero-fill
-  var buf = new Buffer(size);
+  const buf = new Buffer(size);
   buf.fill(0);
   return buf;
 }
@@ -68,8 +68,8 @@ export function bufferFrom(data: string | number[] | Buffer | Uint8Array, encodi
   // Node 0.8 compatibility - deprecated Buffer constructor
   // For Uint8Array, convert to array first (needed for crypto output in Node 0.8)
   if (data instanceof Uint8Array && !(data instanceof Buffer)) {
-    var arr: number[] = [];
-    for (var i = 0; i < data.length; i++) {
+    const arr: number[] = [];
+    for (let i = 0; i < data.length; i++) {
       arr.push(data[i]);
     }
     return new Buffer(arr);
@@ -94,13 +94,13 @@ export function bufferCompare(source: Buffer, target: Buffer, targetStart?: numb
   }
 
   // Manual comparison for older Node versions
-  var sourceLen = sourceEnd - sourceStart;
-  var targetLen = targetEnd - targetStart;
-  var len = Math.min(sourceLen, targetLen);
+  const sourceLen = sourceEnd - sourceStart;
+  const targetLen = targetEnd - targetStart;
+  const len = Math.min(sourceLen, targetLen);
 
-  for (var i = 0; i < len; i++) {
-    var s = source[sourceStart + i];
-    var t = target[targetStart + i];
+  for (let i = 0; i < len; i++) {
+    const s = source[sourceStart + i];
+    const t = target[targetStart + i];
     if (s !== t) return s < t ? -1 : 1;
   }
 
@@ -113,7 +113,7 @@ export function bufferCompare(source: Buffer, target: Buffer, targetStart?: numb
  */
 export function bufferEquals(buf: Buffer, offset: number, expected: number[]): boolean {
   if (offset + expected.length > buf.length) return false;
-  for (var i = 0; i < expected.length; i++) {
+  for (let i = 0; i < expected.length; i++) {
     if (buf[offset + i] !== expected[i]) return false;
   }
   return true;
@@ -124,7 +124,7 @@ export function bufferEquals(buf: Buffer, offset: number, expected: number[]): b
  * Works on all Node versions
  */
 export function bufferSliceCopy(buf: Buffer, start: number, end: number): Buffer {
-  var result = allocBuffer(end - start);
+  const result = allocBuffer(end - start);
   buf.copy(result, 0, start, end);
   return result;
 }
@@ -137,8 +137,8 @@ export function bufferSliceCopy(buf: Buffer, start: number, end: number): Buffer
  * This covers files up to ~9 PB which is practical for all real use cases.
  */
 export function readUInt64LE(buf: Buffer, offset: number): number {
-  var low = buf.readUInt32LE(offset);
-  var high = buf.readUInt32LE(offset + 4);
+  const low = buf.readUInt32LE(offset);
+  const high = buf.readUInt32LE(offset + 4);
   return high * 0x100000000 + low;
 }
 
@@ -147,8 +147,8 @@ export function readUInt64LE(buf: Buffer, offset: number): number {
  * Same precision limitation as readUInt64LE
  */
 export function writeUInt64LE(buf: Buffer, value: number, offset: number): void {
-  var low = value >>> 0;
-  var high = (value / 0x100000000) >>> 0;
+  const low = value >>> 0;
+  const high = (value / 0x100000000) >>> 0;
   buf.writeUInt32LE(low, offset);
   buf.writeUInt32LE(high, offset + 4);
 }
@@ -163,18 +163,18 @@ export function writeUInt64LE(buf: Buffer, value: number, offset: number): void 
  */
 export function bufferConcat(list: (Buffer | Uint8Array)[], totalLength?: number): Buffer {
   // Calculate actual total length first
-  var actualLength = 0;
-  for (var i = 0; i < list.length; i++) {
+  let actualLength = 0;
+  for (let i = 0; i < list.length; i++) {
     actualLength += list[i].length;
   }
 
   // Use specified totalLength or actual length
-  var targetLength = totalLength !== undefined ? totalLength : actualLength;
+  const targetLength = totalLength !== undefined ? totalLength : actualLength;
 
   // Check if all items are proper Buffers AND no truncation needed
   // (Node 0.8's Buffer.concat doesn't handle truncation well)
-  var allBuffers = true;
-  for (var j = 0; j < list.length; j++) {
+  let allBuffers = true;
+  for (let j = 0; j < list.length; j++) {
     if (!(list[j] instanceof Buffer)) {
       allBuffers = false;
       break;
@@ -185,11 +185,11 @@ export function bufferConcat(list: (Buffer | Uint8Array)[], totalLength?: number
   }
 
   // Manual concat for mixed types or when truncation is needed
-  var result = allocBuffer(targetLength);
-  var offset = 0;
-  for (var k = 0; k < list.length && offset < targetLength; k++) {
-    var buf = list[k];
-    for (var l = 0; l < buf.length && offset < targetLength; l++) {
+  const result = allocBuffer(targetLength);
+  let offset = 0;
+  for (let k = 0; k < list.length && offset < targetLength; k++) {
+    const buf = list[k];
+    for (let l = 0; l < buf.length && offset < targetLength; l++) {
       result[offset++] = buf[l];
     }
   }
@@ -216,20 +216,20 @@ export function isNaN(value: number): boolean {
  * - Node 0.11.12+: zlib.inflateRawSync available
  */
 // Feature detection for native zlib sync methods (Node 0.11.12+)
-var zlib: typeof import('zlib') | null = null;
+let zlib: typeof import('zlib') | null = null;
 try {
   zlib = _require('zlib');
 } catch (_e) {
   // zlib not available (shouldn't happen in Node.js)
 }
-var hasNativeInflateRaw = zlib !== null && typeof zlib.inflateRawSync === 'function';
+const hasNativeInflateRaw = zlib !== null && typeof zlib.inflateRawSync === 'function';
 
 export function inflateRaw(input: Buffer): Buffer {
   if (hasNativeInflateRaw && zlib) {
     return zlib.inflateRawSync(input);
   }
   // Fallback to pako for Node 0.8-0.10
-  var pako = _require('pako');
+  const pako = _require('pako');
   return bufferFrom(pako.inflateRaw(input));
 }
 
@@ -244,7 +244,7 @@ export function inflateRaw(input: Buffer): Buffer {
  */
 // Check for native streaming inflate (Node 0.11.12+ has createInflateRaw)
 // biome-ignore lint/suspicious/noExplicitAny: createInflateRaw not in older TS definitions
-var hasNativeStreamingInflate = zlib !== null && typeof (zlib as any).createInflateRaw === 'function';
+const hasNativeStreamingInflate = zlib !== null && typeof (zlib as any).createInflateRaw === 'function';
 
 export function createInflateRawStream(): NodeJS.ReadWriteStream {
   if (hasNativeStreamingInflate && zlib) {
@@ -255,13 +255,13 @@ export function createInflateRawStream(): NodeJS.ReadWriteStream {
 
   // Fallback to pako-based Transform for Node 0.8-0.10
   // Use readable-stream for Node 0.8 compatibility
-  var Transform = _require('readable-stream').Transform;
-  var pako = _require('pako');
+  const Transform = _require('readable-stream').Transform;
+  const pako = _require('pako');
 
-  var inflate = new pako.Inflate({ raw: true, chunkSize: 16384 });
-  var transform = new Transform();
-  var pendingChunks: Buffer[] = [];
-  var ended = false;
+  const inflate = new pako.Inflate({ raw: true, chunkSize: 16384 });
+  const transform = new Transform();
+  const pendingChunks: Buffer[] = [];
+  let ended = false;
 
   // Pako calls onData synchronously during push()
   inflate.onData = (chunk: Uint8Array) => {
@@ -313,8 +313,8 @@ export function createInflateRawStream(): NodeJS.ReadWriteStream {
  * - Uses native setImmediate on Node 0.10+
  * - Falls back to next-tick for Node 0.8
  */
-var hasSetImmediate = typeof setImmediate === 'function';
-var _nextTick: (fn: () => void) => void = hasSetImmediate ? setImmediate : _require('next-tick');
+const hasSetImmediate = typeof setImmediate === 'function';
+const _nextTick: (fn: () => void) => void = hasSetImmediate ? setImmediate : _require('next-tick');
 
 export function setImmediateFn(fn: () => void): void {
   _nextTick(fn);
@@ -325,14 +325,14 @@ export function setImmediateFn(fn: () => void): void {
  * - Uses native Object.assign on Node 4.0+
  * - Falls back to manual property copy on Node 0.8-3.x
  */
-var hasObjectAssign = typeof Object.assign === 'function';
-var _hasOwnProperty = Object.prototype.hasOwnProperty;
+const hasObjectAssign = typeof Object.assign === 'function';
+const _hasOwnProperty = Object.prototype.hasOwnProperty;
 
 export function objectAssign<T, U>(target: T, source: U): T & U {
   if (hasObjectAssign) {
     return Object.assign(target, source);
   }
-  for (var key in source) {
+  for (const key in source) {
     if (_hasOwnProperty.call(source, key)) {
       // biome-ignore lint/suspicious/noExplicitAny: Generic object assignment for Node 0.8 compat
       (target as any)[key] = (source as any)[key];
