@@ -56,14 +56,14 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.0.1",
     "cr": "^0.1.0",
     "fs-iterator": "^6.1.10",
     "fs-stats-spys": "^1.2.7",
     "lodash.find": "^4.6.0",
-    "node-version-use": "^1.9.7",
+    "node-version-use": "^2.1.5",
     "pinkie-promise": "^2.0.1",
-    "ts-dev-stack": "^1.21.2",
+    "ts-dev-stack": "^1.21.3",
     "tsds-config": "^0.2.0"
   },
   "engines": {

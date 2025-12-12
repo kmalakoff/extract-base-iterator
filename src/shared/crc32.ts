@@ -13,13 +13,13 @@
  */
 
 // Pre-computed lookup table for performance
-var CRC32_TABLE: number[] = [];
+const CRC32_TABLE: number[] = [];
 
 // Initialize table at module load time
 (function initTable() {
-  for (var i = 0; i < 256; i++) {
-    var c = i;
-    for (var j = 0; j < 8; j++) {
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let j = 0; j < 8; j++) {
       if ((c & 1) !== 0) {
         c = 0xedb88320 ^ (c >>> 1);
       } else {
@@ -37,10 +37,10 @@ var CRC32_TABLE: number[] = [];
  * @returns CRC32 value as unsigned 32-bit integer
  */
 export function crc32(buf: Buffer, initial?: number): number {
-  var crc = initial === undefined ? 0xffffffff : ~initial >>> 0;
+  let crc = initial === undefined ? 0xffffffff : ~initial >>> 0;
 
-  for (var i = 0; i < buf.length; i++) {
-    var index = (crc ^ buf[i]) & 0xff;
+  for (let i = 0; i < buf.length; i++) {
+    const index = (crc ^ buf[i]) & 0xff;
     crc = CRC32_TABLE[index] ^ (crc >>> 8);
   }
 
@@ -56,11 +56,11 @@ export function crc32(buf: Buffer, initial?: number): number {
  * @returns CRC32 value as unsigned 32-bit integer
  */
 export function crc32Region(buf: Buffer, offset: number, length: number, initial?: number): number {
-  var crc = initial === undefined ? 0xffffffff : ~initial >>> 0;
-  var end = offset + length;
+  let crc = initial === undefined ? 0xffffffff : ~initial >>> 0;
+  const end = offset + length;
 
-  for (var i = offset; i < end; i++) {
-    var index = (crc ^ buf[i]) & 0xff;
+  for (let i = offset; i < end; i++) {
+    const index = (crc ^ buf[i]) & 0xff;
     crc = CRC32_TABLE[index] ^ (crc >>> 8);
   }
 
