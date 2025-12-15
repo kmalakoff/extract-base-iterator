@@ -33,6 +33,7 @@ import type { default as DirectoryEntry } from './DirectoryEntry.ts';
 import type { default as FileEntry } from './FileEntry.ts';
 import type { default as LinkEntry } from './LinkEntry.ts';
 import type { default as SymbolicLinkEntry } from './SymbolicLinkEntry.ts';
+
 export type Entry = DirectoryEntry | FileEntry | LinkEntry | SymbolicLinkEntry;
 
 export interface AbstractEntry {

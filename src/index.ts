@@ -2,7 +2,7 @@ import StackBaseIterator from 'stack-base-iterator';
 
 import type { Entry } from './types.ts';
 
-export default class ExtractBaseIterator extends StackBaseIterator<Entry> {}
+export default class ExtractBaseIterator<T = Entry> extends StackBaseIterator<T> {}
 
 export { default as DirectoryEntry } from './DirectoryEntry.ts';
 export { default as FileEntry } from './FileEntry.ts';
