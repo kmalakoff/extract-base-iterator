@@ -1,6 +1,6 @@
 import ExtractBaseIterator, { type Entry, type ExtractOptions } from 'extract-base-iterator';
 
-export default class EntryIterator extends ExtractBaseIterator {
+export default class EntryIterator extends ExtractBaseIterator<Entry> {
   entries: Entry[];
 
   constructor(entries: Entry[], options: ExtractOptions = {}) {
