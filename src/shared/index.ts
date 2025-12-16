@@ -30,3 +30,5 @@ export {
 export { crc32, crc32Region, verifyCrc32, verifyCrc32Region } from './crc32.ts';
 export { default as EntryStream } from './EntryStream.ts';
 export { type CleanupFn, default as Lock } from './Lock.ts';
+export { default as normalizePath } from './normalizePath.ts';
+export { default as streamToString, type StreamToStringCallback } from './streamToString.ts';
