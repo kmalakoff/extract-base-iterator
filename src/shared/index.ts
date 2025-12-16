@@ -29,3 +29,4 @@ export {
 } from './compat.ts';
 export { crc32, crc32Region, verifyCrc32, verifyCrc32Region } from './crc32.ts';
 export { default as EntryStream } from './EntryStream.ts';
+export { type CleanupFn, default as Lock } from './Lock.ts';
