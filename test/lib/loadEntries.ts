@@ -1,7 +1,7 @@
 import { FileEntry as BaseFileEntry, DirectoryEntry, LinkEntry, SymbolicLinkEntry } from 'extract-base-iterator';
 import fs from 'graceful-fs';
-import find from 'lodash.find';
 import path from 'path';
+import { arrayFind } from './compat.ts';
 
 class FileEntry extends BaseFileEntry {
   contents: string;
@@ -42,7 +42,7 @@ function addDirectories(relativePath, entries) {
   for (let index = 0; index < parts.length - 1; index++) {
     const directoryPath = parts.slice(0, index + 1).join('/');
 
-    if (!find(entries, (entry) => entry instanceof DirectoryEntry && entry.path === directoryPath)) entries.push(new DirectoryEntry({ path: directoryPath, mode: DMODE, mtime: Date.now() }));
+    if (!arrayFind(entries, (entry) => entry instanceof DirectoryEntry && entry.path === directoryPath)) entries.push(new DirectoryEntry({ path: directoryPath, mode: DMODE, mtime: Date.now() }));
   }
 }
 
