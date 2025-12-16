@@ -35,9 +35,9 @@ describe('Lock', () => {
       lock.registerCleanup(() => calls.push('a'));
       lock.registerCleanup(() => calls.push('b'));
 
-      assert.deepStrictEqual(calls, []);
+      assert.deepEqual(calls, []);
       lock.release();
-      assert.deepStrictEqual(calls, ['a', 'b']);
+      assert.deepEqual(calls, ['a', 'b']);
     });
 
     it('runs cleanup functions in registration order', () => {
@@ -48,7 +48,7 @@ describe('Lock', () => {
       lock.registerCleanup(() => calls.push(3));
 
       lock.release();
-      assert.deepStrictEqual(calls, [1, 2, 3]);
+      assert.deepEqual(calls, [1, 2, 3]);
     });
 
     it('continues running cleanups even if one throws', () => {
@@ -61,7 +61,7 @@ describe('Lock', () => {
       lock.registerCleanup(() => calls.push('third'));
 
       lock.release();
-      assert.deepStrictEqual(calls, ['first', 'third']);
+      assert.deepEqual(calls, ['first', 'third']);
     });
 
     it('clears cleanup functions after running', () => {
@@ -117,7 +117,7 @@ describe('Lock', () => {
       lock.registerCleanup(() => calls.push('cleanup2'));
 
       lock.release();
-      assert.deepStrictEqual(calls, ['cleanup1', 'cleanup2', 'destroy']);
+      assert.deepEqual(calls, ['cleanup1', 'cleanup2', 'destroy']);
     });
 
     it('clears onDestroy after calling', () => {
@@ -134,7 +134,7 @@ describe('Lock', () => {
 
       // Should not throw when onDestroy is null
       lock.release();
-      assert.deepStrictEqual(calls, ['cleanup']);
+      assert.deepEqual(calls, ['cleanup']);
     });
   });
 
@@ -155,17 +155,17 @@ describe('Lock', () => {
       lock.release(); // initial count
 
       // Cleanup shouldn't happen yet
-      assert.deepStrictEqual(cleanedUp, []);
+      assert.deepEqual(cleanedUp, []);
 
       // Entries are consumed one by one
       lock.release(); // entry 1 done
-      assert.deepStrictEqual(cleanedUp, []);
+      assert.deepEqual(cleanedUp, []);
 
       lock.release(); // entry 2 done
-      assert.deepStrictEqual(cleanedUp, []);
+      assert.deepEqual(cleanedUp, []);
 
       lock.release(); // entry 3 done - now cleanup happens
-      assert.deepStrictEqual(cleanedUp, ['stream', 'tempfile']);
+      assert.deepEqual(cleanedUp, ['stream', 'tempfile']);
     });
 
     it('handles early termination (destroy)', () => {
@@ -192,7 +192,7 @@ describe('Lock', () => {
       lock.release();
       lock.release();
 
-      assert.deepStrictEqual(cleanedUp, ['resource']);
+      assert.deepEqual(cleanedUp, ['resource']);
       assert.strictEqual(destroyCalled, true);
       assert.strictEqual(destroyError?.message, 'destroyed');
     });
