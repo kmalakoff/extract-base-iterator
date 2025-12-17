@@ -309,18 +309,6 @@ export function createInflateRawStream(): NodeJS.ReadWriteStream {
 }
 
 /**
- * setImmediate wrapper for Node.js 0.8+
- * - Uses native setImmediate on Node 0.10+
- * - Falls back to next-tick for Node 0.8
- */
-const hasSetImmediate = typeof setImmediate === 'function';
-const _nextTick: (fn: () => void) => void = hasSetImmediate ? setImmediate : _require('next-tick');
-
-export function setImmediateFn(fn: () => void): void {
-  _nextTick(fn);
-}
-
-/**
  * Object.assign wrapper for Node.js 0.8+
  * - Uses native Object.assign on Node 4.0+
  * - Falls back to manual property copy on Node 0.8-3.x
