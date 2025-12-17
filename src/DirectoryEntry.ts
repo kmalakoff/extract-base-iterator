@@ -7,6 +7,7 @@ import utimes from './fs/utimes.ts';
 import { objectAssign } from './shared/index.ts';
 import stripPath from './stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
+import waitForAccess from './waitForAccess.ts';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
@@ -42,6 +43,7 @@ export default class DirectoryEntry {
         // do not check for the existence of the directory but allow out-of-order calling
         const queue = new Queue(1);
         queue.defer(mkdirp.bind(null, fullPath));
+        queue.defer(waitForAccess.bind(null, fullPath));
         queue.defer(chmod.bind(null, fullPath, this, options));
         queue.defer(chown.bind(null, fullPath, this, options));
         queue.defer(utimes.bind(null, fullPath, this, options));

@@ -47,11 +47,11 @@
     "graceful-fs": "^4.2.11",
     "is-absolute": "^1.0.0",
     "lodash.compact": "^3.0.1",
-    "mkdirp-classic": "^0.5.3",
+    "mkdirp-classic": "^0.5.2",
     "next-tick": "^1.1.0",
     "on-one": "^1.0.0",
     "pako": "~1.0.11",
-    "queue-cb": "^1.6.3",
+    "queue-cb": "^1.0.0",
     "readable-stream": "^2.3.8",
     "stack-base-iterator": "^2.1.15"
   },
