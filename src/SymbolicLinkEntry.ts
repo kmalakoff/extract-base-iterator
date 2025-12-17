@@ -11,6 +11,7 @@ import symlinkWin32 from './fs/symlinkWin32.ts';
 import { objectAssign } from './shared/index.ts';
 import stripPath from './stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
+import waitForAccess from './waitForAccess.ts';
 
 const isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE);
 
@@ -64,6 +65,7 @@ export default class SymbolicLinkEntry {
         queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
         if (isWindows) queue.defer(symlinkWin32.bind(null, linkFullPath, normalizedLinkpath, fullPath));
         else queue.defer(fs.symlink.bind(fs, normalizedLinkpath, fullPath));
+        queue.defer(waitForAccess.bind(null, fullPath, true)); // noFollow=true for symlinks
         queue.defer(chmod.bind(null, fullPath, this, options));
         queue.defer(chown.bind(null, fullPath, this, options));
         queue.defer(lutimes.bind(null, fullPath, this, options));
