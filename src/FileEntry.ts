@@ -9,6 +9,7 @@ import utimes from './fs/utimes.ts';
 import { objectAssign } from './shared/index.ts';
 import stripPath from './stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
+import waitForAccess from './waitForAccess.ts';
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path'];
 
@@ -75,6 +76,7 @@ export default class FileEntry {
         }
         queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
         queue.defer((this as unknown as AbstractFileEntry)._writeFile.bind(this, fullPath, options));
+        queue.defer(waitForAccess.bind(null, fullPath));
         queue.defer(chmod.bind(null, fullPath, this, options));
         queue.defer(chown.bind(null, fullPath, this, options));
         queue.defer(utimes.bind(null, fullPath, this, options));
