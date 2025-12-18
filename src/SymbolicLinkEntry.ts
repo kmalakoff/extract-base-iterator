@@ -9,7 +9,7 @@ import chown from './fs/chown.ts';
 import lutimes from './fs/lutimes.ts';
 import symlinkWin32 from './fs/symlinkWin32.ts';
 import { objectAssign } from './shared/index.ts';
-import stripPath from './stripPath.ts';
+import stripPath from './shared/stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
 import waitForAccess from './waitForAccess.ts';
 
