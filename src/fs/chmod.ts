@@ -12,10 +12,7 @@ const LMODE = 0o644;
 
 export default function chmodFn(fullPath: string, entry: AbstractEntry, _options: ExtractOptions, callback: NoParamCallback) {
   const chmod = entry.type === 'symlink' ? fs.lchmod : fs.chmod;
-  if (!chmod || UMASK === null) {
-    callback(null);
-    return;
-  }
+  if (!chmod || UMASK === null) return callback(null);
 
   let mode = entry.mode;
   if (!mode) {
