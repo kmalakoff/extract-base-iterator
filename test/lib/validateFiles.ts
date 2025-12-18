@@ -20,10 +20,7 @@ export default function validateFiles(options, _type, callback?) {
     if (type === undefined) {
       const dataPath = TMP_DIR;
       fs.readdir(dataPath, (err, files) => {
-        if (err) {
-          callback(err);
-          return;
-        }
+        if (err) return callback(err);
         assert.equal(files.length, 1);
         assert.deepEqual(files.sort(), ['target']);
         assert.equal(cr(fs.readFileSync(path.join(dataPath, files[0])).toString()), CONTENTS);
@@ -32,10 +29,7 @@ export default function validateFiles(options, _type, callback?) {
     } else if (type === 'js' || type === '.js') {
       const dataPath = TARGET;
       fs.readdir(dataPath, (err, files) => {
-        if (err) {
-          callback(err);
-          return;
-        }
+        if (err) return callback(err);
         assert.equal(files.length, 1);
         assert.ok(~['fixture.js', 'fixture-js'].indexOf(files[0]));
         assert.equal(cr(fs.readFileSync(path.join(dataPath, files[0])).toString()), CONTENTS);
@@ -44,10 +38,7 @@ export default function validateFiles(options, _type, callback?) {
     } else if (type === 'js.gz' || type === '.js.gz') {
       const dataPath = TARGET;
       fs.readdir(dataPath, (err, files) => {
-        if (err) {
-          callback(err);
-          return;
-        }
+        if (err) return callback(err);
         assert.equal(files.length, 1);
         assert.ok(~['fixture.js.gz', 'fixture-js.gz'].indexOf(files[0]));
         assert.equal(cr(fs.readFileSync(path.join(dataPath, files[0])).toString()), CONTENTS);
@@ -57,7 +48,7 @@ export default function validateFiles(options, _type, callback?) {
       const dataPath = !options.strip ? path.join(TARGET, 'data') : TARGET;
       const spys = statsSpys();
       new Iterator(dataPath, { lstat: true }).forEach(
-        (entry): undefined => {
+        (entry): void => {
           spys(entry.stats);
           if (entry.stats.isFile()) {
             assert.equal(cr(fs.readFileSync(entry.fullPath).toString()), CONTENTS);
@@ -66,10 +57,7 @@ export default function validateFiles(options, _type, callback?) {
           }
         },
         (err) => {
-          if (err) {
-            callback(err);
-            return;
-          }
+          if (err) return callback(err);
           assert.equal(spys.dir.callCount, 3);
           assert.equal(spys.file.callCount, 7);
           assert.equal(spys.link.callCount, 5);
