@@ -7,9 +7,9 @@ export interface Options {
   strip?: number;
   force?: boolean;
 }
-export type NoParamsCallback = (error?: Error) => undefined;
+export type NoParamsCallback = (error?: Error) => void;
 
-export default function extract(iterator: BaseIterator, dest: string, options: Options, callback: NoParamsCallback): undefined {
+export default function extract(iterator: BaseIterator, dest: string, options: Options, callback: NoParamsCallback): void {
   const links = [];
   iterator.forEach(
     (entry, callback) => {

@@ -64,7 +64,7 @@ describe('promise', () => {
     it('destroy entries', (done) => {
       const iterator = new EntriesIterator(entries);
       iterator.forEach(
-        (entry): undefined => {
+        (entry): void => {
           entry.destroy();
         },
         (err) => {
