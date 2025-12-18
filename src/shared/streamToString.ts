@@ -10,7 +10,7 @@
 import oo from 'on-one';
 import { bufferFrom } from './compat.ts';
 
-export type StreamToStringCallback = (error?: Error, result?: string) => undefined;
+export type StreamToStringCallback = (error?: Error, result?: string) => void;
 
 export default function streamToString(stream: NodeJS.ReadableStream, callback: StreamToStringCallback): void {
   const chunks: Buffer[] = [];

@@ -9,7 +9,7 @@ import type { AbstractEntry, ExtractOptions } from '../types.ts';
 // biome-ignore lint/suspicious/noExplicitAny: fs.lutimes not in older @types/node
 const HAS_LUTIMES = typeof (fs as any).lutimes === 'function';
 
-export default function lutimes(fullPath: string, entry: AbstractEntry, options: ExtractOptions, callback: NoParamCallback): undefined {
+export default function lutimes(fullPath: string, entry: AbstractEntry, options: ExtractOptions, callback: NoParamCallback): void {
   if (HAS_LUTIMES) {
     const now = options.now || new Date();
     // biome-ignore lint/suspicious/noExplicitAny: fs.lutimes not in older @types/node
