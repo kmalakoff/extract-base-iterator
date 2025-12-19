@@ -39,19 +39,16 @@ export default class FileEntry {
   create(dest: string, options: ExtractOptions, callback: NoParamCallback): void;
   create(dest: string, options?: ExtractOptions): Promise<boolean>;
   create(dest: string, options?: ExtractOptions | NoParamCallback, callback?: NoParamCallback): void | Promise<boolean> {
-    if (typeof options === 'function') {
-      callback = options;
-      options = null;
-    }
+    const actualOptions = typeof options === 'function' ? {} : options || ({} as ExtractOptions);
+    const actualCallback = typeof options === 'function' ? options : callback;
 
-    if (typeof callback === 'function') {
-      options = options || {};
+    if (typeof actualCallback === 'function') {
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, options as ExtractOptions));
+        const fullPath = path.join(dest, stripPath(normalizedPath, actualOptions));
 
         const queue = new Queue(1);
-        if ((options as ExtractOptions).force) {
+        if (actualOptions.force) {
           queue.defer((callback) => {
             rm(fullPath, (err) => {
               err && err.code !== 'ENOENT' ? callback(err) : callback();
@@ -89,7 +86,7 @@ export default class FileEntry {
     }
 
     return new Promise((resolve, reject) => {
-      this.create(dest, options as ExtractOptions, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
+      this.create(dest, actualOptions, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
     });
   }
 
