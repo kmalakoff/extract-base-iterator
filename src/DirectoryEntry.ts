@@ -32,13 +32,13 @@ export default class DirectoryEntry {
   create(dest: string, options: ExtractOptions, callback: NoParamCallback): void;
   create(dest: string, options?: ExtractOptions): Promise<boolean>;
   create(dest: string, options?: ExtractOptions | NoParamCallback, callback?: NoParamCallback): void | Promise<boolean> {
-    const actualOptions = typeof options === 'function' ? {} : options || ({} as ExtractOptions);
-    const actualCallback = typeof options === 'function' ? options : callback;
+    callback = typeof options === 'function' ? options : callback;
+    options = typeof options === 'function' ? {} : ((options || {}) as ExtractOptions);
 
-    if (typeof actualCallback === 'function') {
+    if (typeof callback === 'function') {
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, actualOptions));
+        const fullPath = path.join(dest, stripPath(normalizedPath, options));
 
         // do not check for the existence of the directory but allow out-of-order calling
         const queue = new Queue(1);
@@ -56,7 +56,7 @@ export default class DirectoryEntry {
     }
 
     return new Promise((resolve, reject) => {
-      this.create(dest, actualOptions, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
+      this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
     });
   }
 

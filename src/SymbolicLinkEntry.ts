@@ -39,23 +39,23 @@ export default class SymbolicLinkEntry {
   create(dest: string, options: ExtractOptions, callback: NoParamCallback): void;
   create(dest: string, options?: ExtractOptions): Promise<boolean>;
   create(dest: string, options?: ExtractOptions | NoParamCallback, callback?: NoParamCallback): void | Promise<boolean> {
-    const actualOptions = typeof options === 'function' ? {} : options || ({} as ExtractOptions);
-    const actualCallback = typeof options === 'function' ? options : callback;
+    callback = typeof options === 'function' ? options : callback;
+    options = typeof options === 'function' ? {} : ((options || {}) as ExtractOptions);
 
-    if (typeof actualCallback === 'function') {
+    if (typeof callback === 'function') {
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, actualOptions));
+        const fullPath = path.join(dest, stripPath(normalizedPath, options));
         let normalizedLinkpath = path.normalize(this.linkpath);
-        let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, actualOptions));
+        let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
         if (!isAbsolute(normalizedLinkpath)) {
           const linkRelativePath = path.join(path.dirname(normalizedPath), this.linkpath);
-          linkFullPath = path.join(dest, stripPath(linkRelativePath, actualOptions));
+          linkFullPath = path.join(dest, stripPath(linkRelativePath, options));
           normalizedLinkpath = path.relative(path.dirname(fullPath), linkFullPath);
         }
 
         const queue = new Queue(1);
-        if (actualOptions.force) {
+        if (options.force) {
           queue.defer((callback) => {
             rm(fullPath, (err) => {
               err && err.code !== 'ENOENT' ? callback(err) : callback();
@@ -78,7 +78,7 @@ export default class SymbolicLinkEntry {
     }
 
     return new Promise((resolve, reject) => {
-      this.create(dest, actualOptions, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
+      this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
     });
   }
 
