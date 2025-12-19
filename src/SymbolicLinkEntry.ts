@@ -39,26 +39,23 @@ export default class SymbolicLinkEntry {
   create(dest: string, options: ExtractOptions, callback: NoParamCallback): void;
   create(dest: string, options?: ExtractOptions): Promise<boolean>;
   create(dest: string, options?: ExtractOptions | NoParamCallback, callback?: NoParamCallback): void | Promise<boolean> {
-    if (typeof options === 'function') {
-      callback = options;
-      options = null;
-    }
+    const actualOptions = typeof options === 'function' ? {} : options || ({} as ExtractOptions);
+    const actualCallback = typeof options === 'function' ? options : callback;
 
-    if (typeof callback === 'function') {
-      options = options || {};
+    if (typeof actualCallback === 'function') {
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, options as ExtractOptions));
+        const fullPath = path.join(dest, stripPath(normalizedPath, actualOptions));
         let normalizedLinkpath = path.normalize(this.linkpath);
-        let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options as ExtractOptions));
+        let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, actualOptions));
         if (!isAbsolute(normalizedLinkpath)) {
           const linkRelativePath = path.join(path.dirname(normalizedPath), this.linkpath);
-          linkFullPath = path.join(dest, stripPath(linkRelativePath, options as ExtractOptions));
+          linkFullPath = path.join(dest, stripPath(linkRelativePath, actualOptions));
           normalizedLinkpath = path.relative(path.dirname(fullPath), linkFullPath);
         }
 
         const queue = new Queue(1);
-        if ((options as ExtractOptions).force) {
+        if (actualOptions.force) {
           queue.defer((callback) => {
             rm(fullPath, (err) => {
               err && err.code !== 'ENOENT' ? callback(err) : callback();
@@ -81,7 +78,7 @@ export default class SymbolicLinkEntry {
     }
 
     return new Promise((resolve, reject) => {
-      this.create(dest, options as ExtractOptions, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
+      this.create(dest, actualOptions, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
     });
   }
 
