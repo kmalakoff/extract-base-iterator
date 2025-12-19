@@ -24,8 +24,10 @@ export {
   isNaN,
   objectAssign,
   PassThrough,
+  Readable,
   readUInt64LE,
   Transform,
+  Writable,
   writeUInt64LE,
 } from './compat.ts';
 export { crc32, crc32Region, verifyCrc32, verifyCrc32Region } from './crc32.ts';
