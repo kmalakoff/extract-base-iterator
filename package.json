@@ -50,9 +50,9 @@
     "mkdirp-classic": "^0.5.2",
     "next-tick": "^1.1.0",
     "on-one": "^1.0.0",
-    "pako": "~1.0.11",
+    "pako": "1.0.11",
     "queue-cb": "^1.0.0",
-    "readable-stream": "^2.3.8",
+    "readable-stream": "2.3.8",
     "stack-base-iterator": "^3.0.0"
   },
   "devDependencies": {
