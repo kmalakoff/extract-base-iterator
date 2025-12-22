@@ -21,8 +21,8 @@ export default function waitForAccess(fullPath: string, noFollowOrCallback: bool
   }
 
   // POSIX: finish event is reliable after decompression stream fixes
-  // Use setTimeout(0) to maintain async consistency (avoid Zalgo)
-  if (!isWindows) return setTimeout(callback, 0);
+  // Avoid Zalgo: ensure callback is always async for consistent API
+  if (!isWindows) return process.nextTick(callback);
 
   // Windows: NTFS metadata may not be committed yet, verify accessibility
   // For symlinks (noFollow=true), use lstat to check the link itself exists
