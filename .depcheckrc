@@ -1,1 +1,1 @@
-ignores: ["node-version-use", "ts-dev-stack", "extract-base-iterator", "next-tick", "pako"]
+ignores: ["node-version-use", "ts-dev-stack", "extract-base-iterator", "pako"]

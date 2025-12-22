@@ -232,4 +232,79 @@ export default class BufferList {
     if (this.length === 0) return allocBuffer(0);
     return this.slice(0, this.length);
   }
+
+  /**
+   * Read UInt16 (little-endian) at offset without consuming
+   * Returns null if not enough data
+   */
+  readUInt16LEAt(offset: number): number | null {
+    if (offset < 0 || offset + 2 > this.length) return null;
+
+    const bytes = this.readBytesAt(offset, 2);
+    if (bytes.length < 2) return null;
+
+    return bytes.readUInt16LE(0);
+  }
+
+  /**
+   * Read UInt32 (little-endian) at offset without consuming
+   * Returns null if not enough data
+   */
+  readUInt32LEAt(offset: number): number | null {
+    if (offset < 0 || offset + 4 > this.length) return null;
+
+    const bytes = this.readBytesAt(offset, 4);
+    if (bytes.length < 4) return null;
+
+    return bytes.readUInt32LE(0);
+  }
+
+  /**
+   * Read bytes at offset without consuming.
+   * Returns a slice (zero-copy) when data fits within a single chunk,
+   * otherwise allocates and copies from multiple chunks.
+   */
+  readBytesAt(offset: number, length: number): Buffer {
+    if (length <= 0) return allocBuffer(0);
+    if (offset < 0 || offset >= this.length) return allocBuffer(0);
+
+    // Clamp length to available data
+    const available = this.length - offset;
+    if (length > available) length = available;
+
+    // Find the node containing the offset
+    let bufOffset = 0;
+    let node = this.head;
+    while (node && bufOffset + node.data.length <= offset) {
+      bufOffset += node.data.length;
+      node = node.next;
+    }
+
+    if (!node) return allocBuffer(0);
+
+    const startInChunk = offset - bufOffset;
+
+    // Single-buffer optimization: zero-copy slice
+    if (startInChunk + length <= node.data.length) {
+      return node.data.slice(startInChunk, startInChunk + length);
+    }
+
+    // Multi-buffer case: must allocate and copy
+    const result = allocBuffer(length);
+    let resultOffset = 0;
+
+    while (node && resultOffset < length) {
+      const chunk = node.data;
+      const chunkStart = resultOffset === 0 ? startInChunk : 0;
+      const chunkAvailable = chunk.length - chunkStart;
+      const toCopy = Math.min(chunkAvailable, length - resultOffset);
+
+      chunk.copy(result, resultOffset, chunkStart, chunkStart + toCopy);
+      resultOffset += toCopy;
+
+      node = node.next;
+    }
+
+    return result;
+  }
 }
