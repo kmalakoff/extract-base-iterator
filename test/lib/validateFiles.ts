@@ -1,8 +1,8 @@
 import assert from 'assert';
 import cr from 'cr';
+import fs from 'fs';
 import Iterator from 'fs-iterator';
 import statsSpys from 'fs-stats-spys';
-import fs from 'graceful-fs';
 import path from 'path';
 
 import { CONTENTS, TARGET, TMP_DIR } from './constants.ts';
