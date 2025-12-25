@@ -54,6 +54,7 @@ export default class LinkEntry {
           });
         }
         queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
+        queue.defer(waitForAccess.bind(null, linkFullPath)); // ensure target file is accessible before linking
         queue.defer(fs.link.bind(fs, linkFullPath, fullPath));
         queue.defer(waitForAccess.bind(null, fullPath));
         queue.defer(chmod.bind(null, fullPath, this, options));
