@@ -1,5 +1,5 @@
 import { FileEntry as BaseFileEntry, DirectoryEntry, LinkEntry, SymbolicLinkEntry } from 'extract-base-iterator';
-import fs from 'graceful-fs';
+import fs from 'fs';
 import path from 'path';
 import { arrayFind } from './compat.ts';
 
