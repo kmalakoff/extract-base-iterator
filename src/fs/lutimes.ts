@@ -2,8 +2,7 @@
 // fs.lutimes was added in Node.js 14.5.0
 // For older versions, we skip setting times on symlinks (no good alternative)
 
-import type { NoParamCallback } from 'fs';
-import fs from 'graceful-fs';
+import fs, { type NoParamCallback } from 'fs';
 import type { AbstractEntry, ExtractOptions } from '../types.ts';
 
 // biome-ignore lint/suspicious/noExplicitAny: fs.lutimes not in older @types/node

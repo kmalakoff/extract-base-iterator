@@ -1,7 +1,6 @@
 // adapted from https://github.com/mafintosh/tar-fs
 
-import type { NoParamCallback } from 'fs';
-import fs from 'graceful-fs';
+import fs, { type NoParamCallback } from 'fs';
 import type { AbstractEntry, ExtractOptions } from '../types.ts';
 
 const UID = process.getuid ? process.getuid() : -1;

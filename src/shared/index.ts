@@ -10,7 +10,16 @@
  * All utilities support Node.js 0.8+
  */
 
-export { default as BufferList } from './BufferList.ts';
+import BufferList from './BufferList.ts';
+
+export { BufferList };
+
+/**
+ * Type alias for Buffer or BufferList - both can be read byte-by-byte.
+ * Use this when an API should accept either contiguous data (Buffer)
+ * or chunked streaming data (BufferList).
+ */
+export type BufferLike = Buffer | BufferList;
 export {
   allocBuffer,
   allocBufferUnsafe,
