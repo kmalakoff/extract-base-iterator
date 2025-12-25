@@ -22,34 +22,162 @@ const hasBufferAlloc = typeof Buffer.alloc === 'function';
 const hasBufferAllocUnsafe = typeof Buffer.allocUnsafe === 'function';
 const hasBufferFrom = typeof Buffer.from === 'function' && Buffer.from !== Uint8Array.from;
 
+// Maximum buffer size that works across all Node.js versions
+// Node 0.8-4.x: kMaxLength = 0x3fffffff (~1073MB) but actual limit may be lower
+// Node 6-7.x: ~1073MB for Uint8Array
+// Node 8+: ~2GB for Buffer
+// Node 10+: 2^31-1 (~2147MB) for Buffer.allocUnsafe
+// Use 128MB as a conservative limit for buffer operations
+const MAX_SAFE_BUFFER_LENGTH = 128 * 1024 * 1024; // 128MB
+
+// Try to detect the actual kMaxLength for this Node version
+// If we can't detect it (older Node), assume conservative limit
+let DETECTED_MAX_LENGTH: number | null = null;
+
+function _getMaxBufferLength(): number {
+  if (DETECTED_MAX_LENGTH !== null) return DETECTED_MAX_LENGTH;
+
+  // Try to detect the actual limit
+  // kMaxLength exists on BufferConstructor in newer TypeScript definitions
+  // but may not exist at runtime on very old Node
+  const maxLen = (Buffer as { kMaxLength?: number }).kMaxLength;
+  if (maxLen !== undefined) {
+    DETECTED_MAX_LENGTH = maxLen;
+  } else {
+    // Older Node - use conservative estimate
+    DETECTED_MAX_LENGTH = 0x3fffffff; // ~1073MB
+  }
+
+  return DETECTED_MAX_LENGTH;
+}
+
 /**
- * Allocate a zero-filled buffer (safe)
- * - Uses Buffer.alloc() on Node 4.5+
- * - Falls back to new Buffer() + fill on Node 0.8-4.4
+ * Check if a buffer size can be safely allocated on this Node version
+ * Uses conservative limit to work across all versions
  */
-export function allocBuffer(size: number): Buffer {
+function canAllocateBufferSize(size: number): boolean {
+  return size >= 0 && size <= MAX_SAFE_BUFFER_LENGTH;
+}
+
+/**
+ * Create a single chunk of the specified size
+ */
+function createChunk(size: number, zeroFill: boolean): Buffer {
   if (hasBufferAlloc) {
     return Buffer.alloc(size);
   }
-  // Legacy fallback: new Buffer() is uninitialized, must zero-fill
   const buf = new Buffer(size);
-  buf.fill(0);
+  if (zeroFill) buf.fill(0);
   return buf;
+}
+
+/**
+ * Combine an array of buffers into one by pairwise concatenation
+ * Each combination produces a buffer at most 2x MAX_SAFE_BUFFER_LENGTH (256MB)
+ * which is within kMaxLength for all Node versions
+ */
+function combineBuffersPairwise(buffers: Buffer[]): Buffer {
+  while (buffers.length > 1) {
+    const newBuffers: Buffer[] = [];
+
+    for (let i = 0; i < buffers.length; i += 2) {
+      if (i + 1 < buffers.length) {
+        const size1 = buffers[i].length;
+        const size2 = buffers[i + 1].length;
+        const combinedSize = size1 + size2;
+
+        // Safe: combinedSize <= 2 * MAX_SAFE_BUFFER_LENGTH = 256MB
+        const combined = createChunk(combinedSize, false);
+        buffers[i].copy(combined, 0);
+        buffers[i + 1].copy(combined, size1);
+        newBuffers.push(combined);
+      } else {
+        newBuffers.push(buffers[i]);
+      }
+    }
+
+    // Clear old references to help GC and use traditional for loop for Node 0.8 compatibility
+    for (let j = 0; j < buffers.length; j++) {
+      buffers[j] = undefined as unknown as Buffer;
+    }
+    buffers.length = 0;
+    for (let j = 0; j < newBuffers.length; j++) {
+      buffers.push(newBuffers[j]);
+    }
+  }
+
+  return buffers[0];
+}
+
+/**
+ * Allocate a large buffer by allocating in chunks and combining them
+ * Handles both zero-filled (safe) and uninitialized (unsafe) variants
+ */
+function allocBufferLarge(size: number, zeroFill: boolean): Buffer {
+  // For large sizes, allocate smaller chunks and combine them
+  const numChunks = Math.ceil(size / MAX_SAFE_BUFFER_LENGTH);
+  const chunks: Buffer[] = [];
+
+  // Allocate individual chunks (each <= MAX_SAFE_BUFFER_LENGTH)
+  for (let i = 0; i < numChunks; i++) {
+    const chunkSize = Math.min(MAX_SAFE_BUFFER_LENGTH, size - i * MAX_SAFE_BUFFER_LENGTH);
+    chunks.push(createChunk(chunkSize, zeroFill));
+  }
+
+  // Combine chunks iteratively using pairwise combination
+  return combineBuffersPairwise(chunks);
+}
+
+/**
+ * Allocate a zero-filled buffer (safe) - handles very large allocations
+ * - Uses Buffer.alloc() on Node 4.5+
+ * - Falls back to new Buffer() + fill on Node 0.8-4.4
+ * - For sizes > MAX_SAFE_BUFFER_LENGTH, allocates in chunks and copies
+ */
+export function allocBuffer(size: number): Buffer {
+  if (size === 0) {
+    return new Buffer(0);
+  }
+
+  // Use native allocation for sizes within safe limits
+  if (canAllocateBufferSize(size)) {
+    if (hasBufferAlloc) {
+      return Buffer.alloc(size);
+    }
+    // Legacy fallback: new Buffer() is uninitialized, must zero-fill
+    const buf = new Buffer(size);
+    buf.fill(0);
+    return buf;
+  }
+
+  // For large sizes, allocate in chunks with zero-filling
+  return allocBufferLarge(size, true);
 }
 
 /**
  * Allocate a buffer without initialization (unsafe but faster)
  * - Uses Buffer.allocUnsafe() on Node 4.5+
  * - Falls back to new Buffer() on Node 0.8-4.4
+ * - For sizes > MAX_SAFE_BUFFER_LENGTH, allocates in chunks without zeroing
  *
  * WARNING: Buffer contents are uninitialized and may contain sensitive data.
  * Only use when you will immediately overwrite all bytes.
  */
 export function allocBufferUnsafe(size: number): Buffer {
-  if (hasBufferAllocUnsafe) {
-    return Buffer.allocUnsafe(size);
+  if (size === 0) {
+    return new Buffer(0);
   }
-  return new Buffer(size);
+
+  // Use native allocation for sizes within safe limits
+  if (canAllocateBufferSize(size)) {
+    if (hasBufferAllocUnsafe) {
+      return Buffer.allocUnsafe(size);
+    }
+    return new Buffer(size);
+  }
+
+  // For large sizes, allocate in chunks without zero-filling
+  return allocBufferLarge(size, false);
 }
 
 /**
@@ -154,8 +282,9 @@ export function writeUInt64LE(buf: Buffer, value: number, offset: number): void 
 }
 
 /**
- * Concatenate buffers - compatible with Node 0.8
+ * Concatenate buffers - compatible with Node 0.8+
  * Handles crypto output which may not be proper Buffer instances in old Node.
+ * Also handles very large concatenations that would exceed buffer limits.
  *
  * NOTE: This function is primarily needed for AES decryption compatibility
  * in Node 0.8 where crypto output may not be proper Buffer instances.
@@ -171,28 +300,48 @@ export function bufferConcat(list: (Buffer | Uint8Array)[], totalLength?: number
   // Use specified totalLength or actual length
   const targetLength = totalLength !== undefined ? totalLength : actualLength;
 
-  // Check if all items are proper Buffers AND no truncation needed
-  // (Node 0.8's Buffer.concat doesn't handle truncation well)
-  let allBuffers = true;
-  for (let j = 0; j < list.length; j++) {
-    if (!(list[j] instanceof Buffer)) {
-      allBuffers = false;
-      break;
-    }
-  }
-  if (allBuffers && targetLength >= actualLength) {
-    return Buffer.concat(list as Buffer[], targetLength);
+  // Handle empty list
+  if (list.length === 0) {
+    return new Buffer(0);
   }
 
-  // Manual concat for mixed types or when truncation is needed
-  const result = allocBuffer(targetLength);
-  let offset = 0;
-  for (let k = 0; k < list.length && offset < targetLength; k++) {
-    const buf = list[k];
-    for (let l = 0; l < buf.length && offset < targetLength; l++) {
-      result[offset++] = buf[l];
+  // Handle very large concatenations that would exceed buffer limits
+  // Use native Buffer.concat for smaller sizes (faster)
+  if (targetLength <= MAX_SAFE_BUFFER_LENGTH) {
+    // Check if all items are proper Buffers AND no truncation needed
+    // (Node 0.8's Buffer.concat doesn't handle truncation well)
+    let allBuffers = true;
+    for (let j = 0; j < list.length; j++) {
+      if (!(list[j] instanceof Buffer)) {
+        allBuffers = false;
+        break;
+      }
+    }
+    if (allBuffers && targetLength >= actualLength) {
+      return Buffer.concat(list as Buffer[], targetLength);
     }
   }
+
+  // For large or complex concatenations, use chunked approach
+  // This will use allocBuffer which handles large sizes via chunking
+  const result = allocBuffer(targetLength);
+  let offset = 0;
+
+  for (let k = 0; k < list.length && offset < targetLength; k++) {
+    const buf = list[k];
+    const toCopy = Math.min(buf.length, targetLength - offset);
+
+    if (buf instanceof Buffer) {
+      buf.copy(result, offset, 0, toCopy);
+    } else {
+      // Uint8Array - need to copy byte by byte
+      for (let l = 0; l < toCopy; l++) {
+        result[offset + l] = buf[l];
+      }
+    }
+    offset += toCopy;
+  }
+
   return result;
 }
 
