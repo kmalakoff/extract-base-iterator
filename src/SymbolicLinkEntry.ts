@@ -1,5 +1,5 @@
+import fs from 'fs';
 import { rm } from 'fs-remove-compat';
-import fs from 'graceful-fs';
 import isAbsolute from 'is-absolute';
 import mkdirp from 'mkdirp-classic';
 import path from 'path';
