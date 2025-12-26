@@ -27,14 +27,15 @@ const hasBufferFrom = typeof Buffer.from === 'function' && Buffer.from !== Uint8
 // Node 6-7.x: ~1073MB for Uint8Array
 // Node 8+: ~2GB for Buffer
 // Node 10+: 2^31-1 (~2147MB) for Buffer.allocUnsafe
-// Use 128MB as a conservative limit for buffer operations
-const MAX_SAFE_BUFFER_LENGTH = 128 * 1024 * 1024; // 128MB
+// Use 256MB as a conservative limit for buffer operations
+// Must leave room for pairwise combination (256MB * 2 = 512MB, 512MB * 2 = 1024MB, etc.)
+export const MAX_SAFE_BUFFER_LENGTH = 256 * 1024 * 1024; // 256MB
 
 // Try to detect the actual kMaxLength for this Node version
 // If we can't detect it (older Node), assume conservative limit
 let DETECTED_MAX_LENGTH: number | null = null;
 
-function _getMaxBufferLength(): number {
+function getMaxBufferLength(): number {
   if (DETECTED_MAX_LENGTH !== null) return DETECTED_MAX_LENGTH;
 
   // Try to detect the actual limit
@@ -55,7 +56,7 @@ function _getMaxBufferLength(): number {
  * Check if a buffer size can be safely allocated on this Node version
  * Uses conservative limit to work across all versions
  */
-function canAllocateBufferSize(size: number): boolean {
+export function canAllocateBufferSize(size: number): boolean {
   return size >= 0 && size <= MAX_SAFE_BUFFER_LENGTH;
 }
 
@@ -72,41 +73,33 @@ function createChunk(size: number, zeroFill: boolean): Buffer {
 }
 
 /**
- * Combine an array of buffers into one by pairwise concatenation
- * Each combination produces a buffer at most 2x MAX_SAFE_BUFFER_LENGTH (256MB)
- * which is within kMaxLength for all Node versions
+ * Combine an array of buffers into one by iterative concatenation
+ * Stays under the actual kMaxLength for each Node version
+ * Uses a "fill and continue" approach
  */
 function combineBuffersPairwise(buffers: Buffer[]): Buffer {
-  while (buffers.length > 1) {
-    const newBuffers: Buffer[] = [];
+  const maxLength = getMaxBufferLength();
 
-    for (let i = 0; i < buffers.length; i += 2) {
-      if (i + 1 < buffers.length) {
-        const size1 = buffers[i].length;
-        const size2 = buffers[i + 1].length;
-        const combinedSize = size1 + size2;
-
-        // Safe: combinedSize <= 2 * MAX_SAFE_BUFFER_LENGTH = 256MB
-        const combined = createChunk(combinedSize, false);
-        buffers[i].copy(combined, 0);
-        buffers[i + 1].copy(combined, size1);
-        newBuffers.push(combined);
-      } else {
-        newBuffers.push(buffers[i]);
-      }
-    }
-
-    // Clear old references to help GC and use traditional for loop for Node 0.8 compatibility
-    for (let j = 0; j < buffers.length; j++) {
-      buffers[j] = undefined as unknown as Buffer;
-    }
-    buffers.length = 0;
-    for (let j = 0; j < newBuffers.length; j++) {
-      buffers.push(newBuffers[j]);
-    }
+  // Calculate total size
+  let totalSize = 0;
+  for (let i = 0; i < buffers.length; i++) {
+    totalSize += buffers[i].length;
   }
 
-  return buffers[0];
+  // If total exceeds this Node version's limit, we cannot combine
+  // LZMA1 requires a single contiguous Buffer input
+  if (totalSize > maxLength) {
+    throw new Error(`Cannot combine buffers: total size (${totalSize} bytes) exceeds Node.js buffer limit (${maxLength} bytes). LZMA1 archives with folders larger than ${Math.floor(maxLength / 1024 / 1024)}MB cannot be processed on this Node version.`);
+  }
+
+  // If everything fits in a single allocation, do it directly
+  const result = createChunk(totalSize, false);
+  let offset = 0;
+  for (let i = 0; i < buffers.length; i++) {
+    buffers[i].copy(result, offset);
+    offset += buffers[i].length;
+  }
+  return result;
 }
 
 /**
