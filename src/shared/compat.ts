@@ -38,15 +38,21 @@ let DETECTED_MAX_LENGTH: number | null = null;
 function getMaxBufferLength(): number {
   if (DETECTED_MAX_LENGTH !== null) return DETECTED_MAX_LENGTH;
 
-  // Try to detect the actual limit
-  // kMaxLength exists on BufferConstructor in newer TypeScript definitions
-  // but may not exist at runtime on very old Node
+  // kMaxLength may not exist at runtime on very old or very new Node
+  // Modern Node (v8+) doesn't expose kMaxLength but allows large buffers
   const maxLen = (Buffer as { kMaxLength?: number }).kMaxLength;
   if (maxLen !== undefined) {
     DETECTED_MAX_LENGTH = maxLen;
   } else {
-    // Older Node - use conservative estimate
-    DETECTED_MAX_LENGTH = 0x3fffffff; // ~1073MB
+    // Node 0.8-4.x: use conservative limit
+    // Node 8+: can allocate up to ~2GB (v8 array buffer limit)
+    // Use the higher limit for modern Node
+    const nodeVersion = parseInt(process.version.slice(1).split('.')[0], 10);
+    if (nodeVersion >= 8) {
+      DETECTED_MAX_LENGTH = Number.MAX_SAFE_INTEGER; // Effectively unlimited
+    } else {
+      DETECTED_MAX_LENGTH = 0x3fffffff; // ~1073MB for older Node
+    }
   }
 
   return DETECTED_MAX_LENGTH;
