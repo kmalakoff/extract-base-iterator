@@ -48,16 +48,13 @@ export default class DirectoryEntry {
         queue.defer(chown.bind(null, fullPath, this, options));
         queue.defer(utimes.bind(null, fullPath, this, options));
         queue.await(callback);
-        return;
       } catch (err) {
         callback(err);
-        return;
       }
+      return;
     }
 
-    return new Promise((resolve, reject) => {
-      this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done)));
-    });
+    return new Promise((resolve, reject) => this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done))));
   }
 
   destroy() {}

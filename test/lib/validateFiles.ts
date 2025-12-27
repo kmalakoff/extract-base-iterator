@@ -8,10 +8,8 @@ import path from 'path';
 import { CONTENTS, TARGET, TMP_DIR } from './constants.ts';
 
 export default function validateFiles(options, _type, callback?) {
-  if (typeof _type === 'function') {
-    callback = _type;
-    _type = undefined;
-  }
+  callback = typeof _type === 'function' ? _type : callback;
+  _type = typeof _type === 'function' ? undefined : _type;
 
   if (typeof callback === 'function') {
     if (typeof options === 'string') options = { type: options };
@@ -65,9 +63,7 @@ export default function validateFiles(options, _type, callback?) {
         }
       );
     }
-  } else {
-    return new Promise((resolve, reject) => {
-      validateFiles(options, _type, (err) => (err ? reject(err) : resolve(undefined)));
-    });
+    return;
   }
+  return new Promise((resolve, reject) => validateFiles(options, _type, (err?: Error) => (err ? reject(err) : resolve(null))));
 }
