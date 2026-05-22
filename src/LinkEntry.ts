@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { rm } from 'fs-remove-compat';
+import isAbsolute from 'is-absolute';
 import mkdirp from 'mkdirp-classic';
 import path from 'path';
 import Queue from 'queue-cb';
@@ -7,6 +8,7 @@ import chmod from './fs/chmod.ts';
 import chown from './fs/chown.ts';
 import utimes from './fs/utimes.ts';
 import { objectAssign } from './shared/index.ts';
+import safeJoinPath from './shared/safeJoinPath.ts';
 import stripPath from './shared/stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
 import waitForAccess from './waitForAccess.ts';
@@ -41,9 +43,14 @@ export default class LinkEntry {
     if (typeof callback === 'function') {
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, options));
+        const fullPath = safeJoinPath(dest, stripPath(normalizedPath, options));
+        if (isAbsolute(this.linkpath)) {
+          const err = new Error(`Absolute linkpath rejected: '${this.linkpath}'`) as NodeJS.ErrnoException;
+          err.code = 'ETRAVERSAL';
+          throw err;
+        }
         const normalizedLinkpath = path.normalize(this.linkpath);
-        const linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
+        const linkFullPath = safeJoinPath(dest, stripPath(normalizedLinkpath, options));
 
         const queue = new Queue(1);
         if (options.force) {
