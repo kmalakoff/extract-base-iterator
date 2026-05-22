@@ -355,6 +355,18 @@ export function isNaN(value: number): boolean {
 }
 
 /**
+ * String.prototype.startsWith wrapper for Node.js 0.8+
+ * - Uses native startsWith on Node 4.0+ / ES2015+
+ * - Falls back to indexOf on Node 0.8-3.x
+ */
+const hasStartsWith = typeof String.prototype.startsWith === 'function';
+export function stringStartsWith(str: string, search: string, position?: number): boolean {
+  if (hasStartsWith) return str.startsWith(search, position);
+  position = position || 0;
+  return str.indexOf(search, position) === position;
+}
+
+/**
  * Decompress raw DEFLATE data (no zlib/gzip header)
  * - Uses native zlib.inflateRawSync() on Node 0.11.12+
  * - Falls back to pako for Node 0.8-0.10
