@@ -7,6 +7,7 @@ import chmod from './fs/chmod.ts';
 import chown from './fs/chown.ts';
 import utimes from './fs/utimes.ts';
 import { objectAssign } from './shared/index.ts';
+import safeJoinPath from './shared/safeJoinPath.ts';
 import stripPath from './shared/stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
 import waitForAccess from './waitForAccess.ts';
@@ -45,7 +46,7 @@ export default class FileEntry {
     if (typeof callback === 'function') {
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, options));
+        const fullPath = safeJoinPath(dest, stripPath(normalizedPath, options));
 
         const queue = new Queue(1);
         if (options.force) {

@@ -9,6 +9,7 @@ import chown from './fs/chown.ts';
 import lutimes from './fs/lutimes.ts';
 import symlinkWin32 from './fs/symlinkWin32.ts';
 import { objectAssign } from './shared/index.ts';
+import safeJoinPath from './shared/safeJoinPath.ts';
 import stripPath from './shared/stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
 import waitForAccess from './waitForAccess.ts';
@@ -45,14 +46,19 @@ export default class SymbolicLinkEntry {
     if (typeof callback === 'function') {
       try {
         const normalizedPath = path.normalize(this.path);
-        const fullPath = path.join(dest, stripPath(normalizedPath, options));
-        let normalizedLinkpath = path.normalize(this.linkpath);
-        let linkFullPath = path.join(dest, stripPath(normalizedLinkpath, options));
-        if (!isAbsolute(normalizedLinkpath)) {
-          const linkRelativePath = path.join(path.dirname(normalizedPath), this.linkpath);
-          linkFullPath = path.join(dest, stripPath(linkRelativePath, options));
-          normalizedLinkpath = path.relative(path.dirname(fullPath), linkFullPath);
+        const fullPath = safeJoinPath(dest, stripPath(normalizedPath, options));
+
+        if (isAbsolute(this.linkpath)) {
+          const err = new Error(`Absolute linkpath rejected: '${this.linkpath}'`) as NodeJS.ErrnoException;
+          err.code = 'ETRAVERSAL';
+          throw err;
         }
+        // Resolve the symlink target against the symlink's own directory and verify it
+        // stays within dest. safeJoinPath throws ETRAVERSAL if it escapes.
+        const targetAbs = path.resolve(path.dirname(fullPath), this.linkpath);
+        safeJoinPath(dest, path.relative(dest, targetAbs));
+        const normalizedLinkpath = path.relative(path.dirname(fullPath), targetAbs);
+        const linkFullPath = targetAbs;
 
         const queue = new Queue(1);
         if (options.force) {

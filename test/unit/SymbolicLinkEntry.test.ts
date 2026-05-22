@@ -51,7 +51,7 @@ describe('SymbolicLinkEntry', () => {
 
     const entry = new SymbolicLinkEntry({
       path: 'link',
-      linkpath: '/nonexistent/target.txt', // dangling symlink
+      linkpath: './nonexistent-target.txt', // dangling symlink (relative)
       mode: 0o777,
       mtime: Date.now(),
     });
@@ -64,6 +64,74 @@ describe('SymbolicLinkEntry', () => {
       const symlinkPath = path.join(TMP_DIR, 'link');
       assert.ok(fs.lstatSync(symlinkPath).isSymbolicLink(), 'should be a symlink');
       done();
+    });
+  });
+
+  describe('path traversal', () => {
+    it('happy path — relative target within dest', (done) => {
+      // target.txt resolves to {TMP_DIR}/a/target.txt (inside dest)
+      mkdirp(path.join(TMP_DIR, 'a'), (err) => {
+        if (err) return done(err);
+        fs.writeFile(path.join(TMP_DIR, 'a', 'target.txt'), 'hello', (writeErr) => {
+          if (writeErr) return done(writeErr);
+          const entry = new SymbolicLinkEntry({
+            path: 'a/b/link',
+            linkpath: '../target.txt',
+            mode: 0o777,
+            mtime: Date.now(),
+          });
+          entry.create(TMP_DIR, {}, (createErr) => {
+            if (createErr) return done(createErr);
+            assert.ok(fs.lstatSync(path.join(TMP_DIR, 'a/b/link')).isSymbolicLink(), 'should be a symlink');
+            done();
+          });
+        });
+      });
+    });
+
+    it('rejects traversal in path', (done) => {
+      const entry = new SymbolicLinkEntry({
+        path: '../outside-symlink',
+        linkpath: 'target.txt',
+        mode: 0o777,
+        mtime: Date.now(),
+      });
+      entry.create(TMP_DIR, {}, (err: NodeJS.ErrnoException) => {
+        assert.ok(err);
+        assert.strictEqual(err.code, 'ETRAVERSAL');
+        assert.ok(!fs.existsSync(path.join(TMP_DIR, '..', 'outside-symlink')), 'symlink must not be created');
+        done();
+      });
+    });
+
+    it('rejects relative linkpath escape', (done) => {
+      const entry = new SymbolicLinkEntry({
+        path: 'inside-symlink',
+        linkpath: '../../outside-target',
+        mode: 0o777,
+        mtime: Date.now(),
+      });
+      entry.create(TMP_DIR, {}, (err: NodeJS.ErrnoException) => {
+        assert.ok(err);
+        assert.strictEqual(err.code, 'ETRAVERSAL');
+        assert.ok(!fs.existsSync(path.join(TMP_DIR, 'inside-symlink')), 'symlink must not be created');
+        done();
+      });
+    });
+
+    it('rejects absolute linkpath', (done) => {
+      const entry = new SymbolicLinkEntry({
+        path: 'inside-symlink',
+        linkpath: '/etc/passwd',
+        mode: 0o777,
+        mtime: Date.now(),
+      });
+      entry.create(TMP_DIR, {}, (err: NodeJS.ErrnoException) => {
+        assert.ok(err);
+        assert.strictEqual(err.code, 'ETRAVERSAL');
+        assert.ok(!fs.existsSync(path.join(TMP_DIR, 'inside-symlink')), 'symlink must not be created');
+        done();
+      });
     });
   });
 });

@@ -1,6 +1,7 @@
 import assert from 'assert';
 // biome-ignore lint/suspicious/noShadowRestrictedNames: Legacy compatibility
-import { allocBuffer, allocBufferUnsafe, BufferList, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, crc32, crc32Region, createInflateRawStream, EntryStream, inflateRaw, isNaN, readUInt64LE, verifyCrc32, verifyCrc32Region, writeUInt64LE } from 'extract-base-iterator';
+import { allocBuffer, allocBufferUnsafe, BufferList, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, crc32, crc32Region, createInflateRawStream, EntryStream, inflateRaw, isNaN, readUInt64LE, safeJoinPath, verifyCrc32, verifyCrc32Region, writeUInt64LE } from 'extract-base-iterator';
+import path from 'path';
 import zlib from 'zlib';
 
 describe('shared utilities', () => {
@@ -456,6 +457,52 @@ describe('shared utilities', () => {
         assert.strictEqual(verifyCrc32Region(buf, 2, 5, 0x3610a686), true);
         assert.strictEqual(verifyCrc32Region(buf, 2, 5, 0x12345678), false);
       });
+    });
+  });
+
+  describe('safeJoinPath', () => {
+    const DEST = path.resolve('/tmp/dest');
+
+    function assertTraversal(relPath: string) {
+      assert.throws(
+        () => safeJoinPath(DEST, relPath),
+        (err: NodeJS.ErrnoException) => err.code === 'ETRAVERSAL'
+      );
+    }
+
+    it('throws for one-level escape', () => {
+      assertTraversal('../evil.txt');
+    });
+
+    it('throws for deep escape', () => {
+      assertTraversal('../../etc/passwd');
+    });
+
+    it('throws for nested escape', () => {
+      assertTraversal('safe/../../outside.txt');
+    });
+
+    it('throws for absolute path outside dest', () => {
+      assertTraversal('/etc/passwd');
+    });
+
+    it('throws for trailing parent-dir reference', () => {
+      assertTraversal('../');
+    });
+
+    it('returns resolved path for normal relative path', () => {
+      const result = safeJoinPath(DEST, 'safe/file.txt');
+      assert.strictEqual(result, path.join(DEST, 'safe/file.txt'));
+    });
+
+    it('returns dest for "."', () => {
+      const result = safeJoinPath(DEST, '.');
+      assert.strictEqual(result, DEST);
+    });
+
+    it('allows filename starting with ".."', () => {
+      const result = safeJoinPath(DEST, '..hidden');
+      assert.strictEqual(result, path.join(DEST, '..hidden'));
     });
   });
 

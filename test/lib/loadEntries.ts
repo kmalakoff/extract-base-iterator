@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { arrayFind } from './compat.ts';
 
-class FileEntry extends BaseFileEntry {
+export class FileEntry extends BaseFileEntry {
   contents: string;
 
   constructor(attributes, contents: string) {
