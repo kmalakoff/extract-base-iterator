@@ -9,26 +9,26 @@ export default function waitForAccess(fullPath: string, noFollow: boolean | NoPa
 
   // Exponential backoff: 5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560ms
   // Total max wait: ~5 seconds
-  function waitSymlink(attempts, cb) {
+  function waitSymlink(attempts: number, cb: NoParamCallback): void {
     fs.lstat(fullPath, (err) => {
       if (err) {
         if (err.code === 'ENOENT' && attempts < 10) {
           const delay = Math.min(5 * 2 ** attempts, 2560);
           return setTimeout(() => waitSymlink(attempts + 1, cb), delay);
         }
-        return cb(err);
+        return cb(err ?? undefined);
       }
       cb();
     });
   }
-  function waitOpen(attempts, cb) {
+  function waitOpen(attempts: number, cb: NoParamCallback): void {
     fs.open(fullPath, 'r', (err, fd) => {
       if (err) {
         if (err.code === 'ENOENT' && attempts < 10) {
           const delay = Math.min(5 * 2 ** attempts, 2560);
           return setTimeout(() => waitOpen(attempts + 1, cb), delay);
         }
-        return cb(err);
+        return cb(err ?? undefined);
       }
       fs.close(fd, () => cb());
     });
@@ -38,5 +38,5 @@ export default function waitForAccess(fullPath: string, noFollow: boolean | NoPa
   // Node 0.10: the write stream's finish/close events may fire before the file is fully flushed to disk
   // For symlinks (noFollow=true), use lstat to check the link itself exists
   // For files/dirs/hardlinks, use open to verify the file is accessible
-  noFollow ? waitSymlink(0, callback) : waitOpen(0, callback);
+  noFollow ? waitSymlink(0, callback as NoParamCallback) : waitOpen(0, callback as NoParamCallback);
 }

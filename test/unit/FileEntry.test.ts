@@ -32,9 +32,9 @@ describe('FileEntry', () => {
 
   it('rejects traversal in path', (done) => {
     const entry = new FileEntry({ path: '../outside.txt', mode: 0o644, mtime: Date.now() }, 'evil');
-    entry.create(EXTRACT_DIR, {}, (err: NodeJS.ErrnoException) => {
+    entry.create(EXTRACT_DIR, {}, (err?: Error) => {
       assert.ok(err, 'should error');
-      assert.strictEqual(err.code, 'ETRAVERSAL');
+      assert.strictEqual((err as unknown as NodeJS.ErrnoException).code, 'ETRAVERSAL');
       assert.ok(!fs.existsSync(path.join(TMP_DIR, 'outside.txt')), 'outside file must not exist');
       done();
     });
@@ -44,9 +44,9 @@ describe('FileEntry', () => {
     // After path.normalize, '../../outside.txt' is preserved. After strip:1, it becomes
     // '../outside.txt', which still escapes dest — safeJoinPath must catch it.
     const entry = new FileEntry({ path: '../../outside.txt', mode: 0o644, mtime: Date.now() }, 'evil');
-    entry.create(EXTRACT_DIR, { strip: 1 }, (err: NodeJS.ErrnoException) => {
+    entry.create(EXTRACT_DIR, { strip: 1 }, (err?: Error) => {
       assert.ok(err, 'should error');
-      assert.strictEqual(err.code, 'ETRAVERSAL');
+      assert.strictEqual((err as unknown as NodeJS.ErrnoException).code, 'ETRAVERSAL');
       assert.ok(!fs.existsSync(path.join(TMP_DIR, 'outside.txt')), 'outside file must not exist');
       done();
     });

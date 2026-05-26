@@ -14,7 +14,7 @@ import stripPath from './shared/stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
 import waitForAccess from './waitForAccess.ts';
 
-const isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE);
+const isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE ?? '');
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 
@@ -22,12 +22,12 @@ import type { Mode } from 'fs';
 import type { ExtractOptions, LinkAttributes, NoParamCallback } from './types.ts';
 
 export default class SymbolicLinkEntry {
-  mode: Mode;
-  mtime: number;
-  path: string;
-  linkpath: string;
-  basename: string;
-  type: string;
+  mode!: Mode;
+  mtime!: number;
+  path!: string;
+  linkpath!: string;
+  basename!: string;
+  type!: string;
 
   constructor(attributes: LinkAttributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
@@ -68,21 +68,21 @@ export default class SymbolicLinkEntry {
             });
           });
         }
-        queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
-        if (isWindows) queue.defer(symlinkWin32.bind(null, linkFullPath, normalizedLinkpath, fullPath));
-        else queue.defer(fs.symlink.bind(fs, normalizedLinkpath, fullPath));
-        queue.defer(waitForAccess.bind(null, fullPath, true)); // noFollow=true for symlinks
-        queue.defer(chmod.bind(null, fullPath, this, options));
-        queue.defer(chown.bind(null, fullPath, this, options));
-        queue.defer(lutimes.bind(null, fullPath, this, options));
+        queue.defer((cb) => mkdirp(path.dirname(fullPath), (err) => cb(err ?? undefined)));
+        if (isWindows) queue.defer((cb) => symlinkWin32(linkFullPath, normalizedLinkpath, fullPath, (err) => cb(err ?? undefined)));
+        else queue.defer((cb) => fs.symlink(normalizedLinkpath, fullPath, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => waitForAccess(fullPath, true, cb)); // noFollow=true for symlinks
+        queue.defer((cb) => chmod(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => chown(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => lutimes(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
         queue.await(callback);
       } catch (err) {
-        callback(err);
+        callback(err as Error);
       }
       return;
     }
 
-    return new Promise((resolve, reject) => this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done))));
+    return new Promise((resolve, reject) => this.create(dest, options as ExtractOptions, (err?: Error) => (err ? reject(err) : resolve(true))));
   }
 
   destroy() {}

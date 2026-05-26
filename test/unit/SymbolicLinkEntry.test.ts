@@ -96,9 +96,9 @@ describe('SymbolicLinkEntry', () => {
         mode: 0o777,
         mtime: Date.now(),
       });
-      entry.create(TMP_DIR, {}, (err: NodeJS.ErrnoException) => {
+      entry.create(TMP_DIR, {}, (err?: Error) => {
         assert.ok(err);
-        assert.strictEqual(err.code, 'ETRAVERSAL');
+        assert.strictEqual((err as unknown as NodeJS.ErrnoException).code, 'ETRAVERSAL');
         assert.ok(!fs.existsSync(path.join(TMP_DIR, '..', 'outside-symlink')), 'symlink must not be created');
         done();
       });
@@ -111,9 +111,9 @@ describe('SymbolicLinkEntry', () => {
         mode: 0o777,
         mtime: Date.now(),
       });
-      entry.create(TMP_DIR, {}, (err: NodeJS.ErrnoException) => {
+      entry.create(TMP_DIR, {}, (err?: Error) => {
         assert.ok(err);
-        assert.strictEqual(err.code, 'ETRAVERSAL');
+        assert.strictEqual((err as unknown as NodeJS.ErrnoException).code, 'ETRAVERSAL');
         assert.ok(!fs.existsSync(path.join(TMP_DIR, 'inside-symlink')), 'symlink must not be created');
         done();
       });
@@ -126,9 +126,9 @@ describe('SymbolicLinkEntry', () => {
         mode: 0o777,
         mtime: Date.now(),
       });
-      entry.create(TMP_DIR, {}, (err: NodeJS.ErrnoException) => {
+      entry.create(TMP_DIR, {}, (err?: Error) => {
         assert.ok(err);
-        assert.strictEqual(err.code, 'ETRAVERSAL');
+        assert.strictEqual((err as unknown as NodeJS.ErrnoException).code, 'ETRAVERSAL');
         assert.ok(!fs.existsSync(path.join(TMP_DIR, 'inside-symlink')), 'symlink must not be created');
         done();
       });

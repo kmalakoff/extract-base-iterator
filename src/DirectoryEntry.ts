@@ -16,11 +16,11 @@ import type { Mode } from 'fs';
 import type { DirectoryAttributes, ExtractOptions, NoParamCallback } from './types.ts';
 
 export default class DirectoryEntry {
-  mode: Mode;
-  mtime: number;
-  path: string;
-  basename: string;
-  type: string;
+  mode!: Mode;
+  mtime!: number;
+  path!: string;
+  basename!: string;
+  type!: string;
 
   constructor(attributes: DirectoryAttributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
@@ -43,19 +43,19 @@ export default class DirectoryEntry {
 
         // do not check for the existence of the directory but allow out-of-order calling
         const queue = new Queue(1);
-        queue.defer(mkdirp.bind(null, fullPath));
-        queue.defer(waitForAccess.bind(null, fullPath));
-        queue.defer(chmod.bind(null, fullPath, this, options));
-        queue.defer(chown.bind(null, fullPath, this, options));
-        queue.defer(utimes.bind(null, fullPath, this, options));
+        queue.defer((cb) => mkdirp(fullPath, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => waitForAccess(fullPath, cb));
+        queue.defer((cb) => chmod(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => chown(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => utimes(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
         queue.await(callback);
       } catch (err) {
-        callback(err);
+        callback(err as Error);
       }
       return;
     }
 
-    return new Promise((resolve, reject) => this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done))));
+    return new Promise((resolve, reject) => this.create(dest, options as ExtractOptions, (err?: Error) => (err ? reject(err) : resolve(true))));
   }
 
   destroy() {}
