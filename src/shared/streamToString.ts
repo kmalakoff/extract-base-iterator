@@ -25,13 +25,10 @@ export default function streamToString(stream: NodeJS.ReadableStream, callback: 
   });
 
   // Handle stream end events using on-one for Node 0.8 compatibility
-  oo(stream, ['error', 'end', 'close'], (err?: Error) => {
-    if (err) {
-      callback(err);
-    } else {
-      const content = Buffer.concat(chunks).toString('utf8');
-      callback(null, content);
-    }
+  oo(stream, ['error', 'end', 'close'], (err: Error | null) => {
+    if (err) return callback(err);
+    const content = Buffer.concat(chunks).toString('utf8');
+    callback(undefined, content);
   });
 
   // Ensure stream is flowing (in case it's paused)

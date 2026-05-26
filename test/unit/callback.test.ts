@@ -1,4 +1,5 @@
 import assert from 'assert';
+import type { Entry } from 'extract-base-iterator';
 import { safeRm } from 'fs-remove-compat';
 import mkdirp from 'mkdirp-classic';
 import { TARGET, TMP_DIR } from '../lib/constants.ts';
@@ -25,14 +26,12 @@ describe('iterator', () => {
     it('destroy entries', (done) => {
       const iterator = new EntriesIterator(entries);
       iterator.forEach(
-        (entry): void => {
+        (entry: Entry): void => {
           entry.destroy();
         },
         (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
+
           done();
         }
       );
@@ -41,16 +40,11 @@ describe('iterator', () => {
     it('extract - no strip - concurrency 1', (done) => {
       const options = { now: new Date(), concurrency: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) {
-          done(err);
-          return;
-        }
+        if (err) return done(err);
 
         validateFiles(options, 'tar', (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
+
           done();
         });
       });
@@ -59,16 +53,11 @@ describe('iterator', () => {
     it('extract - no strip - concurrency Infinity', (done) => {
       const options = { now: new Date(), concurrency: Infinity };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) {
-          done(err);
-          return;
-        }
+        if (err) return done(err);
 
         validateFiles(options, 'tar', (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
+
           done();
         });
       });
@@ -77,16 +66,11 @@ describe('iterator', () => {
     it('extract - strip 1', (done) => {
       const options = { now: new Date(), strip: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) {
-          done(err);
-          return;
-        }
+        if (err) return done(err);
 
         validateFiles(options, 'tar', (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
+
           done();
         });
       });
@@ -95,31 +79,19 @@ describe('iterator', () => {
     it('extract multiple times', (done) => {
       const options = { now: new Date(), strip: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) {
-          done(err);
-          return;
-        }
+        if (err) return done(err);
 
         validateFiles(options, 'tar', (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
 
           extract(new EntriesIterator(entries), TARGET, options, (err) => {
             assert.ok(err);
 
             extract(new EntriesIterator(entries), TARGET, { force: true, ...options }, (err) => {
-              if (err) {
-                done(err);
-                return;
-              }
+              if (err) return done(err);
 
               validateFiles(options, 'tar', (err) => {
-                if (err) {
-                  done(err);
-                  return;
-                }
+                if (err) return done(err);
                 done();
               });
             });

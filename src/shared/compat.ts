@@ -477,7 +477,7 @@ const hasObjectAssign = typeof Object.assign === 'function';
 const _hasOwnProperty = Object.prototype.hasOwnProperty;
 
 export function objectAssign<T, U>(target: T, source: U): T & U {
-  if (hasObjectAssign) return Object.assign(target, source);
+  if (hasObjectAssign) return Object.assign(target as object, source) as T & U;
 
   for (const key in source) {
     if (_hasOwnProperty.call(source, key)) (target as Record<string, unknown>)[key] = source[key];

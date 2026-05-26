@@ -1,4 +1,5 @@
 import ExtractBaseIterator, { type Entry, type ExtractOptions } from 'extract-base-iterator';
+import type { StackFunction } from 'stack-base-iterator';
 
 export default class EntryIterator extends ExtractBaseIterator<Entry> {
   entries: Entry[];
@@ -7,12 +8,13 @@ export default class EntryIterator extends ExtractBaseIterator<Entry> {
     super(options);
     this.entries = entries.slice();
 
-    const next = (iterator, callback) => {
-      if (iterator.done || !this.entries.length) return callback();
+    const next: StackFunction<Entry> = (iterator, callback) => {
+      if ((iterator as EntryIterator).done || !this.entries.length) return callback();
 
       // keep going
       iterator.push(next);
-      callback(null, { done: false, value: this.entries.shift() });
+      const entry = this.entries.shift() as Entry;
+      callback(undefined, { done: false, value: entry });
     };
     super.push(next);
   }

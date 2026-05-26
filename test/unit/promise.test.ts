@@ -1,4 +1,5 @@
 import assert from 'assert';
+import type { Entry, ExtractOptions } from 'extract-base-iterator';
 import { safeRm } from 'fs-remove-compat';
 import mkdirp from 'mkdirp-classic';
 import Pinkie from 'pinkie-promise';
@@ -8,11 +9,11 @@ import EntriesIterator from '../lib/EntriesIterator.ts';
 import loadEntries from '../lib/loadEntries.ts';
 import validateFiles from '../lib/validateFiles.ts';
 
-function extract(iterator, dest, options, callback) {
-  const links = [];
+function extract(iterator: EntriesIterator, dest: string, options: ExtractOptions & { concurrency?: number }, callback: (err?: Error) => void) {
+  const links: Entry[] = [];
   iterator
     .forEach(
-      (entry) => {
+      (entry: Entry) => {
         if (entry.type === 'link') links.unshift(entry);
         else if (entry.type === 'symlink') links.push(entry);
         else return entry.create(dest, options);
@@ -25,7 +26,10 @@ function extract(iterator, dest, options, callback) {
       for (let index = 0; index < links.length; index++) {
         ((entry) => {
           queue.defer((callback) => {
-            entry.create(dest, options).then(callback).catch(callback);
+            entry.create(dest, options).then(
+              () => callback(),
+              (err) => callback(err ?? undefined)
+            );
           });
         })(links[index]);
       }
@@ -64,14 +68,12 @@ describe('promise', () => {
     it('destroy entries', (done) => {
       const iterator = new EntriesIterator(entries);
       iterator.forEach(
-        (entry): void => {
+        (entry: Entry): void => {
           entry.destroy();
         },
         (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
+
           done();
         }
       );
@@ -80,16 +82,11 @@ describe('promise', () => {
     it('extract - no strip - concurrency 1', (done) => {
       const options = { now: new Date(), concurrency: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) {
-          done(err);
-          return;
-        }
+        if (err) return done(err);
 
         validateFiles(options, 'tar', (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
+
           done();
         });
       });
@@ -98,16 +95,11 @@ describe('promise', () => {
     it('extract - no strip - concurrency Infinity', (done) => {
       const options = { now: new Date(), concurrency: Infinity };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) {
-          done(err);
-          return;
-        }
+        if (err) return done(err);
 
         validateFiles(options, 'tar', (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
+
           done();
         });
       });
@@ -116,16 +108,11 @@ describe('promise', () => {
     it('extract - strip 1', (done) => {
       const options = { now: new Date(), strip: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) {
-          done(err);
-          return;
-        }
+        if (err) return done(err);
 
         validateFiles(options, 'tar', (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
+
           done();
         });
       });
@@ -134,31 +121,19 @@ describe('promise', () => {
     it('extract multiple times', (done) => {
       const options = { now: new Date(), strip: 1 };
       extract(new EntriesIterator(entries), TARGET, options, (err) => {
-        if (err) {
-          done(err);
-          return;
-        }
+        if (err) return done(err);
 
         validateFiles(options, 'tar', (err) => {
-          if (err) {
-            done(err);
-            return;
-          }
+          if (err) return done(err);
 
           extract(new EntriesIterator(entries), TARGET, options, (err) => {
             assert.ok(err);
 
             extract(new EntriesIterator(entries), TARGET, { force: true, ...options }, (err) => {
-              if (err) {
-                done(err);
-                return;
-              }
+              if (err) return done(err);
 
               validateFiles(options, 'tar', (err) => {
-                if (err) {
-                  done(err);
-                  return;
-                }
+                if (err) return done(err);
                 done();
               });
             });
