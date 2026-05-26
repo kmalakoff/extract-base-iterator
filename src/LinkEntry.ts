@@ -60,13 +60,13 @@ export default class LinkEntry {
             });
           });
         }
-        queue.defer((cb) => mkdirp(path.dirname(fullPath), (err) => cb(err ?? undefined)));
+        queue.defer((cb) => mkdirp(path.dirname(fullPath), (err) => cb(err)));
         queue.defer((cb) => waitForAccess(linkFullPath, cb)); // ensure target file is accessible before linking
-        queue.defer((cb) => fs.link(linkFullPath, fullPath, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => fs.link(linkFullPath, fullPath, (err) => cb(err)));
         queue.defer((cb) => waitForAccess(fullPath, cb));
-        queue.defer((cb) => chmod(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
-        queue.defer((cb) => chown(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
-        queue.defer((cb) => utimes(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => chmod(fullPath, this, options as ExtractOptions, (err) => cb(err)));
+        queue.defer((cb) => chown(fullPath, this, options as ExtractOptions, (err) => cb(err)));
+        queue.defer((cb) => utimes(fullPath, this, options as ExtractOptions, (err) => cb(err)));
         queue.await(callback);
       } catch (err) {
         callback(err as Error);
@@ -74,7 +74,7 @@ export default class LinkEntry {
       return;
     }
 
-    return new Promise((resolve, reject) => this.create(dest, options as ExtractOptions, (err?: Error) => (err ? reject(err) : resolve(true))));
+    return new Promise((resolve, reject) => this.create(dest, options as ExtractOptions, (err?: Error | null) => (err ? reject(err) : resolve(true))));
   }
 
   destroy() {}
