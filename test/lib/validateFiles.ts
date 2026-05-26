@@ -7,7 +7,7 @@ import path from 'path';
 
 import { CONTENTS, TARGET, TMP_DIR } from './constants.ts';
 
-type Callback = (err?: Error) => void;
+type Callback = (err?: Error | null) => void;
 
 export default function validateFiles(options: Record<string, unknown> | string, _type?: Callback | string, callback?: Callback): void | Promise<void> {
   const cb: Callback = typeof _type === 'function' ? _type : (callback as Callback);
@@ -67,5 +67,5 @@ export default function validateFiles(options: Record<string, unknown> | string,
     }
     return;
   }
-  return new Promise((resolve, reject) => validateFiles(options, type_ as string, (err?: Error) => (err ? reject(err) : resolve())));
+  return new Promise((resolve, reject) => validateFiles(options, type_ as string, (err?: Error | null) => (err ? reject(err) : resolve())));
 }

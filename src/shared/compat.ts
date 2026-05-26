@@ -435,7 +435,7 @@ export function createInflateRawStream(): NodeJS.ReadWriteStream {
     }
   };
 
-  transform._transform = function (chunk: Buffer, _encoding: string, callback: (err?: Error) => void) {
+  transform._transform = function (chunk: Buffer, _encoding: string, callback: (err?: Error | null) => void) {
     try {
       inflate.push(chunk, false);
       // Push any pending decompressed chunks
@@ -448,7 +448,7 @@ export function createInflateRawStream(): NodeJS.ReadWriteStream {
     }
   };
 
-  transform._flush = function (callback: (err?: Error) => void) {
+  transform._flush = function (callback: (err?: Error | null) => void) {
     try {
       inflate.push(new Uint8Array(0), true); // Signal end
       // Push any remaining decompressed chunks

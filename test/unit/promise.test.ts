@@ -9,7 +9,7 @@ import EntriesIterator from '../lib/EntriesIterator.ts';
 import loadEntries from '../lib/loadEntries.ts';
 import validateFiles from '../lib/validateFiles.ts';
 
-function extract(iterator: EntriesIterator, dest: string, options: ExtractOptions & { concurrency?: number }, callback: (err?: Error) => void) {
+function extract(iterator: EntriesIterator, dest: string, options: ExtractOptions & { concurrency?: number }, callback: (err?: Error | null) => void) {
   const links: Entry[] = [];
   iterator
     .forEach(
@@ -28,7 +28,7 @@ function extract(iterator: EntriesIterator, dest: string, options: ExtractOption
           queue.defer((callback) => {
             entry.create(dest, options).then(
               () => callback(),
-              (err) => callback(err ?? undefined)
+              (err) => callback(err)
             );
           });
         })(links[index]);

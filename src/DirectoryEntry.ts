@@ -43,11 +43,11 @@ export default class DirectoryEntry {
 
         // do not check for the existence of the directory but allow out-of-order calling
         const queue = new Queue(1);
-        queue.defer((cb) => mkdirp(fullPath, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => mkdirp(fullPath, (err) => cb(err)));
         queue.defer((cb) => waitForAccess(fullPath, cb));
-        queue.defer((cb) => chmod(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
-        queue.defer((cb) => chown(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
-        queue.defer((cb) => utimes(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => chmod(fullPath, this, options as ExtractOptions, (err) => cb(err)));
+        queue.defer((cb) => chown(fullPath, this, options as ExtractOptions, (err) => cb(err)));
+        queue.defer((cb) => utimes(fullPath, this, options as ExtractOptions, (err) => cb(err)));
         queue.await(callback);
       } catch (err) {
         callback(err as Error);
@@ -55,7 +55,7 @@ export default class DirectoryEntry {
       return;
     }
 
-    return new Promise((resolve, reject) => this.create(dest, options as ExtractOptions, (err?: Error) => (err ? reject(err) : resolve(true))));
+    return new Promise((resolve, reject) => this.create(dest, options as ExtractOptions, (err?: Error | null) => (err ? reject(err) : resolve(true))));
   }
 
   destroy() {}
