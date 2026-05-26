@@ -1,24 +1,24 @@
-import { FileEntry as BaseFileEntry, DirectoryEntry, LinkEntry, SymbolicLinkEntry } from 'extract-base-iterator';
+import { FileEntry as BaseFileEntry, DirectoryEntry, type Entry, type FileAttributes, LinkEntry, SymbolicLinkEntry } from 'extract-base-iterator';
+import type { NoParamCallback } from 'fs';
 import fs from 'fs';
 import path from 'path';
 import { arrayFind } from './compat.ts';
+import { CONTENTS } from './constants.ts';
 
 export class FileEntry extends BaseFileEntry {
   contents: string;
 
-  constructor(attributes, contents: string) {
+  constructor(attributes: FileAttributes, contents: string) {
     super(attributes);
     this.contents = contents;
   }
 
-  _writeFile(fullPath, _options, callback) {
+  _writeFile(fullPath: string, _options: object, callback: NoParamCallback) {
     fs.writeFile(fullPath, this.contents, callback);
   }
 }
 
-import { CONTENTS } from './constants.ts';
-
-const STRUCTURE = {
+const STRUCTURE: Record<string, string> = {
   'data/fixture.js': CONTENTS,
   'data/symlink1': '~data/fixture.js',
   'data/link1': ':data/fixture.js',
@@ -37,7 +37,7 @@ const FMODE = 0o644;
 const SMODE = 0o755;
 const LMODE = 0o644;
 
-function addDirectories(relativePath, entries) {
+function addDirectories(relativePath: string, entries: Entry[]) {
   const parts = relativePath.split('/');
   for (let index = 0; index < parts.length - 1; index++) {
     const directoryPath = parts.slice(0, index + 1).join('/');
@@ -46,8 +46,8 @@ function addDirectories(relativePath, entries) {
   }
 }
 
-export default function loadEntries() {
-  const entries = [];
+export default function loadEntries(): Entry[] {
+  const entries: Entry[] = [];
   for (const relativePath in STRUCTURE) {
     const contents = STRUCTURE[relativePath];
     addDirectories(relativePath, entries);

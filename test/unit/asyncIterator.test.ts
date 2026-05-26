@@ -1,4 +1,5 @@
 import assert from 'assert';
+import type { Entry, ExtractOptions } from 'extract-base-iterator';
 import { safeRm } from 'fs-remove-compat';
 import mkdirp from 'mkdirp-classic';
 import Pinkie from 'pinkie-promise';
@@ -7,8 +8,8 @@ import EntriesIterator from '../lib/EntriesIterator.ts';
 import loadEntries from '../lib/loadEntries.ts';
 import validateFiles from '../lib/validateFiles.ts';
 
-async function extract(iterator, dest, options) {
-  const links = [];
+async function extract(iterator: EntriesIterator, dest: string, options: ExtractOptions) {
+  const links: Entry[] = [];
   for await (const entry of iterator) {
     if (entry.type === 'link') links.unshift(entry);
     else if (entry.type === 'symlink') links.push(entry);
