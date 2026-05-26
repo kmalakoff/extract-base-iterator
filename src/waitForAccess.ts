@@ -16,7 +16,7 @@ export default function waitForAccess(fullPath: string, noFollow: boolean | NoPa
           const delay = Math.min(5 * 2 ** attempts, 2560);
           return setTimeout(() => waitSymlink(attempts + 1, cb), delay);
         }
-        return cb(err ?? undefined);
+        return cb(err);
       }
       cb();
     });
@@ -28,7 +28,7 @@ export default function waitForAccess(fullPath: string, noFollow: boolean | NoPa
           const delay = Math.min(5 * 2 ** attempts, 2560);
           return setTimeout(() => waitOpen(attempts + 1, cb), delay);
         }
-        return cb(err ?? undefined);
+        return cb(err);
       }
       fs.close(fd, () => cb());
     });

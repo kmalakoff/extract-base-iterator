@@ -35,7 +35,7 @@ describe('LinkEntry', () => {
 
   it('rejects traversal in path', (done) => {
     const entry = new LinkEntry({ path: '../outside-link', linkpath: 'target.txt', mode: 0o644, mtime: Date.now() });
-    entry.create(EXTRACT_DIR, {}, (err?: Error) => {
+    entry.create(EXTRACT_DIR, {}, (err?: Error | null) => {
       assert.ok(err);
       assert.strictEqual((err as unknown as NodeJS.ErrnoException).code, 'ETRAVERSAL');
       assert.ok(!fs.existsSync(path.join(TMP_DIR, 'outside-link')), 'outside link must not exist');
@@ -45,7 +45,7 @@ describe('LinkEntry', () => {
 
   it('rejects relative linkpath escape', (done) => {
     const entry = new LinkEntry({ path: 'inside-link', linkpath: '../outside-target', mode: 0o644, mtime: Date.now() });
-    entry.create(EXTRACT_DIR, {}, (err?: Error) => {
+    entry.create(EXTRACT_DIR, {}, (err?: Error | null) => {
       assert.ok(err);
       assert.strictEqual((err as unknown as NodeJS.ErrnoException).code, 'ETRAVERSAL');
       assert.ok(!fs.existsSync(path.join(EXTRACT_DIR, 'inside-link')), 'link must not be created');
@@ -55,7 +55,7 @@ describe('LinkEntry', () => {
 
   it('rejects absolute linkpath', (done) => {
     const entry = new LinkEntry({ path: 'inside-link', linkpath: '/etc/passwd', mode: 0o644, mtime: Date.now() });
-    entry.create(EXTRACT_DIR, {}, (err?: Error) => {
+    entry.create(EXTRACT_DIR, {}, (err?: Error | null) => {
       assert.ok(err);
       assert.strictEqual((err as unknown as NodeJS.ErrnoException).code, 'ETRAVERSAL');
       assert.ok(!fs.existsSync(path.join(EXTRACT_DIR, 'inside-link')), 'link must not be created');
