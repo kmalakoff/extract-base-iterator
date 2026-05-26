@@ -1,4 +1,6 @@
 import type BaseIterator from 'extract-base-iterator';
+import type { Entry } from 'extract-base-iterator';
+
 import Queue from 'queue-cb';
 
 export interface Options {
@@ -10,7 +12,7 @@ export interface Options {
 export type NoParamsCallback = (error?: Error) => void;
 
 export default function extract(iterator: BaseIterator, dest: string, options: Options, callback: NoParamsCallback): void {
-  const links = [];
+  const links: Entry[] = [];
   iterator.forEach(
     (entry, callback) => {
       if (entry.type === 'link') {

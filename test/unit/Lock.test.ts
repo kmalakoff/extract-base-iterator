@@ -105,7 +105,8 @@ describe('Lock', () => {
       lock.err = new Error('test error');
       lock.release();
 
-      assert.strictEqual(destroyError?.message, 'test error');
+      assert.ok(destroyError);
+      assert.strictEqual((destroyError as Error).message, 'test error');
     });
 
     it('calls cleanups before onDestroy', () => {
@@ -194,7 +195,8 @@ describe('Lock', () => {
 
       assert.deepEqual(cleanedUp, ['resource']);
       assert.strictEqual(destroyCalled, true);
-      assert.strictEqual(destroyError?.message, 'destroyed');
+      assert.ok(destroyError);
+      assert.strictEqual((destroyError as Error).message, 'destroyed');
     });
   });
 });

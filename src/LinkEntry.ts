@@ -19,12 +19,12 @@ import type { Mode } from 'fs';
 import type { ExtractOptions, LinkAttributes, NoParamCallback } from './types.ts';
 
 export default class LinkEntry {
-  mode: Mode;
-  mtime: number;
-  path: string;
-  linkpath: string;
-  basename: string;
-  type: string;
+  mode!: Mode;
+  mtime!: number;
+  path!: string;
+  linkpath!: string;
+  basename!: string;
+  type!: string;
 
   constructor(attributes: LinkAttributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
@@ -60,21 +60,21 @@ export default class LinkEntry {
             });
           });
         }
-        queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
-        queue.defer(waitForAccess.bind(null, linkFullPath)); // ensure target file is accessible before linking
-        queue.defer(fs.link.bind(fs, linkFullPath, fullPath));
-        queue.defer(waitForAccess.bind(null, fullPath));
-        queue.defer(chmod.bind(null, fullPath, this, options));
-        queue.defer(chown.bind(null, fullPath, this, options));
-        queue.defer(utimes.bind(null, fullPath, this, options));
+        queue.defer((cb) => mkdirp(path.dirname(fullPath), (err) => cb(err ?? undefined)));
+        queue.defer((cb) => waitForAccess(linkFullPath, cb)); // ensure target file is accessible before linking
+        queue.defer((cb) => fs.link(linkFullPath, fullPath, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => waitForAccess(fullPath, cb));
+        queue.defer((cb) => chmod(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => chown(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => utimes(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
         queue.await(callback);
       } catch (err) {
-        callback(err);
+        callback(err as Error);
       }
       return;
     }
 
-    return new Promise((resolve, reject) => this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done))));
+    return new Promise((resolve, reject) => this.create(dest, options as ExtractOptions, (err?: Error) => (err ? reject(err) : resolve(true))));
   }
 
   destroy() {}
