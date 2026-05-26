@@ -7,7 +7,7 @@ export interface ExtractOptions extends StackOptions {
   now?: Date;
 }
 
-export type NoParamCallback = (error?: Error) => void;
+export type NoParamCallback = (error?: Error | null) => void;
 export type WriteFileFn = (path: string, options: object, callback: NoParamCallback) => void;
 
 export interface FileAttributes {

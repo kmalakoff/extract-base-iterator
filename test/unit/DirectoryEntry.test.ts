@@ -30,7 +30,7 @@ describe('DirectoryEntry', () => {
 
   it('rejects traversal in path', (done) => {
     const entry = new DirectoryEntry({ path: '../outside-dir', mode: 0o755, mtime: Date.now() });
-    entry.create(EXTRACT_DIR, {}, (err?: Error) => {
+    entry.create(EXTRACT_DIR, {}, (err?: Error | null) => {
       assert.ok(err, 'should error');
       assert.strictEqual((err as unknown as NodeJS.ErrnoException).code, 'ETRAVERSAL');
       assert.ok(!fs.existsSync(path.join(TMP_DIR, 'outside-dir')), 'outside dir must not exist');
