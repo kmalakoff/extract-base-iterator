@@ -74,7 +74,7 @@ describe('symlink utimes behavior', () => {
 
       // fs.lutimes operates on the symlink itself, not following it
       // biome-ignore lint/suspicious/noExplicitAny: fs.lutimes not in older @types/node
-      (fs as any).lutimes(symlinkPath, new Date(), new Date(), (err) => {
+      (fs as any).lutimes(symlinkPath, new Date(), new Date(), (err: Error | null) => {
         assert.ok(!err, 'lutimes should succeed even when symlink target does not exist');
         done();
       });

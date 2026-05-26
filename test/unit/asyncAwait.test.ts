@@ -1,4 +1,5 @@
 import assert from 'assert';
+import type { Entry, ExtractOptions } from 'extract-base-iterator';
 import { safeRm } from 'fs-remove-compat';
 import mkdirp from 'mkdirp-classic';
 import Pinkie from 'pinkie-promise';
@@ -7,11 +8,11 @@ import EntriesIterator from '../lib/EntriesIterator.ts';
 import loadEntries from '../lib/loadEntries.ts';
 import validateFiles from '../lib/validateFiles.ts';
 
-async function extract(iterator, dest, options) {
-  const links = [];
+async function extract(iterator: EntriesIterator, dest: string, options: ExtractOptions) {
+  const links: Entry[] = [];
   let value = await iterator.next();
   while (!value.done) {
-    const entry = value.value;
+    const entry = value.value as Entry;
     if (entry.type === 'link') links.unshift(entry);
     else if (entry.type === 'symlink') links.push(entry);
     else await entry.create(dest, options);
@@ -22,10 +23,10 @@ async function extract(iterator, dest, options) {
   for (const entry of links) await entry.create(dest, options);
 }
 
-async function extractForEach(iterator, dest, options) {
-  const links = [];
+async function extractForEach(iterator: EntriesIterator, dest: string, options: ExtractOptions & { concurrency?: number }) {
+  const links: Entry[] = [];
   await iterator.forEach(
-    async (entry) => {
+    async (entry: Entry) => {
       if (entry.type === 'link') links.unshift(entry);
       else if (entry.type === 'symlink') links.push(entry);
       else await entry.create(dest, options);

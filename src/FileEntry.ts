@@ -22,11 +22,11 @@ interface AbstractFileEntry {
 }
 
 export default class FileEntry {
-  mode: Mode;
-  mtime: number;
-  path: string;
-  basename: string;
-  type: string;
+  mode!: Mode;
+  mtime!: number;
+  path!: string;
+  basename!: string;
+  type!: string;
 
   constructor(attributes: FileAttributes) {
     validateAttributes(attributes, MANDATORY_ATTRIBUTES);
@@ -72,20 +72,20 @@ export default class FileEntry {
             });
           });
         }
-        queue.defer(mkdirp.bind(null, path.dirname(fullPath)));
+        queue.defer((cb) => mkdirp(path.dirname(fullPath), (err) => cb(err ?? undefined)));
         queue.defer((this as unknown as AbstractFileEntry)._writeFile.bind(this, fullPath, options));
-        queue.defer(waitForAccess.bind(null, fullPath));
-        queue.defer(chmod.bind(null, fullPath, this, options));
-        queue.defer(chown.bind(null, fullPath, this, options));
-        queue.defer(utimes.bind(null, fullPath, this, options));
+        queue.defer((cb) => waitForAccess(fullPath, cb));
+        queue.defer((cb) => chmod(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => chown(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
+        queue.defer((cb) => utimes(fullPath, this, options as ExtractOptions, (err) => cb(err ?? undefined)));
         queue.await(callback);
       } catch (err) {
-        callback(err);
+        callback(err as Error);
       }
       return;
     }
 
-    return new Promise((resolve, reject) => this.create(dest, options, (err?: Error, done?: boolean) => (err ? reject(err) : resolve(done))));
+    return new Promise((resolve, reject) => this.create(dest, options as ExtractOptions, (err?: Error) => (err ? reject(err) : resolve(true))));
   }
 
   destroy() {}
