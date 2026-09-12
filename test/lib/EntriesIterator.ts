@@ -17,6 +17,4 @@ export default class EntryIterator extends ExtractBaseIterator {
     };
     super.push(next);
   }
-
-  destroy() {}
 }
