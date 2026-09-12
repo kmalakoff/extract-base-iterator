@@ -16,14 +16,13 @@ var STRUCTURE = constants.STRUCTURE;
 async function extract(iterator, dest, options) {
   const links = [];
   for await (const entry of iterator) {
-    if (entry.type === 'symlink' || entry.type === 'link') links.push(entry);
+    if (entry.type === 'link') links.unshift(entry);
+    else if (entry.type === 'symlink') links.push(entry);
     else await entry.create(dest, options);
   }
 
-  // create links after directories and files
-  for (const entry of links) {
-    await entry.create(dest, options);
-  }
+  // create links then symlinks after directories and files
+  for (const entry of links) await entry.create(dest, options);
 }
 
 describe('asyncIterator', function () {
