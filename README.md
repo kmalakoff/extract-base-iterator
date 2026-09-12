@@ -1,129 +1,25 @@
-## extract-base-iterator
+# extract-base-iterator
 
-Base iterator for extract iterators like tar-iterator and zip-iterator.
+Base classes and filesystem helpers for archive iterators such as `tar-iterator` and `zip-iterator`. It is intended for authors of extract iterators, not as a standalone archive extractor.
 
-// asyncIterator
+## Install
 
-```js
-var assert = require('assert');
-var BaseIterator = require('extract-base-iterator'));
-
-// extend BaseIterator (see tests, tar-iterator, zip-iterator for examples)
-
-(async function() {
-  var iterator = new YourIterator();
-
-  try {
-    const links = [];
-    for await (const entry of iterator) {
-      if (entry.type === 'link') links.unshift(entry);
-      else if (entry.type === 'symlink') links.push(entry);
-      else await entry.create(dest, options);
-    }
-
-    // create links after directories and files
-    for (const entry of links) await entry.create(dest, options);
-  } catch (err) {
-    }
-
-  iterator.destroy();
-  iterator = null;
-})();
+```sh
+npm install extract-base-iterator
 ```
 
-// Async / Await
+## Extend the base iterator
 
 ```js
-var assert = require('assert');
-var BaseIterator = require('extract-base-iterator'));
+const ExtractBaseIterator = require('extract-base-iterator');
 
-// extend BaseIterator (see tests, tar-iterator, zip-iterator for examples)
-
-var iterator = new YourIterator();
-
-// one by one
-(async function() {
-  let iterator = new YourIterator();
-
-  try {
-    const links = [];
-    for await (const entry of iterator) {
-      if (entry.type === 'link') links.unshift(entry);
-      else if (entry.type === 'symlink') links.push(entry);
-      else await entry.create(dest, options);
-    }
-
-    // create links after directories and files
-    for (const entry of links) await entry.create(dest, options);
-  } catch (err) {
-    }
-
-  iterator.destroy();
-  iterator = null;
-})();
-
-// infinite concurrency
-(async function() {
-  let iterator = new YourIterator();
-
-  try {
-    const links = [];
-    await iterator.forEach(
-      async function (entry) {
-        if (entry.type === 'link') links.unshift(entry);
-        else if (entry.type === 'symlink') links.push(entry);
-        else await entry.create(dest, options);
-      },
-      { concurrency: Infinity }
-    );
-
-    // create links after directories and files
-    for (const entry of links) await entry.create(dest, options);
-  } catch (err) {
-    aseert.ok(!err);
-  }
-
-  iterator.destroy();
-  iterator = null;
-})();
+class ArchiveIterator extends ExtractBaseIterator {
+  // Implement the archive parser and push Entry objects into this iterator.
+}
 ```
 
-// Callbacks
+The package exports `ExtractBaseIterator` as the default export, plus `FileEntry`, `DirectoryEntry`, `LinkEntry`, `SymbolicLinkEntry`, path-safety helpers, and shared types. Entry `create(destination, options)` methods accept `strip` to remove leading path components and `force` to allow overwriting an existing destination. See `tar-iterator` or `zip-iterator` for complete parser implementations.
 
-```js
-var assert = require('assert');
-var Queue = require('queue-cb');
-var BaseIterator = require('extract-base-iterator'));
+## Documentation
 
-// extend BaseIterator (see tests, tar-iterator, zip-iterator for examples)
-
-var iterator = new YourIterator();
-
-// one by one
-var links = [];
-iterator.forEach(
-  function (entry, callback) {
-    if (entry.type === 'link') {
-      links.unshift(entry);
-      callback();
-    } else if (entry.type === 'symlink') {
-      links.push(entry);
-      callback();
-    } else entry.create(dest, options, callback);
-  },
-  { callbacks: true, concurrency: 1 },
-  function (err) {
-  
-    // create links after directories and files
-    var queue = new Queue();
-    for (var index = 0; index < links.length; index++) {
-      var entry = links[index];
-      queue.defer(entry.create.bind(entry, dest, options));
-    }
-    queue.await(callback);
-
-    iterator.destroy();
-    iterator = null;
-  }
-);
-```
+See the [source and tests](https://github.com/kmalakoff/extract-base-iterator) for concrete iterator implementations.

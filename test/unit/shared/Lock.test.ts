@@ -1,5 +1,5 @@
 import assert from 'assert';
-import Lock from '../../src/shared/Lock.ts';
+import Lock from '../../../src/shared/Lock.ts';
 
 describe('Lock', () => {
   describe('reference counting', () => {

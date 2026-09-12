@@ -10,7 +10,7 @@ import url from 'url';
 // If the target doesn't exist, it fails with ENOENT
 
 const __dirname = path.dirname(typeof __filename !== 'undefined' ? __filename : url.fileURLToPath(import.meta.url));
-const TMP_DIR = path.join(__dirname, '..', '..', '.tmp-symlink-test');
+const TMP_DIR = path.join(__dirname, '..', '..', '.tmp', 'symlink-utimes');
 
 describe('symlink utimes behavior', () => {
   beforeEach((done) => {
