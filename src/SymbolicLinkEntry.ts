@@ -4,6 +4,7 @@ import isAbsolute from 'is-absolute';
 import mkdirp from 'mkdirp-classic';
 import path from 'path';
 import Queue from 'queue-cb';
+import { isWindows } from './constants.ts';
 import chmod from './fs/chmod.ts';
 import chown from './fs/chown.ts';
 import lutimes from './fs/lutimes.ts';
@@ -13,8 +14,6 @@ import safeJoinPath from './shared/safeJoinPath.ts';
 import stripPath from './shared/stripPath.ts';
 import validateAttributes from './validateAttributes.ts';
 import waitForAccess from './waitForAccess.ts';
-
-const isWindows = process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE ?? '');
 
 const MANDATORY_ATTRIBUTES = ['mode', 'mtime', 'path', 'linkpath'];
 

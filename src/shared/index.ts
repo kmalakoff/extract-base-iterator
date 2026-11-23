@@ -30,6 +30,7 @@ export {
   bufferSliceCopy,
   canAllocateBufferSize,
   createInflateRawStream,
+  destroyStream,
   inflateRaw,
   isNaN,
   MAX_SAFE_BUFFER_LENGTH,
@@ -38,6 +39,7 @@ export {
   Readable,
   readUInt64LE,
   Transform,
+  tmpdir,
   Writable,
   writeUInt64LE,
 } from './compat.ts';

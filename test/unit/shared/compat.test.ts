@@ -1,8 +1,18 @@
 import assert from 'assert';
-import { allocBuffer, allocBufferUnsafe, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, createInflateRawStream, inflateRaw, readUInt64LE, writeUInt64LE } from 'extract-base-iterator';
+import { allocBuffer, allocBufferUnsafe, bufferCompare, bufferConcat, bufferEquals, bufferFrom, bufferSliceCopy, canAllocateBufferSize, createInflateRawStream, destroyStream, inflateRaw, MAX_SAFE_BUFFER_LENGTH, readUInt64LE, tmpdir, writeUInt64LE } from 'extract-base-iterator';
+import os from 'os';
 import zlib from 'zlib';
 
+const dep0005Warnings: Error[] = [];
+function onWarning(warning: Error & { code?: string }) {
+  if (warning && warning.code === 'DEP0005') dep0005Warnings.push(warning);
+}
+process.on('warning', onWarning);
+
 describe('compat', () => {
+  after(() => {
+    process.removeListener('warning', onWarning);
+  });
   describe('allocBuffer', () => {
     it('should allocate zero-filled buffer', () => {
       const buf = allocBuffer(10);
@@ -393,6 +403,93 @@ describe('compat', () => {
 
       inflate.write(compressed);
       inflate.end();
+    });
+  });
+
+  describe('empty buffers DEP0005', () => {
+    it('should not emit DEP0005 for allocBuffer(0), allocBufferUnsafe(0), and bufferConcat([])', (done) => {
+      const a = allocBuffer(0);
+      const b = allocBufferUnsafe(0);
+      const c = bufferConcat([]);
+      assert.strictEqual(Buffer.isBuffer(a), true);
+      assert.strictEqual(a.length, 0);
+      assert.strictEqual(Buffer.isBuffer(b), true);
+      assert.strictEqual(b.length, 0);
+      assert.strictEqual(Buffer.isBuffer(c), true);
+      assert.strictEqual(c.length, 0);
+      process.nextTick(() => {
+        try {
+          assert.strictEqual(dep0005Warnings.length, 0);
+          done();
+        } catch (err) {
+          done(err);
+        }
+      });
+    });
+  });
+
+  describe('canAllocateBufferSize and large-buffer allocation', () => {
+    it('should enforce MAX_SAFE_BUFFER_LENGTH bounds', () => {
+      assert.strictEqual(canAllocateBufferSize(-1), false);
+      assert.strictEqual(canAllocateBufferSize(0), true);
+      assert.strictEqual(canAllocateBufferSize(MAX_SAFE_BUFFER_LENGTH), true);
+      assert.strictEqual(canAllocateBufferSize(MAX_SAFE_BUFFER_LENGTH + 1), false);
+    });
+
+    it('should allocate buffers larger than MAX_SAFE_BUFFER_LENGTH via chunked path', () => {
+      const size = MAX_SAFE_BUFFER_LENGTH + 1;
+      const buf = allocBufferUnsafe(size);
+      assert.strictEqual(Buffer.isBuffer(buf), true);
+      assert.strictEqual(buf.length, size);
+    });
+  });
+
+  describe('tmpdir', () => {
+    it('should return a non-empty string path', () => {
+      const dir = tmpdir();
+      assert.strictEqual(typeof dir, 'string');
+      assert.ok(dir.length > 0);
+      if (typeof os.tmpdir === 'function') {
+        assert.strictEqual(dir, os.tmpdir());
+      }
+    });
+  });
+
+  describe('destroyStream', () => {
+    it('should call destroy() with no arguments when err is omitted', () => {
+      let called = 0;
+      let argCount = -1;
+      const stream = {
+        destroy(...args: unknown[]) {
+          called++;
+          argCount = args.length;
+        },
+      };
+      destroyStream(stream);
+      assert.strictEqual(called, 1);
+      assert.strictEqual(argCount, 0);
+    });
+
+    it('should forward err when provided', () => {
+      const received: (Error | null | undefined)[] = [];
+      const stream = {
+        destroy(err?: Error | null) {
+          received.push(err);
+        },
+      };
+      const error = new Error('boom');
+      destroyStream(stream, error);
+      destroyStream(stream, null);
+      assert.strictEqual(received.length, 2);
+      assert.strictEqual(received[0], error);
+      assert.strictEqual(received[1], null);
+    });
+
+    it('should be a no-op for null, undefined, and objects without destroy', () => {
+      destroyStream(null);
+      destroyStream(undefined);
+      destroyStream({});
+      destroyStream({ destroy: 'not-a-function' });
     });
   });
 });

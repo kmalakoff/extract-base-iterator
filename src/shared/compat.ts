@@ -14,6 +14,7 @@
 
 // ESM-compatible require - works in both CJS and ESM
 import Module from 'module';
+import os from 'os';
 
 const _require = typeof require === 'undefined' ? Module.createRequire(import.meta.url) : require;
 
@@ -31,30 +32,14 @@ const hasBufferFrom = typeof Buffer.from === 'function' && Buffer.from !== Uint8
 // Must leave room for pairwise combination (256MB * 2 = 512MB, 512MB * 2 = 1024MB, etc.)
 export const MAX_SAFE_BUFFER_LENGTH = 256 * 1024 * 1024; // 256MB
 
-// Try to detect the actual kMaxLength for this Node version
-// If we can't detect it (older Node), assume conservative limit
+// Cached runtime buffer length limit
 let DETECTED_MAX_LENGTH: number | null = null;
 
 function getMaxBufferLength(): number {
   if (DETECTED_MAX_LENGTH !== null) return DETECTED_MAX_LENGTH;
 
-  // kMaxLength may not exist at runtime on very old or very new Node
-  // Modern Node (v8+) doesn't expose kMaxLength but allows large buffers
-  const maxLen = (Buffer as { kMaxLength?: number }).kMaxLength;
-  if (maxLen !== undefined) {
-    DETECTED_MAX_LENGTH = maxLen;
-  } else {
-    // Node 0.8-4.x: use conservative limit
-    // Node 8+: can allocate up to ~2GB (v8 array buffer limit)
-    // Use the higher limit for modern Node
-    const nodeVersion = parseInt(process.version.slice(1).split('.')[0], 10);
-    if (nodeVersion >= 8) {
-      DETECTED_MAX_LENGTH = Number.MAX_SAFE_INTEGER; // Effectively unlimited
-    } else {
-      DETECTED_MAX_LENGTH = 0x3fffffff; // ~1073MB for older Node
-    }
-  }
-
+  const bufMod = _require('buffer') as { constants?: { MAX_LENGTH?: number }; kMaxLength?: number };
+  DETECTED_MAX_LENGTH = (bufMod.constants && bufMod.constants.MAX_LENGTH) || bufMod.kMaxLength || 0x3fffffff;
   return DETECTED_MAX_LENGTH;
 }
 
@@ -135,7 +120,7 @@ function allocBufferLarge(size: number, zeroFill: boolean): Buffer {
  */
 export function allocBuffer(size: number): Buffer {
   if (size === 0) {
-    return new Buffer(0);
+    return hasBufferAlloc ? Buffer.alloc(0) : new Buffer(0);
   }
 
   // Use native allocation for sizes within safe limits
@@ -164,7 +149,7 @@ export function allocBuffer(size: number): Buffer {
  */
 export function allocBufferUnsafe(size: number): Buffer {
   if (size === 0) {
-    return new Buffer(0);
+    return hasBufferAlloc ? Buffer.alloc(0) : new Buffer(0);
   }
 
   // Use native allocation for sizes within safe limits
@@ -301,7 +286,7 @@ export function bufferConcat(list: (Buffer | Uint8Array)[], totalLength?: number
 
   // Handle empty list
   if (list.length === 0) {
-    return new Buffer(0);
+    return hasBufferAlloc ? Buffer.alloc(0) : new Buffer(0);
   }
 
   // Handle very large concatenations that would exceed buffer limits
@@ -485,11 +470,19 @@ export function objectAssign<T, U>(target: T, source: U): T & U {
   return target as T & U;
 }
 
-/**
- * Stream compatibility - Transform class
- * - Uses native stream.Transform on Node 0.10+
- * - Falls back to readable-stream for Node 0.8
- */
+export function tmpdir(): string {
+  return typeof os.tmpdir === 'function' ? os.tmpdir() : _require('os-shim').tmpdir();
+}
+
+export function destroyStream(stream: unknown, err?: Error | null): void {
+  const s = stream as { destroy?: (err?: Error | null) => void } | null | undefined;
+  if (s && typeof s.destroy === 'function') {
+    if (err !== undefined) s.destroy(err);
+    else s.destroy();
+  }
+}
+
+// Node 0.x native streams lack Streams3 behaviour; use readable-stream for major === 0.
 const major = +process.versions.node.split('.')[0];
 export const Readable: typeof import('stream').Readable = major > 0 ? _require('stream').Readable : _require('readable-stream').Readable;
 export const Writable: typeof import('stream').Writable = major > 0 ? _require('stream').Writable : _require('readable-stream').Writable;

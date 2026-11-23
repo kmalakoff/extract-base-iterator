@@ -11,22 +11,13 @@
  * - Any other archive iterator library
  */
 
-import Stream from 'stream';
-
-// Use native streams when available, readable-stream only for Node 0.x
-const major = +process.versions.node.split('.')[0];
-let ReadableBase: typeof Stream.Readable;
-if (major > 0) {
-  ReadableBase = Stream.Readable;
-} else {
-  ReadableBase = require('readable-stream').Readable;
-}
+import { Readable } from './compat.ts';
 
 /**
  * Base stream class for archive entry content.
  * Can be extended for special entry types like sparse files.
  */
-export default class EntryStream extends ReadableBase {
+export default class EntryStream extends Readable {
   protected _ended = false;
 
   /**
